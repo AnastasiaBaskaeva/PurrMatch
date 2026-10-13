@@ -25,3 +25,19 @@ replay_pid*
 
 # Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
 .kotlin/
+
+# IDE and local build configuration
+.idea/
+*.iml
+local.properties
+.gradle/
+**/build/
+.DS_Store
+
+# Gradle Wrapper must be tracked despite the archive rule above
+!gradle-wrapper.jar
+
+# Local environment configuration
+.env
+.env.*
+!.env.example

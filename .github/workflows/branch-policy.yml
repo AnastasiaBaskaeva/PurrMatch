@@ -1,0 +1,33 @@
+name: Branch policy
+
+on:
+  pull_request:
+    branches: [main, android/trunk, backend/trunk]
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  branch-policy:
+    name: Branch policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate source branch
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+          BASE_BRANCH: ${{ github.base_ref }}
+        shell: bash
+        run: |
+          case "$BASE_BRANCH" in
+            android/trunk) pattern='^android/.+' ;;
+            backend/trunk) pattern='^backend/.+' ;;
+            main) pattern='^(android|backend)/.+' ;;
+            *) exit 1 ;;
+          esac
+
+          if [[ ! "$HEAD_BRANCH" =~ $pattern ]]; then
+            echo "::error::Source branch must match $pattern for a PR into $BASE_BRANCH."
+            exit 1
+          fi

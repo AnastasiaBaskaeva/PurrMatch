@@ -1,0 +1,50 @@
+name: Android CI
+
+on:
+  pull_request:
+    branches: [android/trunk]
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    name: Android checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Check Android project exists
+        working-directory: .
+        run: |
+          if [[ ! -f mobile/gradlew ]]; then
+            echo "::error::Add the Android project and Gradle Wrapper to mobile/ before running Android CI."
+            exit 1
+          fi
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Make Gradle Wrapper executable
+        run: chmod +x gradlew
+
+      - name: Lint, unit tests and debug APK
+        run: ./gradlew :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
