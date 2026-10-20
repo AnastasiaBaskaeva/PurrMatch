@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 30
     defaults:
       run:
-        working-directory: mobile
+        working-directory: android
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -29,8 +29,8 @@ jobs:
       - name: Check Android project exists
         working-directory: .
         run: |
-          if [[ ! -f mobile/gradlew ]]; then
-            echo "::error::Add the Android project and Gradle Wrapper to mobile/ before running Android CI."
+          if [[ ! -f android/gradlew ]]; then
+            echo "::error::Add the Android project and Gradle Wrapper to android/ before running Android CI."
             exit 1
           fi
 

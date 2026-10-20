@@ -23,7 +23,7 @@ jobs:
           case "$BASE_BRANCH" in
             android/trunk) pattern='^android/.+' ;;
             backend/trunk) pattern='^backend/.+' ;;
-            main) pattern='^(android|backend)/.+' ;;
+            main) pattern='^(android/trunk|backend/trunk)$' ;;
             *) exit 1 ;;
           esac
 
