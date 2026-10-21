@@ -11,10 +11,11 @@ import androidx.compose.ui.unit.dp
 import com.purrmatch.presentation.components.*
 
 @Composable
-fun RegistrationScreen(state: AuthState, onChange: (AuthState) -> Unit, onBack: () -> Unit, onRegister: () -> Unit, modifier: Modifier = Modifier) {
+fun RegistrationScreen(state: AuthState, onChange: (AuthState) -> Unit, onBack: () -> Unit, onRegister: () -> Unit, modifier: Modifier = Modifier, loading: Boolean = false, error: String? = null) {
     ScreenLayout("Регистрация", modifier, onBack, footer = {
         ActionFooter(contentPadding = PaddingValues(start = 20.dp, top = 11.dp, end = 20.dp, bottom = 40.dp)) {
-            Button("Зарегистрироваться", onRegister, Modifier.fillMaxWidth())
+            if (error != null) Text(error, color = Colors.DestructiveText, style = Typography.Body)
+            Button(if (loading) "Создаём аккаунт…" else "Зарегистрироваться", onRegister, Modifier.fillMaxWidth(), enabled = !loading)
         }
     }) {
         FormContent {
