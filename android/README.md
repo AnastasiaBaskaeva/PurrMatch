@@ -7,15 +7,23 @@
 - `presentation/src/main/.../auth`, `browse`, `favorites`, `profile`, `filters`, `listing`: все 16 экранов и два состояния свайпа, сгруппированные по функциональности.
 - `presentation/src/main/.../App.kt`: навигация и состояние приложения.
 - `presentation/src/debug`: Preview всех экранов и каталог компонентов.
-- `app`: приложение для запуска экранов и проверки сценариев на устройстве.
+- `domain`: Kotlin/JVM, контракт сессии без зависимостей от Android.
+- `data`: Kotlin/JVM, реализация контракта сессии в памяти.
+- `app`: приложение для запуска экранов и проверки сценариев на устройстве, Application и сборка зависимостей через Hilt.
 - `design/figma`: исходные SVG и соответствие Android-ресурсам.
+
+Из `android/trunk` сохранён навигационный каркас `navigation/PurrMatchApp.kt`
+с типизированными маршрутами и `SessionViewModel`. Его экраны пока остаются
+заглушками. `MainActivity` запускает готовый интерактивный прототип `App.kt`;
+перенос его сценариев на каркас MVVM и Navigation — отдельный этап.
+Android-модули используют встроенный Kotlin AGP 9, Hilt обрабатывается через KSP.
 
 Открывайте эту папку в Android Studio. Нужны JDK 17+, Android SDK 37 и
 `sdk.dir` в локальном `local.properties` либо `ANDROID_HOME`.
 
 ```sh
 ./gradlew :app:assembleDebug :presentation:assembleRelease
-./gradlew :app:lintDebug :presentation:lintDebug
+./gradlew :app:lintDebug :presentation:lintDebug :app:testDebugUnitTest :data:test
 ANDROID_SERIAL=emulator-5554 ./gradlew :presentation:connectedDebugAndroidTest
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb shell am start -n com.purrmatch.android/.MainActivity

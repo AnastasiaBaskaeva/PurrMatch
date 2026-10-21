@@ -1,7 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
+
 android {
     namespace = "com.purrmatch.android"
     compileSdk = 37
@@ -18,11 +21,16 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 }
+
 dependencies {
+    implementation(project(":domain"))
+    implementation(project(":data"))
     implementation(project(":presentation"))
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.material3)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 }
 
 // This module hosts screens and the component catalogue; the UI library also builds in release.

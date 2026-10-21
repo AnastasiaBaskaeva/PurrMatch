@@ -23,9 +23,11 @@ import com.purrmatch.presentation.components.preview.ComponentsCatalog
 import com.purrmatch.presentation.App
 import com.purrmatch.presentation.Screen
 import com.purrmatch.presentation.profile.Profile
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

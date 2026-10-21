@@ -18,4 +18,28 @@
     <string name="logout_message">Чтобы снова открыть избранное и свои анкеты, потребуется войти в аккаунт.</string>
     <string name="swipe_like">Нравится</string>
     <string name="swipe_skip">Пропустить</string>
+
+    <string name="home">Главная</string>
+    <string name="favorites">Избранное</string>
+    <string name="profile">Профиль</string>
+    <string name="login">Вход</string>
+    <string name="registration">Регистрация</string>
+    <string name="open_login">Открыть вход</string>
+    <string name="open_registration">Открыть регистрацию</string>
+    <string name="demo_continue">Продолжить (заглушка)</string>
+    <string name="filters">Фильтры</string>
+    <string name="apply_filters">Применить (заглушка)</string>
+    <string name="reset_filters">Сбросить (заглушка)</string>
+    <string name="cat_details">Анкета кошки</string>
+    <string name="open_cat">Открыть анкету кошки</string>
+    <string name="author_profile">Публичный профиль автора</string>
+    <string name="open_author">Открыть профиль автора</string>
+    <string name="create_cat">Создание анкеты</string>
+    <string name="add_cat">Добавить анкету</string>
+    <string name="settings">Настройки</string>
+    <string name="verification">Заявка на верификацию</string>
+    <string name="sign_out">Выйти</string>
+    <string name="back">Назад</string>
+    <string name="empty_state">Пока ничего нет</string>
+    <string name="retry">Повторить</string>
 </resources>
