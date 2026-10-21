@@ -42,7 +42,7 @@ fun ProfileScreen(
             }
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 listings.forEach { listing ->
-                    CatListItem(listing.name, if (public && listing.id == "peach") "Метис · ${listing.price}" else listing.price,
+                    CatListItem(listing.name, if (public) "${listing.breed} · ${listing.price}" else listing.price,
                         { onOpen(listing) }, trailingContent = if (public) null else {
                             { IconButton(Icon.Delete, "Удалить анкету ${listing.name}", { onDelete(listing) }) }
                         })
