@@ -28,6 +28,7 @@ import com.purrmatch.presentation.listing.*
 import com.purrmatch.presentation.profile.EditProfileScreen
 import com.purrmatch.presentation.profile.EditProfileViewModel
 import com.purrmatch.presentation.profile.ProfileScreen
+import com.purrmatch.presentation.profile.displayName
 import com.purrmatch.presentation.profile.ProfileViewModel
 import com.purrmatch.presentation.profile.Profile as ProfileData
 import com.purrmatch.presentation.session.SessionViewModel
@@ -92,14 +93,22 @@ private fun MainNavigation(
     val upload = designUploadPhoto()
     val catPhoto = designCatPhoto()
     val detailPhoto = designCatPhoto(detail = true)
-    fun photos(slots: List<Int>) = slots.mapNotNull { if (it == -1) upload else pickedPhotos.getOrNull(it) }
+    fun photos(references: List<com.purrmatch.domain.match.ListingPhoto>, detail: Boolean = true) = references.mapNotNull {
+        when (it.reference) {
+            "sample:upload" -> upload
+            "sample:cat" -> catPhoto
+            "sample:detail" -> if (detail) detailPhoto else catPhoto
+            else -> it.reference.removePrefix("picked:").toIntOrNull()?.let(pickedPhotos::getOrNull)
+        }
+    }
+    fun draftPhotos(slots: List<Int>) = slots.mapNotNull { if (it == -1) upload else pickedPhotos.getOrNull(it) }
     val provider = entryProvider<NavKey> {
         entry<Home> {
             val model = screenModel { BrowseViewModel(matches, userId) }
             val state by model.state.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
             val current = state.current
-            Box { HomeScreen(current, photos(state.photoSlots).firstOrNull() ?: catPhoto,
+            Box { HomeScreen(current, photos(current?.photos.orEmpty(), detail = false).firstOrNull() ?: catPhoto,
                 { current?.let(openListing) }, { current?.let { model.swipe(it.id, true) } },
                 { current?.let { model.swipe(it.id, false) } }, { navigation.open(Filters) }); ActionError(error, model::dismissError) }
         }
@@ -127,7 +136,7 @@ private fun MainNavigation(
             val error by model.error.collectAsStateWithLifecycle()
             val listing = state.listing
             if (listing == null) MissingDestination("Анкета не найдена", navigation::back)
-            else Box { ListingScreen(listing, state.author?.name.orEmpty(), photos(state.photoSlots).ifEmpty { List(3) { detailPhoto } },
+            else Box { ListingScreen(listing, state.author?.displayName.orEmpty(), photos(listing.photos).ifEmpty { List(3) { detailPhoto } },
                 state.favorite, navigation::back,
                 { model.toggleFavorite { if (!listing.available) navigation.back() } },
                 { navigation.open(AuthorProfile(listing.authorId)) },
@@ -139,7 +148,7 @@ private fun MainNavigation(
             val model = screenModel { NewListingViewModel(it, matches, userId, pickedPhotos.size) }
             val state by model.state.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
-            Box { NewListingScreen(state, model::edit, model.profile, photos(state.photoSlots(pickedPhotos.size)),
+            Box { NewListingScreen(state, model::edit, model.profile, draftPhotos(state.photoSlots(pickedPhotos.size)),
                 onAddPhoto, { model.removePhoto(it, pickedPhotos.size) }, navigation::back,
                 { model.publish(pickedPhotos.size, navigation::profile) }); ActionError(error, model::dismissError) }
         }
@@ -152,7 +161,7 @@ private fun MainNavigation(
                 { model.delete(navigation::back) }) {
                 ScreenLayout("Профиль") {
                     FormContent(Modifier.blur(1.dp)) {
-                        listing?.let { CatListItem(it.name, "${it.price} · опубликована", {}) }
+                        listing?.let { CatListItem(it.name, "${it.priceText} · опубликована", {}) }
                     }
                 }
             }; ActionError(error, model::dismissError) }
