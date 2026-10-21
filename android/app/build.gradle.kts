@@ -7,11 +7,11 @@ plugins {
 
 android {
     namespace = "com.purrmatch.android"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig {
         applicationId = "com.purrmatch.android"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
     }
@@ -31,4 +31,9 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+}
+
+// This module hosts screens and the component catalogue; the UI library also builds in release.
+androidComponents {
+    beforeVariants(selector().withBuildType("release")) { it.enable = false }
 }

@@ -1,4 +1,24 @@
 <resources>
+    <string name="tab_home">Главная</string>
+    <string name="tab_favorites">Избранное</string>
+    <string name="tab_profile">Профиль</string>
+    <string name="show_password">Показать пароль</string>
+    <string name="hide_password">Скрыть пароль</string>
+    <string name="unavailable">Неактуально</string>
+    <string name="photos_title">Фотографии · 1–%1$d</string>
+    <string name="photo_number">Фотография %1$d</string>
+    <string name="add_photo">Добавить фотографию</string>
+    <string name="first_photo_hint">Первое фото станет обложкой карточки.</string>
+    <string name="cancel">Отмена</string>
+    <string name="delete">Удалить</string>
+    <string name="logout">Выйти</string>
+    <string name="delete_title">Удалить анкету?</string>
+    <string name="delete_message">Она исчезнет из общего подбора и ваших действующих анкет. У тех, кто добавил её в Избранное, останется запись с пометкой «Неактуально».</string>
+    <string name="logout_title">Выйти из аккаунта?</string>
+    <string name="logout_message">Чтобы снова открыть избранное и свои анкеты, потребуется войти в аккаунт.</string>
+    <string name="swipe_like">Нравится</string>
+    <string name="swipe_skip">Пропустить</string>
+
     <string name="home">Главная</string>
     <string name="favorites">Избранное</string>
     <string name="profile">Профиль</string>
