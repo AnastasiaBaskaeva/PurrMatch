@@ -13,6 +13,8 @@ fun HomeScreen(
     listing: Listing?, photo: Painter,
     onOpen: () -> Unit, onLike: () -> Unit, onSkip: () -> Unit, onFilters: () -> Unit,
     modifier: Modifier = Modifier, swipeProgress: Float? = null,
+    onSwipe: ((Boolean, (Boolean) -> Unit) -> Unit)? = null,
+    pendingLike: Boolean? = null,
 ) {
     ScreenLayout("Кошки рядом", modifier) {
         if (listing == null) EmptyBrowseState(false, onFilters)
@@ -28,7 +30,8 @@ fun HomeScreen(
                     )
                 }
                 if (swipeProgress == null) SwipeCard(onLike, onSkip,
-                    Modifier.fillMaxSize().padding(top = 17.dp), card)
+                    Modifier.fillMaxSize().padding(top = 17.dp), cardKey = listing.id,
+                    onSwipe = onSwipe, pendingLike = pendingLike, content = card)
                 else SwipeCardFrame(swipeProgress, Modifier.padding(top = 6.dp), card)
             }
             Button("Фильтры", onFilters,
