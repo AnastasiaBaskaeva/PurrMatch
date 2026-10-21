@@ -50,7 +50,7 @@ fun ProfileScreen(
                 }
             }
             itemsIndexed(listings, key = { _, listing -> "listing:${listing.id}" }, contentType = { _, _ -> "listing" }) { index, listing ->
-                CatListItem(listing.name, if (public && listing.id == "peach") "Метис · ${listing.price}" else listing.price,
+                CatListItem(listing.name, if (public) "${listing.breed} · ${listing.price}" else listing.price,
                     { onOpen(listing) },
                     modifier = Modifier.padding(bottom = if (index < listings.lastIndex) 10.dp else 0.dp),
                     trailingContent = if (public) null else {
