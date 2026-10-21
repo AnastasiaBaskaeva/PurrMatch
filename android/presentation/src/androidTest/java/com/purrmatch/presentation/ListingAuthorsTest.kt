@@ -73,7 +73,7 @@ class ListingAuthorsTest {
 
     @Test fun publicListUsesActualBreedAndPriceAndRemovesDeletedListings() {
         val data = fixture.copy(listings = fixture.listings.map {
-            if (it.id == "peach") it.copy(breed = "Сибирская", price = "12 000 ₽") else it
+            if (it.id == "peach") it.copy(breed = "Сибирская", price = 12000L) else it
         })
         val matches = MockMatchRepository(initialData = data)
         compose.setContent { PurrMatchApp(sessions, matches, initialDestination = AuthorProfile("anna")) }
@@ -88,7 +88,7 @@ class ListingAuthorsTest {
     }
 
     @Test fun missingPublicAuthorShowsExplicitStateAndBackWorks() {
-        compose.setContent { PurrMatchApp(sessions, MockMatchRepository(), initialDestination = AuthorProfile("missing")) }
+        compose.setContent { PurrMatchApp(LocalSessionRepository().also { runBlocking { it.signIn("reader") } }, MockMatchRepository(), initialDestination = AuthorProfile("missing")) }
         compose.onAllNodesWithText("Автор не найден").assertCountEquals(2)
         compose.onNodeWithText("Анна", substring = false).assertDoesNotExist()
         pressBack()
@@ -97,7 +97,7 @@ class ListingAuthorsTest {
 
     @Test fun listingWithMissingAuthorShowsExplicitStateInsteadOfEmptyContacts() {
         val data = fixture.copy(profiles = fixture.profiles.filterNot { it.id == "olga" })
-        compose.setContent { PurrMatchApp(sessions, MockMatchRepository(initialData = data), initialDestination = ListingDetails("barsik")) }
+        compose.setContent { PurrMatchApp(LocalSessionRepository().also { runBlocking { it.signIn("reader") } }, MockMatchRepository(initialData = data), initialDestination = ListingDetails("barsik")) }
         compose.onAllNodesWithText("Автор не найден").assertCountEquals(2)
         compose.onNodeWithText("Телефон", substring = false).assertDoesNotExist()
         pressBack()
