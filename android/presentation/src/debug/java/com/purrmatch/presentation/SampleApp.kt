@@ -63,7 +63,9 @@ fun SampleApp(
             if (it.id == "anna") it.copy(about = "Помогаю кошкам находить дом") else it
         })
         SampleDependencies(MockMatchRepository(initialData = data), LocalSessionRepository().also { sessions ->
-            if (initialScreen != Screen.Login && initialScreen != Screen.Registration) runBlocking { sessions.signIn("anna") }
+            if (initialScreen != Screen.Login && initialScreen != Screen.Registration) runBlocking {
+                sessions.signIn(if (initialScreen in listOf(Screen.Home, Screen.Filters)) "olga" else "anna")
+            }
         })
     }
     val data by dependencies.matches.data.collectAsStateWithLifecycle()

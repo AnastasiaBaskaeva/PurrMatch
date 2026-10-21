@@ -56,7 +56,7 @@ class NavigationTest {
 
     @Test fun missingListingHasExplicitStateInsteadOfFirstCat() {
         val matches = MockMatchRepository()
-        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("anna") } }
+        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("viewer") } }
         compose.setContent { PurrMatchApp(sessions, matches, initialDestination = ListingDetails("missing")) }
         compose.onAllNodesWithText("Анкета не найдена").assertCountEquals(2)
         compose.onNodeWithText("Мия", substring = false).assertDoesNotExist()
@@ -82,7 +82,7 @@ class NavigationTest {
     }
 
     @Test fun reopeningListingKeepsIntermediateAuthorInBackHistory() {
-        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("anna") } }
+        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("viewer") } }
         compose.setContent { PurrMatchApp(sessions, MockMatchRepository()) }
         compose.onNodeWithText("Мия, 2 года").performClick()
         compose.onNodeWithText("Профиль автора и контакты").performClick()

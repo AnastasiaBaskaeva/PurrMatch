@@ -56,6 +56,33 @@ class MockMatchRepositoryTest {
         assertEquals("mia", BrowseListings()(repository.data.value, "other")!!.id)
     }
 
+    @Test fun personalDeckExcludesOwnDeletedAndCompletedSwipesAfterDiskReload() {
+        val directory = Files.createTempDirectory("purrmatch-deck").toFile()
+        try {
+            val file = File(directory, "matches")
+            val repository = MockMatchRepository(file)
+            runBlocking {
+                repository.awaitReady()
+                assertEquals("barsik", BrowseListings()(repository.data.value, "anna")!!.id)
+                repository.swipe("viewer", "mia", true).getOrThrow()
+                repository.swipe("viewer", "peach", false).getOrThrow()
+                repository.toggleFavorite("viewer", "mia").getOrThrow()
+                repository.applyFilters("viewer", SearchFilters(breed = "Сибирская")).getOrThrow()
+                assertNull(BrowseListings()(repository.data.value, "viewer"))
+                repository.applyFilters("viewer", SearchFilters()).getOrThrow()
+                repository.delete("olga", "barsik").getOrThrow()
+            }
+            val restored = MockMatchRepository(file)
+            runBlocking { restored.awaitReady() }
+            assertEquals(listOf("mia", "peach"), restored.data.value.selection("viewer").seen)
+            assertTrue(restored.data.value.selection("viewer").favorites.isEmpty())
+            assertNull(BrowseListings()(restored.data.value, "viewer"))
+            assertNull(BrowseListings()(restored.data.value, "anna"))
+            assertEquals("mia", BrowseListings()(restored.data.value, "other")!!.id)
+            assertTrue(restored.data.value.selection("other").seen.isEmpty())
+        } finally { directory.deleteRecursively() }
+    }
+
     @Test fun deletingRequiresOwnerAndKeepsOthersFavorites() {
         val repository = MockMatchRepository()
         runBlocking {

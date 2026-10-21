@@ -8,7 +8,7 @@ class BrowseListings {
         return data.listings.firstOrNull { listing ->
             val age = if (listing.age.contains("мес")) 0 else listing.age.filter(Char::isDigit).toIntOrNull() ?: 0
             val price = listing.price.filter(Char::isDigit).toIntOrNull() ?: 0
-            listing.available && listing.id !in selection.seen &&
+            listing.available && listing.authorId != userId && listing.id !in selection.seen &&
                 (filters.breed == "Любая порода" || filters.breed == listing.breed) &&
                 (filters.sex == 0 || (filters.sex == 1) == (listing.sex == "кошка")) &&
                 (filters.color == "Любой окрас" || filters.color.equals(listing.color, true)) &&
