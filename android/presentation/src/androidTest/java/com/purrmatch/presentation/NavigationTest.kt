@@ -1,6 +1,7 @@
 package com.purrmatch.presentation
 
 import androidx.compose.ui.test.*
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.espresso.Espresso.pressBack
@@ -74,9 +75,18 @@ class NavigationTest {
         compose.onNodeWithText("Выйти", substring = false).performClick()
         compose.onNodeWithText("Войти", substring = false).assertIsDisplayed()
         // A new session gets new tab stacks and entry-scoped ViewModels.
-        compose.onNodeWithContentDescription("Логин").performTextInput("anna")
-        compose.onNodeWithContentDescription("Пароль", useUnmergedTree = true).performTextInput("password")
+        compose.onNodeWithContentDescription("Логин").performTextInput("olga_cats")
+        compose.onNodeWithContentDescription("Пароль", useUnmergedTree = true).performTextInput("purrmatch-demo")
         compose.onNodeWithText("Войти", substring = false).performClick()
+        try {
+            compose.waitUntil(10_000) { compose.onAllNodesWithText("Главная", substring = false).fetchSemanticsNodes().isNotEmpty() }
+        } finally {
+            val output = androidx.test.platform.app.InstrumentationRegistry.getArguments().getString("additionalTestOutputDir")
+                ?: androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null)!!.path
+            java.io.File(output, "account-switch.png").outputStream().use {
+                compose.onRoot().captureToImage().asAndroidBitmap().compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it)
+            }
+        }
         compose.onNodeWithText("Избранное", substring = false).performClick()
         compose.onNodeWithText("Пока пусто").assertExists()
     }
