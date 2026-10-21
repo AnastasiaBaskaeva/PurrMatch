@@ -34,7 +34,7 @@ fun ListingScreen(
                     title = "Неактуально", unavailable = true)
                 Spacer(Modifier.height(310.dp))
                 Text(listing.name, style = Typography.Name, color = Colors.Ink)
-                Body("${listing.breed} · ${listing.age} · ${listing.color.lowercase()}", Modifier.padding(top = 14.dp, bottom = 30.dp))
+                Body("${listing.breed} · ${listing.ageText} · ${listing.color.lowercase()}", Modifier.padding(top = 14.dp, bottom = 30.dp))
                 Heading("Описание")
                 Body(listing.description, Modifier.padding(top = 14.dp, bottom = 30.dp))
                 Divider()
@@ -47,12 +47,12 @@ fun ListingScreen(
                 Row(Modifier.fillMaxWidth().padding(top = 15.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(listing.name, style = Typography.Name, color = Colors.Ink)
-                    Tag(listing.price)
+                    Tag(listing.priceText)
                 }
-                Body("${listing.breed} · ${listing.sex}${if (listing.age.isEmpty()) "" else " · ${listing.age}"}",
+                Body("${listing.breed} · ${listing.sex}${if (listing.ageText.isEmpty()) "" else " · ${listing.ageText}"}",
                     Modifier.padding(top = 14.dp, bottom = 30.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DetailRow("Дата рождения", listing.birthday)
+                    DetailRow("Дата рождения", listing.birthdayText)
                     DetailRow("Окрас", listing.color)
                     DetailRow("Глаза", listing.eyes)
                 }
@@ -65,7 +65,7 @@ fun ListingScreen(
                     CatTag("Кошками · ${if (listing.cats) "да" else "нет"}"),
                     CatTag("Детьми · ${if (listing.children) "да" else "нет"}")), Modifier.padding(top = 8.dp, bottom = 16.dp))
                 Divider(); Spacer(Modifier.height(16.dp)); Heading("Передача и автор")
-                Body("${listing.city} · ${listing.price.lowercase()}", Modifier.padding(top = 14.dp))
+                Body("${listing.city} · ${listing.priceText.lowercase()}", Modifier.padding(top = 14.dp))
                 Text("$authorName · открыть профиль", Modifier.padding(top = 14.dp)
                     .clickable(role = Role.Button, onClick = onAuthor), style = Typography.Body.copy(textDecoration = TextDecoration.Underline), color = Colors.Accent)
                 Spacer(Modifier.height(16.dp)); Divider(); Spacer(Modifier.height(16.dp)); Heading("Связаться")

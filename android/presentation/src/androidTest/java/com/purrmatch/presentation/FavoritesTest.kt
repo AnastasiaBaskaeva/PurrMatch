@@ -12,6 +12,7 @@ import com.purrmatch.domain.match.Listing
 import com.purrmatch.presentation.navigation.Favorites
 import com.purrmatch.presentation.navigation.PurrMatchApp
 import java.io.File
+import java.time.LocalDate
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Rule
@@ -33,11 +34,9 @@ class FavoritesTest {
         compose.onNodeWithContentDescription("В Избранное").assertIsDisplayed()
         pressBack()
         compose.onNodeWithText("Персик, 7 мес.").assertDoesNotExist()
-        compose.onNodeWithText("Главная", substring = false).performClick()
         compose.onNodeWithText("Мия, 2 года").performClick()
         compose.onNodeWithContentDescription("Убрать из Избранного").performClick()
         pressBack()
-        compose.onNodeWithText("Избранное", substring = false).performClick()
         compose.onNodeWithText("Мия, 2 года").assertDoesNotExist()
         compose.onNodeWithContentDescription("Убрать Соня из Избранного").performClick()
         compose.onNodeWithText("Пока пусто").assertIsDisplayed()
@@ -73,7 +72,7 @@ class FavoritesTest {
             runBlocking {
                 val original = MockMatchRepository(file)
                 original.ensureProfile("owner", "owner").getOrThrow()
-                original.publish("owner", Listing("luna", "Луна", age = "1 год"), emptyList()).getOrThrow()
+                original.publish("owner", Listing("luna", "Луна", birthday = LocalDate.now().minusYears(1))).getOrThrow()
                 original.swipe("reader", "luna", true).getOrThrow()
                 original.delete("owner", "luna").getOrThrow()
             }

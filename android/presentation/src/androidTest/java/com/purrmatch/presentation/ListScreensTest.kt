@@ -13,12 +13,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import java.time.LocalDate
 
 class ListScreensTest {
     @get:Rule val compose = createComposeRule()
 
     private val listings = List(200) { index ->
-        Listing(id = "cat-$index", name = "Кошка $index", age = "2 года", city = "Москва")
+        Listing(id = "cat-$index", name = "Кошка $index", birthday = LocalDate.now().minusYears(2), city = "Москва")
     }
     private val profile = Profile(name = "Анна", city = "Москва", about = "Помогаю кошкам", phone = "+7 900 123-45-67")
 

@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.purrmatch.presentation.components.*
 
 @Composable
-fun LoginScreen(state: AuthState, onChange: (AuthState) -> Unit, onLogin: () -> Unit, onRegister: () -> Unit, modifier: Modifier = Modifier) {
+fun LoginScreen(state: AuthState, onChange: (AuthState) -> Unit, onLogin: () -> Unit, onRegister: () -> Unit, modifier: Modifier = Modifier, loading: Boolean = false, error: String? = null) {
     BoxWithConstraints(modifier.fillMaxSize()) {
         val topSpace = (maxHeight / 2 - 311.5.dp).coerceAtLeast(16.dp)
         Icon(Icon.Paw, null,
@@ -35,8 +35,9 @@ fun LoginScreen(state: AuthState, onChange: (AuthState) -> Unit, onLogin: () -> 
                     errorMessage = if (state.submitted && state.login.isBlank()) "Введите логин" else null)
                 PasswordField(state.password, { onChange(state.copy(password = it)) }, "Пароль", state.visible, { onChange(state.copy(visible = it)) },
                     placeholder = "••••••••", errorMessage = if (state.submitted && state.password.isEmpty()) "Введите пароль" else null)
-                Button("Войти", onLogin, Modifier.fillMaxWidth())
-                Button("Создать аккаунт", onRegister, Modifier.fillMaxWidth(), ButtonStyle.Text)
+                if (error != null) Text(error, color = Colors.DestructiveText, style = Typography.Body)
+                Button(if (loading) "Входим…" else "Войти", onLogin, Modifier.fillMaxWidth(), enabled = !loading)
+                Button("Создать аккаунт", onRegister, Modifier.fillMaxWidth(), ButtonStyle.Text, enabled = !loading)
             }
             Spacer(Modifier.height(24.dp))
         }

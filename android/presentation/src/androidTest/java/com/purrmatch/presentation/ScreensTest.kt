@@ -32,6 +32,7 @@ class ScreensTest {
         compose.onNodeWithContentDescription("Пароль", useUnmergedTree = true).performTextInput("password123")
         compose.onNodeWithContentDescription("Повторите пароль", useUnmergedTree = true).performTextInput("password123")
         compose.onNodeWithText("Зарегистрироваться").performClick()
+        compose.waitUntil(10_000) { compose.onAllNodesWithText("Расскажите о себе").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("Расскажите о себе").assertIsDisplayed()
         compose.onNodeWithText("Заполнить позже").performClick()
         compose.onNodeWithText("Мия, 2 года").assertIsDisplayed()
