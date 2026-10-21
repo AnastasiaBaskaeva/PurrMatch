@@ -1,5 +1,7 @@
 package com.purrmatch.presentation.components
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.rememberScrollState
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -26,6 +29,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -44,21 +48,30 @@ fun SwipeCardFrame(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    Box(
-        modifier,
-    ) {
-        if (progress != 0f) {
-            val liking = progress > 0
-            val edge = if (liking) Colors.Like else Colors.Skip
-            val fade = if (liking) Colors.LikeFade else Colors.SkipFade
-            val stops = if (liking) arrayOf(0f to edge, .48f to fade.copy(alpha = .75f), 1f to fade.copy(alpha = 0f))
-                else arrayOf(0f to fade.copy(alpha = 0f), .52f to fade.copy(alpha = .75f), 1f to edge)
-            Box(Modifier.matchParentSize().graphicsLayer {
-                alpha = (abs(progress) / .33f).coerceAtMost(1f)
-            }.background(Brush.horizontalGradient(*stops)))
-        }
-        if (progress != 0f) {
-            val liking = progress > 0
+    SwipeCardFrame({ progress }, modifier, content)
+}
+
+@Composable
+private fun SwipeCardFrame(
+    progress: () -> Float,
+    modifier: Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    val currentProgress by rememberUpdatedState(progress)
+    val direction by remember { derivedStateOf { sign(currentProgress()) } }
+    Box(modifier) {
+        if (direction != 0f) Box(Modifier.matchParentSize().drawWithCache {
+            val like = Brush.horizontalGradient(0f to Colors.Like,
+                .48f to Colors.LikeFade.copy(alpha = .75f), 1f to Colors.LikeFade.copy(alpha = 0f))
+            val skip = Brush.horizontalGradient(0f to Colors.SkipFade.copy(alpha = 0f),
+                .52f to Colors.SkipFade.copy(alpha = .75f), 1f to Colors.Skip)
+            onDrawBehind {
+                val value = currentProgress()
+                drawRect(if (value > 0) like else skip, alpha = (abs(value) / .33f).coerceAtMost(1f))
+            }
+        })
+        if (direction != 0f) {
+            val liking = direction > 0
             Icon(
                 if (liking) Icon.SwipeLike else Icon.SwipeSkip,
                 null,
@@ -70,15 +83,20 @@ fun SwipeCardFrame(
         }
         Box(
             Modifier.fillMaxWidth().graphicsLayer {
-                translationX = progress * size.width
-                rotationZ = progress * (7f / .33f)
+                val value = currentProgress()
+                translationX = value * size.width
+                rotationZ = value * (7f / .33f)
             },
             content = content,
         )
     }
 }
 
-/** Gestures and action buttons share the exit animation and async completion lock. */
+/**
+ * Gestures and action buttons share exit, entrance and async completion locks.
+ * [cardKey] identifies the displayed listing; [onSwipe] reports whether the deck advanced.
+ * Failed or unchanged selections spring back. [pendingLike] restores an in-flight selection.
+ */
 @Composable
 fun SwipeCard(
     onLike: () -> Unit,
@@ -96,16 +114,23 @@ fun SwipeCard(
     val doubleTapTimeout = LocalViewConfiguration.current.doubleTapTimeoutMillis
     key(cardKey) {
         var progress by remember { mutableFloatStateOf(pendingLike?.let { if (it) 1.5f else -1.5f } ?: 0f) }
-        var settling by remember { mutableStateOf(pendingLike != null) }
+        var settling by remember { mutableStateOf(true) }
         var restoringPending by remember { mutableStateOf(pendingLike != null) }
+        val entrance = remember { Animatable(if (pendingLike == null) 0f else 1f) }
         val scope = rememberCoroutineScope()
         val currentLike by rememberUpdatedState(onLike)
         val currentSkip by rememberUpdatedState(onSkip)
         val currentSwipe by rememberUpdatedState(onSwipe)
         val currentPendingLike by rememberUpdatedState(pendingLike)
+        LaunchedEffect(Unit) {
+            if (!restoringPending) {
+                entrance.animateTo(1f, tween(220))
+                settling = false
+            }
+        }
         if (restoringPending) LaunchedEffect(pendingLike) {
             if (pendingLike == null) {
-                animate(progress, 0f, animationSpec = tween(180)) { value, _ -> progress = value }
+                animate(progress, 0f, animationSpec = spring()) { value, _ -> progress = value }
                 settling = false
                 restoringPending = false
             }
@@ -118,25 +143,22 @@ fun SwipeCard(
                 val direction = selection?.let { if (it) 1f else -1f } ?: sign(progress)
                 settling = true
                 scope.launch {
-                    animate(progress, if (commit) direction * 1.5f else 0f, animationSpec = tween(180)) { value, _ ->
-                        progress = value
-                    }
                     if (!commit) {
+                        animate(progress, 0f, animationSpec = spring()) { value, _ -> progress = value }
                         settling = false
                         return@launch
                     }
+                    animate(progress, direction * 1.5f, animationSpec = tween(180)) { value, _ -> progress = value }
                     val select = currentSwipe
                     if (select == null) {
                         if (direction > 0) currentLike() else currentSkip()
-                        progress = 0f
-                        settling = false
                     } else {
                         var completed = false
                         select(direction > 0) { advanced ->
                             if (!completed) {
                                 completed = true
                                 if (!advanced) scope.launch {
-                                    animate(progress, 0f, animationSpec = tween(180)) { value, _ -> progress = value }
+                                    animate(progress, 0f, animationSpec = spring()) { value, _ -> progress = value }
                                     settling = false
                                 }
                             }
@@ -147,8 +169,12 @@ fun SwipeCard(
             }
             val card: @Composable () -> Unit = {
                 SwipeCardFrame(
-                    progress,
-                    (if (actions == null) Modifier.fillMaxSize() else Modifier.fillMaxWidth()).pointerInput(width) {
+                    { progress },
+                    (if (actions == null) Modifier.fillMaxSize() else Modifier.fillMaxWidth()).graphicsLayer {
+                        alpha = entrance.value
+                        scaleX = .94f + .06f * entrance.value
+                        scaleY = scaleX
+                    }.pointerInput(width) {
                         detectHorizontalDragGestures(
                             onDragEnd = { settle() },
                             onDragCancel = { settle(cancelled = true) },
