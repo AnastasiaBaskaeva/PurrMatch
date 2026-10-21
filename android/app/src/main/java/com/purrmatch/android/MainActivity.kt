@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
         val address = when (type) {
             "website" -> profile.website.takeIf { it.isNotBlank() }?.let { if (it.startsWith("https://") || it.startsWith("http://")) it else "https://$it" }
             "telegram" -> profile.telegram.trim().removePrefix("@").takeIf { it.isNotBlank() }?.let { "https://t.me/$it" }
-            "phone", "whatsapp" -> profile.phone.filter(Char::isDigit).takeIf { it.length >= 10 }?.let {
+            "phone", "whatsapp" -> (if (type == "whatsapp") profile.whatsapp.ifBlank { profile.phone } else profile.phone).filter(Char::isDigit).takeIf { it.length >= 10 }?.let {
                 if (type == "phone") "tel:$it" else "https://wa.me/$it"
             }
             else -> null
