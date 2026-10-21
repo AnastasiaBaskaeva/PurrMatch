@@ -72,13 +72,17 @@ private fun AuthNavigation(sessions: SessionRepository, matches: MatchRepository
                 val model = screenModel { AuthViewModel(it, matches, sessions) }
                 val state by model.state.collectAsStateWithLifecycle()
                 val error by model.error.collectAsStateWithLifecycle()
-                Box { LoginScreen(state, model::edit, { model.submit(false) }, { stack.add(Registration) }); ActionError(error, model::dismissError) }
+                val loading by model.loading.collectAsStateWithLifecycle()
+                androidx.activity.compose.BackHandler(enabled = loading) {}
+                LoginScreen(state, model::edit, { model.submit(false) }, { stack.add(Registration) }, loading = loading, error = error)
             }
             entry<Registration> {
                 val model = screenModel { AuthViewModel(it, matches, sessions) }
                 val state by model.state.collectAsStateWithLifecycle()
                 val error by model.error.collectAsStateWithLifecycle()
-                Box { RegistrationScreen(state, model::edit, { stack.removeAt(stack.lastIndex) }, { model.submit(true) }); ActionError(error, model::dismissError) }
+                val loading by model.loading.collectAsStateWithLifecycle()
+                androidx.activity.compose.BackHandler(enabled = loading) {}
+                RegistrationScreen(state, model::edit, { if (!loading) stack.removeAt(stack.lastIndex) }, { model.submit(true) }, loading = loading, error = error)
             }
         },
     )

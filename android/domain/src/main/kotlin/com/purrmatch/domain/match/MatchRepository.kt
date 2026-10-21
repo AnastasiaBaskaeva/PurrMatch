@@ -27,7 +27,14 @@ data class MatchData(
     fun listing(listingId: String) = listings.firstOrNull { it.id == listingId }
 }
 
+/** Authentication failures are distinct from storage failures; both leave the form available. */
+class LoginOccupiedException : IllegalArgumentException()
+class InvalidCredentialsException : IllegalArgumentException()
+
 interface MatchRepository {
+    /** Logins are case-sensitive, with surrounding whitespace removed. */
+    suspend fun register(login: String, password: String, name: String): Result<String>
+    suspend fun authenticate(login: String, password: String): Result<String>
     val data: StateFlow<MatchData>
     suspend fun ensureProfile(userId: String, login: String, name: String = login): Result<Unit>
     suspend fun saveProfile(profile: Profile): Result<Unit>
