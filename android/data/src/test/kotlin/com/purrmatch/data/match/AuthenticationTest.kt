@@ -31,7 +31,7 @@ class AuthenticationTest {
             val bob = repository.register("bob", "bob-pass", "Bob").getOrThrow()
             repository.swipe(alice, "mia", true).getOrThrow()
             repository.saveProfile(repository.data.value.profile(alice)!!.copy(city = "Казань")).getOrThrow()
-            repository.publish(alice, Listing("alice-cat", "Cat"), emptyList()).getOrThrow()
+            repository.publish(alice, Listing("alice-cat", "Cat", photos = listOf(ListingPhoto("local:alice")))).getOrThrow()
             val restored = MockMatchRepository(file)
             // Deliberately do not await initialization: authentication and registration must wait themselves.
             assertTrue(restored.register("alice", "other-pass", "Other").exceptionOrNull() is LoginOccupiedException)
@@ -122,7 +122,7 @@ class AuthenticationTest {
             val id = writer.register("retry", "retry-password", "Retry").getOrThrow()
             writer.swipe(id, "mia", true).getOrThrow()
             writer.saveProfile(writer.data.value.profile(id)!!.copy(city = "Казань")).getOrThrow()
-            writer.publish(id, Listing("retry-cat", "Cat"), emptyList()).getOrThrow()
+            writer.publish(id, Listing("retry-cat", "Cat", photos = listOf(ListingPhoto("local:retry")))).getOrThrow()
             val expected = writer.data.value
             val snapshot = file.readBytes()
             file.writeText("temporarily unreadable")

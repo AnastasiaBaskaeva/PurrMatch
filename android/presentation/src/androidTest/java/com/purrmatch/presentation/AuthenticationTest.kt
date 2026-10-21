@@ -74,6 +74,44 @@ class AuthenticationTest {
         } finally { dir.deleteRecursively() }
     }
 
+    @Test fun auth18SnapshotLogsInWithOriginalPasswordAndKeepsTypedDataAfterProfileSaveAndRestart() = runBlocking {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val dir = File(instrumentation.targetContext.cacheDir, "auth18-migration-${java.util.UUID.randomUUID()}")
+        check(dir.mkdirs())
+        try {
+            val file = File(dir, "matches")
+            instrumentation.context.assets.open("auth18-wrapped-v1.bin").use { input -> file.outputStream().use(input::copyTo) }
+            val repository = MockMatchRepository(file)
+            compose.setContent { PurrMatchApp(LocalSessionRepository(), repository) }
+            waitFor("Войти")
+            compose.onNodeWithContentDescription("Логин").performTextInput("auth18_owner")
+            password("auth18-password-🐈")
+            compose.onNodeWithText("Войти", substring = false).performClick()
+            waitFor("Главная")
+            val expected = repository.data.value
+            assertEquals(java.time.LocalDate.of(2024, 2, 29), expected.listing("compat-cat")!!.birthday)
+            assertEquals(12_345L, expected.listing("compat-cat")!!.price)
+            assertEquals(listOf("sample:upload", "picked:1", "picked:3"), expected.listing("compat-cat")!!.photos.map { it.reference })
+            assertEquals(listOf("peach", "sonya"), expected.selection("auth18-owner").seen)
+            compose.onNodeWithText("Избранное", substring = false).performClick()
+            compose.onNodeWithText("Мия,", substring = true).assertExists()
+            compose.onNodeWithText("Луна,", substring = true).assertExists()
+            compose.onNodeWithText("Профиль", substring = false).performClick()
+            compose.onNodeWithContentDescription("Настройки").performClick()
+            compose.onNodeWithContentDescription("О себе").performScrollTo().performTextReplacement("После обновления")
+            compose.onNodeWithText("Сохранить изменения", substring = false).performClick()
+            compose.waitUntil(15_000) { repository.data.value.profile("auth18-owner")?.about == "После обновления" }
+            val registered = repository.register("after-android-upgrade", "new-android-password", "Новый").getOrThrow()
+            val restored = MockMatchRepository(file)
+            assertEquals("auth18-owner", restored.authenticate("auth18_owner", "auth18-password-🐈").getOrThrow())
+            assertTrue(restored.authenticate("auth18_owner", "purrmatch-demo").isFailure)
+            assertEquals(registered, restored.authenticate("after-android-upgrade", "new-android-password").getOrThrow())
+            assertEquals(repository.data.value, restored.data.value)
+            assertEquals(expected.listings, restored.data.value.listings)
+            assertEquals(expected.selections, restored.data.value.selections)
+        } finally { dir.deleteRecursively() }
+    }
+
     @Test fun loadingRejectsRepeatsAndFailedWritePreservesInputWithoutPersistingPassword() {
         val gate = CompletableDeferred<Result<String>>()
         var calls = 0

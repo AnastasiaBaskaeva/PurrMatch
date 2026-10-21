@@ -20,8 +20,9 @@ data class MatchData(
     val profiles: List<Profile>,
     val listings: List<Listing>,
     val selections: Map<String, UserSelection> = emptyMap(),
-    val photoSlots: Map<String, List<Int>> = emptyMap(),
 ) : Serializable {
+    private companion object { private const val serialVersionUID = 2L }
+
     fun selection(userId: String) = selections[userId] ?: UserSelection()
     fun profile(userId: String) = profiles.firstOrNull { it.id == userId }
     fun listing(listingId: String) = listings.firstOrNull { it.id == listingId }
@@ -41,6 +42,6 @@ interface MatchRepository {
     suspend fun toggleFavorite(userId: String, listingId: String): Result<Unit>
     suspend fun swipe(userId: String, listingId: String, like: Boolean): Result<Unit>
     suspend fun applyFilters(userId: String, filters: SearchFilters): Result<Unit>
-    suspend fun publish(userId: String, listing: Listing, photoSlots: List<Int>): Result<Unit>
+    suspend fun publish(userId: String, listing: Listing): Result<Unit>
     suspend fun delete(userId: String, listingId: String): Result<Unit>
 }

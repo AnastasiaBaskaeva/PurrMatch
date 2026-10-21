@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import com.purrmatch.domain.match.MatchRepository
 import com.purrmatch.presentation.AsyncActionViewModel
 import java.io.Serializable
+import java.time.LocalDate
+import com.purrmatch.domain.match.ListingPhoto
 import java.util.UUID
 
 data class NewListingState(
@@ -38,11 +40,15 @@ class NewListingViewModel(
         val form = state.value
         val photos = form.photoSlots(pickedCount)
         if (form.name.isBlank() || form.breed !in breeds || photos.isEmpty() ||
-            (form.paid && (form.price.toIntOrNull() ?: 0) <= 0)) return
+            (form.paid && (form.price.toLongOrNull() ?: 0) <= 0)) return
+        val birthday = if (form.birthday.isBlank()) null else
+            runCatching { LocalDate.parse(form.birthday, inputBirthdayFormat) }.getOrNull() ?: return
+        if (birthday?.isAfter(LocalDate.now()) == true) return
         runAction(onSuccess) { repository.publish(userId, Listing(form.id, form.name.trim(), authorId = userId, breed = form.breed,
-            sex = if (form.sex == 0) "кошка" else "кот", age = "", birthday = form.birthday,
+            sex = if (form.sex == 0) "кошка" else "кот", birthday = birthday,
             color = form.color, eyes = form.eyes, character = form.character, description = form.description,
-            city = profile.city, price = if (form.paid) "${form.price} ₽" else "Бесплатно",
-            dogs = form.dogs, cats = form.cats, children = form.children), photos) }
+            city = profile.city, coordinates = profile.coordinates, price = if (form.paid) form.price.toLong() else 0,
+            photos = photos.map { ListingPhoto(if (it == -1) "sample:upload" else "picked:$it") },
+            dogs = form.dogs, cats = form.cats, children = form.children)) }
     }
 }
