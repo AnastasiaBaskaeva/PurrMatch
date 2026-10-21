@@ -1,6 +1,7 @@
 package com.purrmatch.data.match
 
 import com.purrmatch.domain.match.*
+import java.io.IOException
 import java.io.File
 import java.io.ObjectInputStream
 import java.io.ObjectStreamClass
@@ -10,8 +11,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.ResolverStyle
 import java.util.Locale
 
-/** Only the original prototype snapshot is remapped; new snapshots use the domain types. */
-internal fun readMatchData(file: File): MatchData = object : ObjectInputStream(file.inputStream()) {
+/** Decoder-only surrogates accept both old and typed payloads without altering stored credentials. */
+internal fun readCompatibleMatchSnapshot(file: File): StoredMatches = object : ObjectInputStream(file.inputStream()) {
     private var legacySnapshot = false
 
     override fun readClassDescriptor(): ObjectStreamClass {
@@ -20,6 +21,7 @@ internal fun readMatchData(file: File): MatchData = object : ObjectInputStream(f
             legacySnapshot = descriptor.fields.any { it.name == "photoSlots" }
         }
         val legacy = when (descriptor.name) {
+            "com.purrmatch.data.match.StoredMatches" -> DecodedStoredMatches::class.java
             "[Lcom.purrmatch.domain.match.Listing;" -> arrayOfNulls<LegacyListing>(0).javaClass.takeIf { legacySnapshot }
             "[Lcom.purrmatch.domain.match.Profile;" -> arrayOfNulls<LegacyProfile>(0).javaClass.takeIf { legacySnapshot }
             "com.purrmatch.domain.match.MatchData" -> LegacyMatchData::class.java.takeIf {
@@ -37,9 +39,22 @@ internal fun readMatchData(file: File): MatchData = object : ObjectInputStream(f
     }
 }.use { stream ->
     when (val snapshot = stream.readObject()) {
-        is MatchData -> snapshot
-        is LegacyMatchData -> snapshot.toDomain()
-        else -> error("Unsupported match snapshot")
+        is MatchData -> legacyMatchSnapshot(snapshot)
+        is LegacyMatchData -> legacyMatchSnapshot(snapshot.toDomain())
+        is DecodedStoredMatches -> StoredMatches(snapshot.domainData(), snapshot.credentials)
+        else -> throw IOException("Unsupported match snapshot")
+    }
+}
+
+// Object field slots have the same wire shape; Any accepts a legacy surrogate or a typed MatchData.
+private class DecodedStoredMatches(
+    val data: Any,
+    val credentials: Map<String, PasswordVerifier>,
+) : Serializable {
+    fun domainData(): MatchData = when (val value = data) {
+        is MatchData -> value
+        is LegacyMatchData -> value.toDomain()
+        else -> throw IOException("Unsupported wrapped match data")
     }
 }
 

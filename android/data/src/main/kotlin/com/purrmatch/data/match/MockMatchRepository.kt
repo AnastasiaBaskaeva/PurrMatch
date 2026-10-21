@@ -5,6 +5,7 @@ import java.io.File
 import java.io.IOException
 import java.time.LocalDate
 import java.io.ObjectOutputStream
+import java.util.UUID
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -28,14 +29,18 @@ class MockMatchRepository(
     private val ready = CompletableDeferred<Unit>()
     private val mutableData = MutableStateFlow(initialData)
     override val data = mutableData.asStateFlow()
+    private var credentials = emptyMap<String, PasswordVerifier>()
+    private var loadFailure: Throwable? = null
 
     init {
         scope.launch {
             mutex.withLock {
-                file?.takeIf { it.exists() }?.let { target ->
-                    runCatching { readMatchData(target) }
-                        .getOrNull()?.let { mutableData.value = it }
-                }
+                runCatching {
+                    val stored = file?.takeIf { it.exists() }?.let(::readMatchSnapshot)
+                        ?: legacyMatchSnapshot(mutableData.value)
+                    mutableData.value = stored.data
+                    credentials = stored.credentials
+                }.onFailure { loadFailure = it }
                 ready.complete(Unit)
             }
         }
@@ -47,13 +52,60 @@ class MockMatchRepository(
         ready.await()
         mutex.withLock {
             runCatching {
+                retryFailedLoad()
                 val next = transform(mutableData.value)
-                file?.let { target ->
-                    val temporary = File(target.parentFile, "${target.name}.tmp")
-                    ObjectOutputStream(temporary.outputStream()).use { it.writeObject(next) }
-                    if (!temporary.renameTo(target)) throw IOException("Cannot save mock data")
-                }
+                persist(next, credentials)
                 mutableData.value = next
+            }
+        }
+    }
+
+    private fun retryFailedLoad() {
+        if (loadFailure == null) return
+        // A failed existing snapshot must be read again, never replaced with fresh fixtures.
+        val stored = readMatchSnapshot(checkNotNull(file))
+        mutableData.value = stored.data
+        credentials = stored.credentials
+        loadFailure = null
+    }
+
+    private fun persist(data: MatchData, credentials: Map<String, PasswordVerifier>) {
+        file?.let { target ->
+            val temporary = File(target.parentFile, "${target.name}.tmp")
+            ObjectOutputStream(temporary.outputStream()).use { it.writeObject(StoredMatches(data, credentials)) }
+            if (!temporary.renameTo(target)) throw IOException("Cannot save mock data")
+        }
+    }
+
+    override suspend fun register(login: String, password: String, name: String): Result<String> = withContext(ioDispatcher) {
+        ready.await()
+        mutex.withLock {
+            runCatching {
+                retryFailedLoad()
+                val normalized = login.trim()
+                require(normalized.isNotEmpty() && name.isNotBlank() && password.length >= 8)
+                if (mutableData.value.profiles.any { it.login == normalized }) throw LoginOccupiedException()
+                val id = UUID.randomUUID().toString()
+                val profile = Profile(id = id, login = normalized, name = name.trim(),
+                    city = "", about = "", telegram = "", phone = "", website = "")
+                val next = mutableData.value.copy(profiles = mutableData.value.profiles + profile)
+                val nextCredentials = credentials + (id to PasswordVerifier.create(password))
+                persist(next, nextCredentials)
+                credentials = nextCredentials
+                mutableData.value = next
+                id
+            }
+        }
+    }
+
+    override suspend fun authenticate(login: String, password: String): Result<String> = withContext(ioDispatcher) {
+        ready.await()
+        mutex.withLock {
+            runCatching {
+                retryFailedLoad()
+                val profile = mutableData.value.profiles.firstOrNull { it.login == login.trim() }
+                if (profile == null || credentials[profile.id]?.matches(password) != true) throw InvalidCredentialsException()
+                profile.id
             }
         }
     }

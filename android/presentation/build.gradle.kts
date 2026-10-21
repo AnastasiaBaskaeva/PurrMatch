@@ -48,3 +48,8 @@ dependencies {
     androidTestImplementation(libs.test.espresso)
     debugImplementation(libs.compose.test.manifest)
 }
+
+// Share the authentic snapshot fixtures with Android's ObjectInputStream regression test.
+androidComponents.onVariants { variant ->
+    variant.androidTest?.sources?.assets?.addStaticSourceDirectory("../data/src/test/resources")
+}

@@ -92,7 +92,7 @@ class MockMatchRepositoryTest {
             }
             val repository = MockMatchRepository(file)
             runBlocking { repository.awaitReady() }
-            val data = readMatchData(file)
+            val data = readMatchSnapshot(file).data
             assertEquals(repository.data.value, data)
             assertEquals(LocalDate.of(2024, 5, 14), data.listing("mia")!!.birthday)
             assertEquals(5000L, data.listing("peach")!!.price)
