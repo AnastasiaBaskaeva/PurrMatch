@@ -15,12 +15,14 @@ android {
     }
     buildFeatures { compose = true }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(project(":domain"))
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
@@ -45,4 +47,9 @@ dependencies {
     androidTestImplementation(libs.test.runner)
     androidTestImplementation(libs.test.espresso)
     debugImplementation(libs.compose.test.manifest)
+}
+
+// Share the authentic snapshot fixtures with Android's ObjectInputStream regression test.
+androidComponents.onVariants { variant ->
+    variant.androidTest?.sources?.assets?.addStaticSourceDirectory("../data/src/test/resources")
 }

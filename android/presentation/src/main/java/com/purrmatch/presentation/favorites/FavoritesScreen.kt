@@ -1,5 +1,6 @@
 package com.purrmatch.presentation.favorites
 
+import com.purrmatch.presentation.listing.ageText
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -18,7 +19,7 @@ fun FavoritesScreen(listings: List<Listing>, onOpen: (Listing) -> Unit,
             Spacer(Modifier.height(13.99.dp))
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 listings.forEach { listing ->
-                    CatListItem("${listing.name}, ${listing.age}",
+                    CatListItem("${listing.name}, ${listing.ageText}",
                         "${listing.breed.substringBefore(' ')} · ${listing.city}",
                         { onOpen(listing) }, available = listing.available) {
                         IconButton(Icon.FavoriteFilled, "Убрать ${listing.name} из Избранного", { onRemove(listing) })
