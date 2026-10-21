@@ -99,9 +99,11 @@ private fun MainNavigation(
             val state by model.state.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
             val current = state.current
+            val pending by model.pendingSwipe.collectAsStateWithLifecycle()
             Box { HomeScreen(current, photos(state.photoSlots).firstOrNull() ?: catPhoto,
-                { current?.let(openListing) }, { current?.let { model.swipe(it.id, true) } },
-                { current?.let { model.swipe(it.id, false) } }, { navigation.open(Filters) }); ActionError(error, model::dismissError) }
+                { current?.let(openListing) }, {}, {}, { navigation.open(Filters) },
+                onSwipe = { like, complete -> current?.let { model.swipe(it.id, like, complete) } },
+                pendingLike = pending?.takeIf { it.listingId == current?.id }?.like); ActionError(error, model::dismissError) }
         }
         entry<Favorites> {
             val model = screenModel { FavoritesViewModel(matches, userId) }
