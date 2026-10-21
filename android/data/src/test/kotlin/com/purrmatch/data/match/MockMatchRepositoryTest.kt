@@ -70,6 +70,34 @@ class MockMatchRepositoryTest {
         assertNotEquals(repository.data.value.listing("mia")!!.authorId, repository.data.value.listing("barsik")!!.authorId)
     }
 
+    @Test fun publishedListingRemainsRemovableInOtherAccountsFavoritesAfterRestart() = runBlocking {
+        val directory = Files.createTempDirectory("purrmatch-favorites").toFile()
+        try {
+            val file = File(directory, "matches")
+            val repository = MockMatchRepository(file)
+            repository.ensureProfile("owner", "owner").getOrThrow()
+            repository.ensureProfile("reader", "reader").getOrThrow()
+            repository.publish("owner", Listing("luna", "Луна"), emptyList()).getOrThrow()
+            repository.swipe("reader", "luna", true).getOrThrow()
+            repository.toggleFavorite("owner", "barsik").getOrThrow()
+            repository.delete("owner", "luna").getOrThrow()
+
+            val restored = MockMatchRepository(file)
+            restored.awaitReady()
+            assertEquals(listOf("luna"), restored.data.value.selection("reader").favorites)
+            assertEquals(listOf("barsik"), restored.data.value.selection("owner").favorites)
+            assertFalse(restored.data.value.listing("luna")!!.available)
+            assertTrue(restored.data.value.listings.none { it.authorId == "owner" && it.available })
+            restored.toggleFavorite("reader", "luna").getOrThrow()
+
+            val afterRemoval = MockMatchRepository(file)
+            afterRemoval.awaitReady()
+            assertTrue(afterRemoval.data.value.selection("reader").favorites.isEmpty())
+            assertEquals(listOf("luna"), afterRemoval.data.value.selection("reader").seen)
+            assertEquals(listOf("barsik"), afterRemoval.data.value.selection("owner").favorites)
+        } finally { directory.deleteRecursively() }
+    }
+
     @Test fun failedWriteReturnsErrorAndKeepsInMemoryStateForRetry() {
         val directory = Files.createTempDirectory("purrmatch").toFile()
         try {

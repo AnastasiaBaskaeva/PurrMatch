@@ -27,7 +27,7 @@ fun FavoritesScreen(listings: List<Listing>, onOpen: (Listing) -> Unit,
             }
             itemsIndexed(listings, key = { _, listing -> "listing:${listing.id}" }, contentType = { _, _ -> "listing" }) { index, listing ->
                 CatListItem("${listing.name}, ${listing.age}",
-                    if (listing.id == "peach") "Метис · бесплатно" else "${listing.breed.substringBefore(' ')} · ${listing.city}",
+                    "${listing.breed.substringBefore(' ')} · ${listing.city}",
                     { onOpen(listing) },
                     modifier = Modifier.padding(bottom = if (index < listings.lastIndex) 10.dp else 0.dp),
                     available = listing.available) {
