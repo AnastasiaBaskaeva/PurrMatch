@@ -19,7 +19,7 @@ fun FavoritesScreen(listings: List<Listing>, onOpen: (Listing) -> Unit,
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 listings.forEach { listing ->
                     CatListItem("${listing.name}, ${listing.age}",
-                        if (listing.id == "peach") "Метис · бесплатно" else "${listing.breed.substringBefore(' ')} · ${listing.city}",
+                        "${listing.breed.substringBefore(' ')} · ${listing.city}",
                         { onOpen(listing) }, available = listing.available) {
                         IconButton(Icon.FavoriteFilled, "Убрать ${listing.name} из Избранного", { onRemove(listing) })
                     }
