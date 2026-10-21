@@ -19,9 +19,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.core.net.toUri
 import com.purrmatch.presentation.components.Background
-import com.purrmatch.presentation.components.preview.ComponentsCatalog
-import com.purrmatch.presentation.App
-import com.purrmatch.presentation.Screen
 import com.purrmatch.presentation.profile.Profile
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -59,10 +56,7 @@ class MainActivity : ComponentActivity() {
             }
             Background(Modifier.fillMaxSize()) {
                 Box(Modifier.fillMaxSize().safeDrawingPadding().imePadding()) {
-                    val sample = intent.getStringExtra("sample")
-                    if (sample != null) ComponentsCatalog(sample)
-                    else App(
-                        initialScreen = Screen.fromRoute(intent.getStringExtra("screen")), pickedPhotos = photos,
+                    AppEntry(intent, photos,
                         onAddPhoto = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                         onContact = ::openContact,
                     )

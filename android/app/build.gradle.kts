@@ -14,6 +14,7 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true }
     compileOptions {
@@ -31,6 +32,10 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.test)
+    androidTestImplementation(libs.test.runner)
+    androidTestImplementation(libs.test.espresso)
 }
 
 // This module hosts screens and the component catalogue; the UI library also builds in release.

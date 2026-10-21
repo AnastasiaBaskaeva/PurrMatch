@@ -11,15 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.purrmatch.presentation.App
-import com.purrmatch.presentation.Screen
 import com.purrmatch.presentation.components.*
 
 @Composable
 fun ListingScreen(
-    listing: Listing, photos: List<Painter>, favorite: Boolean,
+    listing: Listing, authorName: String, photos: List<Painter>, favorite: Boolean,
     onBack: () -> Unit, onToggleFavorite: () -> Unit, onAuthor: () -> Unit,
     onContact: (String) -> Unit, modifier: Modifier = Modifier,
 ) {
@@ -69,7 +66,7 @@ fun ListingScreen(
                     CatTag("Детьми · ${if (listing.children) "да" else "нет"}")), Modifier.padding(top = 8.dp, bottom = 16.dp))
                 Divider(); Spacer(Modifier.height(16.dp)); Heading("Передача и автор")
                 Body("${listing.city} · ${listing.price.lowercase()}", Modifier.padding(top = 14.dp))
-                Text("Анна · открыть профиль", Modifier.padding(top = 14.dp)
+                Text("$authorName · открыть профиль", Modifier.padding(top = 14.dp)
                     .clickable(role = Role.Button, onClick = onAuthor), style = Typography.Body.copy(textDecoration = TextDecoration.Underline), color = Colors.Accent)
                 Spacer(Modifier.height(16.dp)); Divider(); Spacer(Modifier.height(16.dp)); Heading("Связаться")
                 FlowRow(Modifier.padding(top = 8.dp, bottom = 24.dp), horizontalArrangement = Arrangement.spacedBy(7.dp),
@@ -81,16 +78,4 @@ fun ListingScreen(
             }
         }
     }
-}
-
-@Preview(name = "Полная анкета", widthDp = 376, heightDp = 803, showBackground = true)
-@Composable
-private fun ListingScreenPreview() {
-    App(initialScreen = Screen.Listing)
-}
-
-@Preview(name = "Неактуальная анкета", widthDp = 376, heightDp = 803, showBackground = true)
-@Composable
-private fun UnavailableListingScreenPreview() {
-    App(initialScreen = Screen.Unavailable)
 }

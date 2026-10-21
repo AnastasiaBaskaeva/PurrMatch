@@ -3,10 +3,7 @@ package com.purrmatch.presentation.profile
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.purrmatch.presentation.App
-import com.purrmatch.presentation.Screen
 import com.purrmatch.presentation.components.*
 import com.purrmatch.presentation.listing.Listing
 
@@ -55,16 +52,4 @@ fun ProfileScreen(
                 Modifier.fillMaxWidth().padding(top = 23.dp), ButtonStyle.Warm)
         }
     }
-}
-
-@Preview(name = "Мой профиль", widthDp = 376, heightDp = 803, showBackground = true)
-@Composable
-private fun ProfileScreenPreview() {
-    App(initialScreen = Screen.Profile)
-}
-
-@Preview(name = "Публичный профиль", widthDp = 376, heightDp = 803, showBackground = true)
-@Composable
-private fun AuthorScreenPreview() {
-    App(initialScreen = Screen.Author)
 }

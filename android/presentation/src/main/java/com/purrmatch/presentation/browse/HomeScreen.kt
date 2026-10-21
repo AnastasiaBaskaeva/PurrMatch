@@ -4,10 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.purrmatch.presentation.App
-import com.purrmatch.presentation.Screen
 import com.purrmatch.presentation.components.*
 import com.purrmatch.presentation.listing.Listing
 
@@ -39,28 +36,4 @@ fun HomeScreen(
                 ButtonStyle.Secondary, leadingIcon = Icon.Filters)
         }
     }
-}
-
-@Preview(name = "Главная", widthDp = 376, heightDp = 803, showBackground = true)
-@Composable
-private fun HomeScreenPreview() {
-    App(initialScreen = Screen.Home)
-}
-
-@Preview(name = "Свайп вправо", widthDp = 376, heightDp = 803, showBackground = true)
-@Composable
-private fun SwipeRightScreenPreview() {
-    App(initialScreen = Screen.SwipeRight)
-}
-
-@Preview(name = "Свайп влево", widthDp = 376, heightDp = 803, showBackground = true)
-@Composable
-private fun SwipeLeftScreenPreview() {
-    App(initialScreen = Screen.SwipeLeft)
-}
-
-@Preview(name = "Нет новых анкет", widthDp = 376, heightDp = 803, showBackground = true)
-@Composable
-private fun NoResultsScreenPreview() {
-    App(initialScreen = Screen.NoResults)
 }
