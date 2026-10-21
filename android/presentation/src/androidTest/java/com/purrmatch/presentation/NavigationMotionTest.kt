@@ -1,5 +1,13 @@
 package com.purrmatch.presentation
 
+import android.view.KeyEvent
+import androidx.test.platform.app.InstrumentationRegistry
+import com.purrmatch.data.match.MockMatchRepository
+import com.purrmatch.data.session.LocalSessionRepository
+import com.purrmatch.presentation.navigation.Favorites
+import com.purrmatch.presentation.navigation.PurrMatchApp
+import kotlinx.coroutines.runBlocking
+
 import androidx.activity.BackEventCompat
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
@@ -48,7 +56,9 @@ class NavigationMotionTest {
     }
 
     @Test fun tabChangeCrossfadesWithoutSlidingAndKeepsTheCurrentCard() {
-        compose.setContent { SampleApp(Screen.EmptyFavorites) }
+        val matches = MockMatchRepository()
+        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("viewer") } }
+        compose.setContent { PurrMatchApp(sessions, matches, initialDestination = Favorites) }
         compose.onNodeWithText("Главная", substring = false).performClick()
         compose.waitForIdle()
         compose.mainClock.autoAdvance = false
@@ -90,7 +100,8 @@ class NavigationMotionTest {
         compose.setContent { SampleApp(Screen.Settings) }
         compose.onNodeWithText("Выйти из аккаунта").performScrollTo().performClick()
         compose.onNodeWithText("Выйти", substring = false).assertIsDisplayed()
-        pressBack()
+        // Back targets the focused Dialog window, not Espresso's underlying Activity root.
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
         compose.onNodeWithText("Выйти", substring = false).assertDoesNotExist()
         compose.onNodeWithText("Сохранить изменения").assertIsDisplayed()
         pressBack()
