@@ -26,7 +26,14 @@ class ActivityRestorationTest {
             compose.onNodeWithContentDescription("Пароль", useUnmergedTree = true).performTextInput("password")
             scenario.recreate()
             compose.onNodeWithContentDescription("Логин").assertTextContains("activity_test")
-            compose.onNodeWithText("Войти", substring = false).performClick()
+            compose.onNodeWithText("Создать аккаунт").performClick()
+            compose.onNodeWithContentDescription("Имя").performTextInput("Тест")
+            compose.onNodeWithContentDescription("Логин").performTextInput("activity_test")
+            compose.onNodeWithContentDescription("Пароль", useUnmergedTree = true).performTextInput("password")
+            compose.onNodeWithContentDescription("Повторите пароль", useUnmergedTree = true).performTextInput("password")
+            compose.onNodeWithText("Зарегистрироваться").performClick()
+            compose.waitUntil(10_000) { compose.onAllNodesWithText("Расскажите о себе").fetchSemanticsNodes().isNotEmpty() }
+            compose.onNodeWithText("Заполнить позже").performClick()
             compose.onNodeWithText("Фильтры").performClick()
             compose.onNodeWithContentDescription("От").performTextInput("1")
             scenario.recreate()
@@ -59,6 +66,7 @@ class ActivityRestorationTest {
             scenario.recreate()
             compose.onNodeWithText("Войти", substring = false).assertIsDisplayed()
             pressBackUnconditionally()
+            compose.waitUntil(5_000) { scenario.state == Lifecycle.State.DESTROYED }
             assertEquals(Lifecycle.State.DESTROYED, scenario.state)
         }
         } finally {

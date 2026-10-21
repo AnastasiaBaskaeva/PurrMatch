@@ -1,5 +1,6 @@
 package com.purrmatch.presentation.profile
 
+import com.purrmatch.presentation.listing.priceText
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -19,7 +20,7 @@ fun ProfileScreen(
             if (!public) IconButton(Icon.Settings, "Настройки", onSettings)
         }) {
         FormContent {
-            ProfileHeader(profile.name, profile.city)
+            ProfileHeader(profile.displayName, profile.city)
             Spacer(Modifier.height(13.3.dp))
             Body(profile.about)
             Spacer(Modifier.height(if (public) 14.dp else 13.3.dp))
@@ -42,7 +43,7 @@ fun ProfileScreen(
             }
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 listings.forEach { listing ->
-                    CatListItem(listing.name, if (public) "${listing.breed} · ${listing.price}" else listing.price,
+                    CatListItem(listing.name, if (public) "${listing.breed} · ${listing.priceText}" else listing.priceText,
                         { onOpen(listing) }, trailingContent = if (public) null else {
                             { IconButton(Icon.Delete, "Удалить анкету ${listing.name}", { onDelete(listing) }) }
                         })

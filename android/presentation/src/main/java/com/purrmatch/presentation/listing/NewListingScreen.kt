@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.purrmatch.presentation.components.*
+import com.purrmatch.presentation.profile.displayName
 import com.purrmatch.presentation.profile.Profile
 import java.util.Calendar
 import java.util.Locale
@@ -70,8 +71,8 @@ fun NewListingScreen(
                 }
                 TextField(state.price, { onChange(state.copy(price = it.filter(Char::isDigit))) }, "Цена при платной передаче", placeholder = "0 ₽",
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    errorMessage = if (state.submitted && state.paid && (state.price.toIntOrNull() ?: 0) <= 0) "Укажите цену" else null)
-                Notice("Автор: ${profile.name}. Контакты и местоположение берутся из вашего профиля.")
+                    errorMessage = if (state.submitted && state.paid && (state.price.toLongOrNull() ?: 0) <= 0) "Укажите цену" else null)
+                Notice("Автор: ${profile.displayName}. Контакты и местоположение берутся из вашего профиля.")
             }
         }
     }
