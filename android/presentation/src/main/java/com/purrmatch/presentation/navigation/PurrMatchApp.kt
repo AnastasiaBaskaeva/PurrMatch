@@ -28,6 +28,7 @@ import com.purrmatch.presentation.listing.*
 import com.purrmatch.presentation.profile.EditProfileScreen
 import com.purrmatch.presentation.profile.EditProfileViewModel
 import com.purrmatch.presentation.profile.ProfileScreen
+import com.purrmatch.presentation.profile.displayName
 import com.purrmatch.presentation.profile.ProfileViewModel
 import com.purrmatch.presentation.profile.Profile as ProfileData
 import com.purrmatch.presentation.session.SessionViewModel
@@ -63,6 +64,8 @@ private fun AuthNavigation(sessions: SessionRepository, matches: MatchRepository
     val stack = rememberNavBackStack(*if (initial == Registration) arrayOf(Login, Registration) else arrayOf(Login))
     NavDisplay(
         backStack = stack,
+        transitionSpec = { navigationTransition(isPop = false) },
+        popTransitionSpec = { navigationTransition(isPop = true) },
         onBack = { if (stack.size > 1) stack.removeAt(stack.lastIndex) },
         entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
         entryProvider = entryProvider {
@@ -70,13 +73,17 @@ private fun AuthNavigation(sessions: SessionRepository, matches: MatchRepository
                 val model = screenModel { AuthViewModel(it, matches, sessions) }
                 val state by model.state.collectAsStateWithLifecycle()
                 val error by model.error.collectAsStateWithLifecycle()
-                Box { LoginScreen(state, model::edit, { model.submit(false) }, { stack.add(Registration) }); ActionError(error, model::dismissError) }
+                val loading by model.loading.collectAsStateWithLifecycle()
+                androidx.activity.compose.BackHandler(enabled = loading) {}
+                LoginScreen(state, model::edit, { model.submit(false) }, { stack.add(Registration) }, loading = loading, error = error)
             }
             entry<Registration> {
                 val model = screenModel { AuthViewModel(it, matches, sessions) }
                 val state by model.state.collectAsStateWithLifecycle()
                 val error by model.error.collectAsStateWithLifecycle()
-                Box { RegistrationScreen(state, model::edit, { stack.removeAt(stack.lastIndex) }, { model.submit(true) }); ActionError(error, model::dismissError) }
+                val loading by model.loading.collectAsStateWithLifecycle()
+                androidx.activity.compose.BackHandler(enabled = loading) {}
+                RegistrationScreen(state, model::edit, { if (!loading) stack.removeAt(stack.lastIndex) }, { model.submit(true) }, loading = loading, error = error)
             }
         },
     )
@@ -92,24 +99,32 @@ private fun MainNavigation(
     val upload = designUploadPhoto()
     val catPhoto = designCatPhoto()
     val detailPhoto = designCatPhoto(detail = true)
-    fun photos(slots: List<Int>) = slots.mapNotNull { if (it == -1) upload else pickedPhotos.getOrNull(it) }
+    fun photos(references: List<com.purrmatch.domain.match.ListingPhoto>, detail: Boolean = true) = references.mapNotNull {
+        when (it.reference) {
+            "sample:upload" -> upload
+            "sample:cat" -> catPhoto
+            "sample:detail" -> if (detail) detailPhoto else catPhoto
+            else -> it.reference.removePrefix("picked:").toIntOrNull()?.let(pickedPhotos::getOrNull)
+        }
+    }
+    fun draftPhotos(slots: List<Int>) = slots.mapNotNull { if (it == -1) upload else pickedPhotos.getOrNull(it) }
     val provider = entryProvider<NavKey> {
-        entry<Home> {
+        entry<Home>(metadata = mapOf(TAB_ROOT to Tab.Home)) {
             val model = screenModel { BrowseViewModel(matches, userId) }
             val state by model.state.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
             val current = state.current
-            Box { HomeScreen(current, photos(state.photoSlots).firstOrNull() ?: catPhoto,
+            Box { HomeScreen(current, photos(current?.photos.orEmpty(), detail = false).firstOrNull() ?: catPhoto,
                 { current?.let(openListing) }, { current?.let { model.swipe(it.id, true) } },
                 { current?.let { model.swipe(it.id, false) } }, { navigation.open(Filters) }); ActionError(error, model::dismissError) }
         }
-        entry<Favorites> {
+        entry<Favorites>(metadata = mapOf(TAB_ROOT to Tab.Favorites)) {
             val model = screenModel { FavoritesViewModel(matches, userId) }
             val listings by model.listings.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
             Box { FavoritesScreen(listings, openListing, { model.toggle(it.id) }, navigation::home); ActionError(error, model::dismissError) }
         }
-        entry<Profile> {
+        entry<Profile>(metadata = mapOf(TAB_ROOT to Tab.Profile)) {
             ProfileDestination(matches, userId, false, navigation, openListing, onContact)
         }
         entry<AuthorProfile> { route ->
@@ -127,7 +142,7 @@ private fun MainNavigation(
             val error by model.error.collectAsStateWithLifecycle()
             val listing = state.listing
             if (listing == null) MissingDestination("Анкета не найдена", navigation::back)
-            else Box { ListingScreen(listing, state.author?.name.orEmpty(), photos(state.photoSlots).ifEmpty { List(3) { detailPhoto } },
+            else Box { ListingScreen(listing, state.author?.displayName.orEmpty(), photos(listing.photos).ifEmpty { List(3) { detailPhoto } },
                 state.favorite, navigation::back,
                 { model.toggleFavorite { if (!listing.available) navigation.back() } },
                 { navigation.open(AuthorProfile(listing.authorId)) },
@@ -139,11 +154,11 @@ private fun MainNavigation(
             val model = screenModel { NewListingViewModel(it, matches, userId, pickedPhotos.size) }
             val state by model.state.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
-            Box { NewListingScreen(state, model::edit, model.profile, photos(state.photoSlots(pickedPhotos.size)),
+            Box { NewListingScreen(state, model::edit, model.profile, draftPhotos(state.photoSlots(pickedPhotos.size)),
                 onAddPhoto, { model.removePhoto(it, pickedPhotos.size) }, navigation::back,
                 { model.publish(pickedPhotos.size, navigation::profile) }); ActionError(error, model::dismissError) }
         }
-        entry<DeleteListing> { route ->
+        entry<DeleteListing>(metadata = mapOf(CONFIRMATION to true)) { route ->
             val model = screenModel { ListingViewModel(matches, userId, route.listingId) }
             val state by model.state.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
@@ -152,12 +167,12 @@ private fun MainNavigation(
                 { model.delete(navigation::back) }) {
                 ScreenLayout("Профиль") {
                     FormContent(Modifier.blur(1.dp)) {
-                        listing?.let { CatListItem(it.name, "${it.price} · опубликована", {}) }
+                        listing?.let { CatListItem(it.name, "${it.priceText} · опубликована", {}) }
                     }
                 }
             }; ActionError(error, model::dismissError) }
         }
-        entry<Logout> {
+        entry<Logout>(metadata = mapOf(CONFIRMATION to true)) {
             val model = screenModel { SessionViewModel(sessions, matches) }
             val error by model.error.collectAsStateWithLifecycle()
             val profileModel = screenModel { ProfileViewModel(matches, userId) }
@@ -176,6 +191,8 @@ private fun MainNavigation(
     }
     Column(Modifier.fillMaxSize()) {
         NavDisplay(entries = navigation.entries(provider), onBack = navigation::back,
+            transitionSpec = { navigationTransition(isPop = false) },
+            popTransitionSpec = { navigationTransition(isPop = true) },
             modifier = Modifier.weight(1f).fillMaxWidth())
         if (navigation.showsTabs) BottomBar(navigation.tab, { navigation.tab = it },
             Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp))

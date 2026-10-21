@@ -1,5 +1,6 @@
 package com.purrmatch.presentation.browse
 
+import com.purrmatch.presentation.listing.ageText
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -20,7 +21,7 @@ fun HomeScreen(
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 val card: @Composable BoxScope.() -> Unit = {
                     CatCard(
-                        "${listing.name}${if (listing.age.isEmpty()) "" else ", ${listing.age}"}",
+                        "${listing.name}${if (listing.ageText.isEmpty()) "" else ", ${listing.ageText}"}",
                         "${listing.breed} · ${listing.color.lowercase()}", photo, listing.city,
                         listing.character.split(",").take(2).mapIndexed { index, tag ->
                             CatTag(tag.trim(), if (index == 1) TagStyle.Peach else TagStyle.Lavender)

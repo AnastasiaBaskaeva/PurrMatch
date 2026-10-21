@@ -40,7 +40,11 @@ class LocalSessionRepository(
     internal suspend fun awaitReady() = ready.await()
 
     override suspend fun signIn(userId: String, onboarding: Boolean): Result<Unit> = update(SessionState.SignedIn(userId, onboarding)) {
-        file?.writeText(userId)
+        file?.let { target ->
+            val temporary = File(target.parentFile, "${target.name}.tmp")
+            temporary.writeText(userId)
+            if (!temporary.renameTo(target)) throw java.io.IOException("Cannot save session")
+        }
     }
 
     override suspend fun signOut(): Result<Unit> = update(SessionState.Guest) {
