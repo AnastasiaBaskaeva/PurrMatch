@@ -80,14 +80,16 @@ class ScreensTest {
     @Test fun publishingAddsListingAndRestoresIt() {
         val restoration = StateRestorationTester(compose)
         restoration.setContent { SampleApp(initialScreen = Screen.Profile) }
-        compose.onNodeWithText("Добавить анкету").performScrollTo().performClick()
+        compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Добавить анкету"))
+        compose.onNodeWithText("Добавить анкету").performClick()
         compose.onNodeWithContentDescription("Имя кошки").performTextInput("Луна")
         compose.onNodeWithText("Выберите породу").performClick()
         compose.onNodeWithText("Метис").performClick()
         compose.onNodeWithText("Опубликовать бесплатно").performClick()
         compose.onNodeWithText("3 действующие").assertIsDisplayed()
         restoration.emulateSavedInstanceStateRestore()
-        compose.onNodeWithText("Луна").performScrollTo().performClick()
+        compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Луна"))
+        compose.onNodeWithText("Луна").performClick()
         compose.onNodeWithText("Луна").assertIsDisplayed()
         compose.onNodeWithText("Метис · кошка").assertIsDisplayed()
     }

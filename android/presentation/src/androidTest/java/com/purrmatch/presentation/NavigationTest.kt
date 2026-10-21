@@ -23,7 +23,8 @@ class NavigationTest {
         restoration.setContent {
             PurrMatchApp(sessions, matches, initialDestination = Favorites, onContact = { _, author -> contactAuthor = author.id })
         }
-        compose.onNodeWithText("Барсик, 2 года").performScrollTo().performClick()
+        compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Барсик, 2 года"))
+        compose.onNodeWithText("Барсик, 2 года").performClick()
         compose.onNodeWithText("Барсик", substring = false).assertIsDisplayed()
         compose.onNodeWithText("Профиль автора и контакты").performClick()
         compose.onNodeWithText("Ольга", substring = false).assertIsDisplayed()
