@@ -63,6 +63,8 @@ private fun AuthNavigation(sessions: SessionRepository, matches: MatchRepository
     val stack = rememberNavBackStack(*if (initial == Registration) arrayOf(Login, Registration) else arrayOf(Login))
     NavDisplay(
         backStack = stack,
+        transitionSpec = { navigationTransition(isPop = false) },
+        popTransitionSpec = { navigationTransition(isPop = true) },
         onBack = { if (stack.size > 1) stack.removeAt(stack.lastIndex) },
         entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
         entryProvider = entryProvider {
@@ -98,7 +100,7 @@ private fun MainNavigation(
     val detailPhoto = designCatPhoto(detail = true)
     fun photos(slots: List<Int>) = slots.mapNotNull { if (it == -1) upload else pickedPhotos.getOrNull(it) }
     val provider = entryProvider<NavKey> {
-        entry<Home> {
+        entry<Home>(metadata = mapOf(TAB_ROOT to Tab.Home)) {
             val model = screenModel { BrowseViewModel(matches, userId) }
             val state by model.state.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
@@ -107,13 +109,13 @@ private fun MainNavigation(
                 { current?.let(openListing) }, { current?.let { model.swipe(it.id, true) } },
                 { current?.let { model.swipe(it.id, false) } }, { navigation.open(Filters) }); ActionError(error, model::dismissError) }
         }
-        entry<Favorites> {
+        entry<Favorites>(metadata = mapOf(TAB_ROOT to Tab.Favorites)) {
             val model = screenModel { FavoritesViewModel(matches, userId) }
             val listings by model.listings.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
             Box { FavoritesScreen(listings, openListing, { model.toggle(it.id) }, navigation::home); ActionError(error, model::dismissError) }
         }
-        entry<Profile> {
+        entry<Profile>(metadata = mapOf(TAB_ROOT to Tab.Profile)) {
             ProfileDestination(matches, userId, false, navigation, openListing, onContact)
         }
         entry<AuthorProfile> { route ->
@@ -147,7 +149,7 @@ private fun MainNavigation(
                 onAddPhoto, { model.removePhoto(it, pickedPhotos.size) }, navigation::back,
                 { model.publish(pickedPhotos.size, navigation::profile) }); ActionError(error, model::dismissError) }
         }
-        entry<DeleteListing> { route ->
+        entry<DeleteListing>(metadata = mapOf(CONFIRMATION to true)) { route ->
             val model = screenModel { ListingViewModel(matches, userId, route.listingId) }
             val state by model.state.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
@@ -161,7 +163,7 @@ private fun MainNavigation(
                 }
             }; ActionError(error, model::dismissError) }
         }
-        entry<Logout> {
+        entry<Logout>(metadata = mapOf(CONFIRMATION to true)) {
             val model = screenModel { SessionViewModel(sessions, matches) }
             val error by model.error.collectAsStateWithLifecycle()
             val profileModel = screenModel { ProfileViewModel(matches, userId) }
@@ -180,6 +182,8 @@ private fun MainNavigation(
     }
     Column(Modifier.fillMaxSize()) {
         NavDisplay(entries = navigation.entries(provider), onBack = navigation::back,
+            transitionSpec = { navigationTransition(isPop = false) },
+            popTransitionSpec = { navigationTransition(isPop = true) },
             modifier = Modifier.weight(1f).fillMaxWidth())
         if (navigation.showsTabs) BottomBar(navigation.tab, { navigation.tab = it },
             Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp))
