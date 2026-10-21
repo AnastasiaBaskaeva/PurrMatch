@@ -3,10 +3,7 @@ package com.purrmatch.presentation.favorites
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.purrmatch.presentation.App
-import com.purrmatch.presentation.Screen
 import com.purrmatch.presentation.components.*
 import com.purrmatch.presentation.listing.Listing
 
@@ -30,16 +27,4 @@ fun FavoritesScreen(listings: List<Listing>, onOpen: (Listing) -> Unit,
             }
         }
     }
-}
-
-@Preview(name = "Избранное", widthDp = 376, heightDp = 803, showBackground = true)
-@Composable
-private fun FavoritesScreenPreview() {
-    App(initialScreen = Screen.Favorites)
-}
-
-@Preview(name = "Пустое Избранное", widthDp = 376, heightDp = 803, showBackground = true)
-@Composable
-private fun EmptyFavoritesScreenPreview() {
-    App(initialScreen = Screen.EmptyFavorites)
 }

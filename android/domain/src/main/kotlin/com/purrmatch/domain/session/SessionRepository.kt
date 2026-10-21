@@ -2,11 +2,15 @@ package com.purrmatch.domain.session
 
 import kotlinx.coroutines.flow.StateFlow
 
-enum class SessionState { Guest, Demo }
+sealed interface SessionState {
+    data object Loading : SessionState
+    data object Guest : SessionState
+    data class SignedIn(val userId: String, val onboarding: Boolean = false) : SessionState
+}
 
-/** Temporary session contract. Real authentication will replace the demo operation. */
+/** Local authentication boundary; server authentication will replace signIn. */
 interface SessionRepository {
     val session: StateFlow<SessionState>
-    fun enterDemoSession()
-    fun signOut()
+    suspend fun signIn(userId: String, onboarding: Boolean = false): Result<Unit>
+    suspend fun signOut(): Result<Unit>
 }

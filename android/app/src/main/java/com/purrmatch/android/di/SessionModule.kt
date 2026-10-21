@@ -1,6 +1,11 @@
 package com.purrmatch.android.di
 
-import com.purrmatch.data.session.InMemorySessionRepository
+import android.content.Context
+import java.io.File
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.purrmatch.domain.match.MatchRepository
+import com.purrmatch.data.match.MockMatchRepository
+import com.purrmatch.data.session.LocalSessionRepository
 import com.purrmatch.domain.session.SessionRepository
 import dagger.Module
 import dagger.Provides
@@ -13,5 +18,11 @@ import javax.inject.Singleton
 object SessionModule {
     @Provides
     @Singleton
-    fun provideSessionRepository(): SessionRepository = InMemorySessionRepository()
+    fun provideSessionRepository(@ApplicationContext context: Context): SessionRepository =
+        LocalSessionRepository(File(context.filesDir, "session"))
+
+    @Provides
+    @Singleton
+    fun provideMatchRepository(@ApplicationContext context: Context): MatchRepository =
+        MockMatchRepository(File(context.filesDir, "mock-matches-v1"))
 }

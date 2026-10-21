@@ -23,7 +23,7 @@ class ScreensTest {
     @get:Rule val compose = createComposeRule()
 
     @Test fun registrationValidatesAndOpensProfileThenHome() {
-        compose.setContent { App() }
+        compose.setContent { SampleApp(Screen.Login) }
         compose.onNodeWithText("Создать аккаунт").performClick()
         compose.onNodeWithText("Зарегистрироваться").performClick()
         compose.onNodeWithText("Укажите имя").assertIsDisplayed()
@@ -38,7 +38,7 @@ class ScreensTest {
     }
 
     @Test fun deleteKeepsUnavailableListingInFavorites() {
-        compose.setContent { App(initialScreen = Screen.Profile) }
+        compose.setContent { SampleApp(initialScreen = Screen.Profile) }
         compose.onNodeWithContentDescription("Удалить анкету Мия").performClick()
         compose.onNodeWithText("Удалить", substring = false).performClick()
         compose.onNodeWithText("1 действующие").assertIsDisplayed()
@@ -50,7 +50,7 @@ class ScreensTest {
     }
 
     @Test fun filtersApplyAndReset() {
-        compose.setContent { App(initialScreen = Screen.Home) }
+        compose.setContent { SampleApp(initialScreen = Screen.Home) }
         compose.onNodeWithText("Фильтры").performClick()
         compose.onNodeWithText("Любая порода").performClick()
         compose.onNodeWithText("Сибирская").performClick()
@@ -64,7 +64,7 @@ class ScreensTest {
 
     @Test fun stateRestoresFavoritesAndProfileForm() {
         val restoration = StateRestorationTester(compose)
-        restoration.setContent { App(initialScreen = Screen.Favorites) }
+        restoration.setContent { SampleApp(initialScreen = Screen.Favorites) }
         compose.onNodeWithContentDescription("Убрать Мия из Избранного").performClick()
         restoration.emulateSavedInstanceStateRestore()
         compose.onNodeWithText("Мия, 2 года").assertDoesNotExist()
@@ -79,7 +79,7 @@ class ScreensTest {
 
     @Test fun publishingAddsListingAndRestoresIt() {
         val restoration = StateRestorationTester(compose)
-        restoration.setContent { App(initialScreen = Screen.Profile) }
+        restoration.setContent { SampleApp(initialScreen = Screen.Profile) }
         compose.onNodeWithText("Добавить анкету").performScrollTo().performClick()
         compose.onNodeWithContentDescription("Имя кошки").performTextInput("Луна")
         compose.onNodeWithText("Выберите породу").performClick()
@@ -97,7 +97,7 @@ class ScreensTest {
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(1f, 1f)) {
                 Box(Modifier.requiredSize(376.dp, 803.dp).testTag("screen")) {
-                    key(screen) { App(initialScreen = screen) }
+                    key(screen) { SampleApp(initialScreen = screen) }
                 }
             }
         }

@@ -12,5 +12,5 @@ class ScreenPreviews : PreviewParameterProvider<Screen> {
 @Preview(name = "Figma screens", widthDp = 376, heightDp = 803, showBackground = true)
 @Composable
 private fun ScreenPreview(@PreviewParameter(ScreenPreviews::class) screen: Screen) {
-    App(initialScreen = screen)
+    SampleApp(initialScreen = screen)
 }

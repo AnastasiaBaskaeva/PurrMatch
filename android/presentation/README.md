@@ -83,10 +83,10 @@ SVG иконок конвертированы штатным Android SDK `Svg2Ve
 Откройте `src/debug/java/.../components/preview` в Android Studio:
 Preview сгруппированы по кнопкам, полям, карточкам, навигации и состояниям.
 Экраны находятся в пакетах `auth`, `browse`, `favorites`, `profile`, `filters`
-и `listing` внутри `src/main/java/com/purrmatch/presentation`. Рядом с кодом находятся
-именованные Preview всех 18 экранов и состояний размером 376×803 dp.
-Они используют `App`, поэтому включают тему, фон и навигационные панели.
-Навигация приложения и превью диалогов находятся в `App.kt`,
+и `listing` внутри `src/main/java/com/purrmatch/presentation`. Все 18 Preview
+экранов и состояний размером 376×803 dp находятся в debug-файле `ScreenPreviews.kt`.
+Они используют `SampleApp`, поэтому включают тему, фон и навигационные панели.
+Навигация приложения находится в `navigation/`,
 общая разметка экранов — в `components/ScreenLayout.kt`.
 Модуль `:app` открывает экраны; каталог доступен через extra `sample`.
 [Все экраны, маршруты и сценарии](../README.md).
@@ -94,7 +94,7 @@ Preview сгруппированы по кнопкам, полям, карточ
 ```sh
 ./gradlew :app:assembleDebug :presentation:assembleRelease
 ./gradlew :app:lintDebug :presentation:lintDebug
-ANDROID_SERIAL=<device> ./gradlew :presentation:connectedDebugAndroidTest
+ANDROID_SERIAL=<device> ./gradlew :presentation:connectedDebugAndroidTest :app:connectedDebugAndroidTest
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb shell am start -n com.purrmatch.android/.MainActivity
 adb shell am start -n com.purrmatch.android/.MainActivity --es sample home
