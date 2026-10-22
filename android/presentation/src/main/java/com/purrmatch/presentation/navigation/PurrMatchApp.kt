@@ -141,8 +141,10 @@ private fun MainNavigation(
             val state by model.state.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
             val listing = state.listing
+            val author = state.author
             if (listing == null) MissingDestination("Анкета не найдена", navigation::back)
-            else Box { ListingScreen(listing, state.author?.displayName.orEmpty(), photos(listing.photos).ifEmpty { List(3) { detailPhoto } },
+            else if (listing.available && author == null) MissingDestination("Автор не найден", navigation::back)
+            else Box { ListingScreen(listing, author?.displayName.orEmpty(), photos(listing.photos).ifEmpty { List(3) { detailPhoto } },
                 state.favorite, navigation::back,
                 { model.toggleFavorite { if (!listing.available) navigation.back() } },
                 { navigation.open(AuthorProfile(listing.authorId)) },
