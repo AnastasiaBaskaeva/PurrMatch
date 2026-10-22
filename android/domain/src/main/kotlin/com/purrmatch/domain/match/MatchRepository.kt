@@ -12,6 +12,7 @@ data class SearchFilters(
 
 data class UserSelection(
     val favorites: List<String> = emptyList(),
+    /** Completed swipes only; opening a card or cancelling a drag does not mark it seen. */
     val seen: List<String> = emptyList(),
     val filters: SearchFilters = SearchFilters(),
 ) : Serializable
