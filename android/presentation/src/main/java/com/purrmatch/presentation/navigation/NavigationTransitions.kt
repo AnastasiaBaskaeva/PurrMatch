@@ -10,13 +10,10 @@ import androidx.navigation3.ui.defaultPopTransitionSpec
 import androidx.navigation3.ui.defaultTransitionSpec
 
 internal const val TAB_ROOT = "purrmatch.tabRoot"
-internal const val CONFIRMATION = "purrmatch.confirmation"
 
-/** Keep tab changes and confirmations on NavDisplay's crossfade; slide through screen history. */
+/** Keep tab changes on NavDisplay's crossfade; slide through screen history. */
 internal fun AnimatedContentTransitionScope<Scene<NavKey>>.navigationTransition(isPop: Boolean): ContentTransform {
-    if (initialState.tabRoot() != targetState.tabRoot() ||
-        initialState.metadata[CONFIRMATION] == true || targetState.metadata[CONFIRMATION] == true
-    ) {
+    if (initialState.tabRoot() != targetState.tabRoot()) {
         return if (isPop) defaultPopTransitionSpec<NavKey>().invoke(this)
         else defaultTransitionSpec<NavKey>().invoke(this)
     }

@@ -16,107 +16,346 @@ import org.junit.Test
 import kotlinx.coroutines.runBlocking
 
 class MockMatchRepositoryTest {
-    @Test fun changesAndSessionSurviveNewRepositoryInstances() {
+
+    @Test
+    fun changesAndSessionSurviveNewRepositoryInstances() {
         val directory = Files.createTempDirectory("purrmatch").toFile()
         try {
-            val file = File(directory, "matches")
+            val file = File(
+                directory,
+                "matches"
+            )
             val repository = MockMatchRepository(file)
             runBlocking {
-                repository.ensureProfile("maria", "maria_cats", "Мария")
-                repository.saveProfile(repository.data.value.profile("maria")!!.copy(city = "Казань",
-                    surname = "Иванова", coordinates = Coordinates(55.8, 49.1), whatsapp = "+79991234567",
-                    verification = VerificationStatus.PENDING, catteryName = "Луна"))
-                repository.publish("maria", Listing("luna", "Луна", birthday = LocalDate.of(2025, 3, 4),
-                    price = 1000, photos = listOf(ListingPhoto("local:luna"))))
-                repository.toggleFavorite("maria", "mia")
+                repository.ensureProfile(
+                    "maria",
+                    "maria_cats",
+                    "Мария"
+                )
+                repository.saveProfile(
+                    repository.data.value.profile("maria")!!.copy(
+                        city = "Казань",
+                        surname = "Иванова",
+                        coordinates = Coordinates(
+                            55.8,
+                            49.1
+                        ),
+                        whatsapp = "+79991234567",
+                        verification = VerificationStatus.PENDING,
+                        catteryName = "Луна"
+                    )
+                )
+                repository.publish(
+                    "maria",
+                    Listing(
+                        "luna",
+                        "Луна",
+                        birthday = LocalDate.of(
+                            2025,
+                            3,
+                            4
+                        ),
+                        price = 1000,
+                        photos = listOf(ListingPhoto("local:luna"))
+                    )
+                )
+                repository.toggleFavorite(
+                    "maria",
+                    "mia"
+                )
             }
             val restored = MockMatchRepository(file)
             runBlocking { restored.awaitReady() }
-            assertEquals("Мария", restored.data.value.profile("maria")!!.name)
-            assertEquals("Казань", restored.data.value.profile("maria")!!.city)
-            assertEquals("Иванова", restored.data.value.profile("maria")!!.surname)
-            assertEquals(Coordinates(55.8, 49.1), restored.data.value.profile("maria")!!.coordinates)
-            assertEquals("+79991234567", restored.data.value.profile("maria")!!.whatsapp)
-            assertEquals(VerificationStatus.PENDING, restored.data.value.profile("maria")!!.verification)
-            assertEquals("maria", restored.data.value.listing("luna")!!.authorId)
-            assertEquals(listOf(ListingPhoto("local:luna")), restored.data.value.listing("luna")!!.photos)
-            assertEquals(LocalDate.of(2025, 3, 4), restored.data.value.listing("luna")!!.birthday)
-            assertEquals(1000L, restored.data.value.listing("luna")!!.price)
-            assertEquals(listOf("mia"), restored.data.value.selection("maria").favorites)
-            val sessionFile = File(directory, "session")
+            assertEquals(
+                "Мария",
+                restored.data.value.profile("maria")!!.name
+            )
+            assertEquals(
+                "Казань",
+                restored.data.value.profile("maria")!!.city
+            )
+            assertEquals(
+                "Иванова",
+                restored.data.value.profile("maria")!!.surname
+            )
+            assertEquals(
+                Coordinates(
+                    55.8,
+                    49.1
+                ),
+                restored.data.value.profile("maria")!!.coordinates
+            )
+            assertEquals(
+                "+79991234567",
+                restored.data.value.profile("maria")!!.whatsapp
+            )
+            assertEquals(
+                VerificationStatus.PENDING,
+                restored.data.value.profile("maria")!!.verification
+            )
+            assertEquals(
+                "maria",
+                restored.data.value.listing("luna")!!.authorId
+            )
+            assertEquals(
+                listOf(ListingPhoto("local:luna")),
+                restored.data.value.listing("luna")!!.photos
+            )
+            assertEquals(
+                LocalDate.of(
+                    2025,
+                    3,
+                    4
+                ),
+                restored.data.value.listing("luna")!!.birthday
+            )
+            assertEquals(
+                1000L,
+                restored.data.value.listing("luna")!!.price
+            )
+            assertEquals(
+                listOf("mia"),
+                restored.data.value.selection("maria").favorites
+            )
+            val sessionFile = File(
+                directory,
+                "session"
+            )
             val session = LocalSessionRepository(sessionFile)
             runBlocking { session.signIn("maria") }
             val restoredSession = LocalSessionRepository(sessionFile)
             runBlocking { restoredSession.awaitReady() }
-            assertEquals(SessionState.SignedIn("maria"), restoredSession.session.value)
+            assertEquals(
+                SessionState.SignedIn("maria"),
+                restoredSession.session.value
+            )
             runBlocking { restoredSession.signOut() }
-            assertEquals(SessionState.Guest, restoredSession.session.value)
-        } finally { directory.deleteRecursively() }
-    }
-
-    @Test fun applyingFiltersDoesNotReshowSwipedCardOrChangeOtherAccount() {
-        val repository = MockMatchRepository()
-        runBlocking {
-            repository.swipe("maria", "mia", true)
-            repository.swipe("maria", "mia", true)
-            repository.applyFilters("maria", SearchFilters(breed = "Сибирская"))
-            repository.applyFilters("maria", SearchFilters())
+            assertEquals(
+                SessionState.Guest,
+                restoredSession.session.value
+            )
+        } finally {
+            directory.deleteRecursively()
         }
-        assertEquals("peach", BrowseListings()(repository.data.value, "maria")!!.id)
-        assertEquals(listOf("mia"), repository.data.value.selection("maria").seen)
-        assertEquals(listOf("mia"), repository.data.value.selection("maria").favorites)
-        assertTrue(repository.data.value.selection("other").favorites.isEmpty())
-        assertEquals("mia", BrowseListings()(repository.data.value, "other")!!.id)
     }
 
-    @Test fun deletingRequiresOwnerAndKeepsOthersFavorites() {
+    @Test
+    fun applyingFiltersDoesNotReshowSwipedCardOrChangeOtherAccount() {
         val repository = MockMatchRepository()
         runBlocking {
-            repository.toggleFavorite("maria", "mia")
-            repository.delete("maria", "mia")
+            repository.swipe(
+                "maria",
+                "mia",
+                true
+            )
+            repository.swipe(
+                "maria",
+                "mia",
+                true
+            )
+            repository.applyFilters(
+                "maria",
+                SearchFilters(breed = "Сибирская")
+            )
+            repository.applyFilters(
+                "maria",
+                SearchFilters()
+            )
+        }
+        assertEquals(
+            "peach",
+            BrowseListings()(
+                repository.data.value,
+                "maria"
+            )!!.id
+        )
+        assertEquals(
+            listOf("mia"),
+            repository.data.value.selection("maria").seen
+        )
+        assertEquals(
+            listOf("mia"),
+            repository.data.value.selection("maria").favorites
+        )
+        assertTrue(repository.data.value.selection("other").favorites.isEmpty())
+        assertEquals(
+            "mia",
+            BrowseListings()(
+                repository.data.value,
+                "other"
+            )!!.id
+        )
+    }
+
+    @Test
+    fun deletingRequiresOwnerAndKeepsOthersFavorites() {
+        val repository = MockMatchRepository()
+        runBlocking {
+            repository.toggleFavorite(
+                "maria",
+                "mia"
+            )
+            repository.delete(
+                "maria",
+                "mia"
+            )
         }
         assertTrue(repository.data.value.listing("mia")!!.available)
-        runBlocking { repository.delete("anna", "mia") }
+        runBlocking {
+            repository.delete(
+                "anna",
+                "mia"
+            )
+        }
         assertFalse(repository.data.value.listing("mia")!!.available)
-        assertEquals(listOf("mia"), repository.data.value.selection("maria").favorites)
+        assertEquals(
+            listOf("mia"),
+            repository.data.value.selection("maria").favorites
+        )
         assertNull(repository.data.value.listing("missing"))
-        assertNotEquals(repository.data.value.listing("mia")!!.authorId, repository.data.value.listing("barsik")!!.authorId)
+        assertNotEquals(
+            repository.data.value.listing("mia")!!.authorId,
+            repository.data.value.listing("barsik")!!.authorId
+        )
     }
 
-    @Test fun originalSnapshotMigratesAndSurvivesAnotherRestart() {
+    @Test
+    fun originalSnapshotMigratesAndSurvivesAnotherRestart() {
         val directory = Files.createTempDirectory("purrmatch-legacy").toFile()
         try {
-            val file = File(directory, "matches")
+            val file = File(
+                directory,
+                "matches"
+            )
             javaClass.getResourceAsStream("/matches-v1.bin")!!.use { input ->
                 file.outputStream().use(input::copyTo)
             }
             val repository = MockMatchRepository(file)
             runBlocking { repository.awaitReady() }
-            val data = readMatchSnapshot(file).data
-            assertEquals(repository.data.value, data)
-            assertEquals(LocalDate.of(2024, 5, 14), data.listing("mia")!!.birthday)
-            assertEquals(5000L, data.listing("peach")!!.price)
-            assertEquals(listOf("sample:upload", "picked:2"), data.listing("mia")!!.photos.map { it.reference })
-            assertEquals(listOf("mia", "peach", "sonya"), data.selection("anna").favorites)
-            assertEquals("@anna_cats", data.profile("anna")!!.telegram)
+            val data = readMatchSnapshot(file).data.toDomain()
+            assertEquals(
+                repository.data.value,
+                data
+            )
+            assertEquals(
+                LocalDate.of(
+                    2024,
+                    5,
+                    14
+                ),
+                data.listing("mia")!!.birthday
+            )
+            assertEquals(
+                5000L,
+                data.listing("peach")!!.price
+            )
+            assertEquals(
+                listOf(
+                    "sample:upload",
+                    "picked:2"
+                ),
+                data.listing("mia")!!.photos.map { it.reference })
+            assertEquals(
+                listOf(
+                    "mia",
+                    "peach",
+                    "sonya"
+                ),
+                data.selection("anna").favorites
+            )
+            assertEquals(
+                "@anna_cats",
+                data.profile("anna")!!.telegram
+            )
             assertTrue(data.profile("anna")!!.whatsapp.isEmpty())
             assertFalse(data.listing("sonya")!!.available)
-            runBlocking { repository.swipe("reader", "mia", true).getOrThrow() }
+            runBlocking {
+                repository.swipe(
+                    "reader",
+                    "mia",
+                    true
+                ).getOrThrow()
+            }
             val restored = MockMatchRepository(file)
             runBlocking { restored.awaitReady() }
-            assertEquals(repository.data.value, restored.data.value)
-        } finally { directory.deleteRecursively() }
+            assertEquals(
+                repository.data.value,
+                restored.data.value
+            )
+        } finally {
+            directory.deleteRecursively()
+        }
     }
 
-    @Test fun failedWriteReturnsErrorAndKeepsInMemoryStateForRetry() {
+    @Test
+    fun failedWriteReturnsErrorAndKeepsInMemoryStateForRetry() {
         val directory = Files.createTempDirectory("purrmatch").toFile()
         try {
-            val target = File(directory, "matches")
-            File(directory, "matches.tmp").mkdir()
+            val target = File(
+                directory,
+                "matches"
+            )
+            File(
+                directory,
+                "matches.tmp"
+            ).mkdir()
             val repository = MockMatchRepository(target)
-            val result = runBlocking { repository.toggleFavorite("maria", "mia") }
+            val result = runBlocking {
+                repository.toggleFavorite(
+                    "maria",
+                    "mia"
+                )
+            }
             assertTrue(result.isFailure)
             assertTrue(repository.data.value.selection("maria").favorites.isEmpty())
-        } finally { directory.deleteRecursively() }
+        } finally {
+            directory.deleteRecursively()
+        }
     }
+
+    @Test
+    fun diskRepositoryPublishesOnlyLoadedDataInsteadOfTemporaryFixtures() {
+        val directory = Files.createTempDirectory("loading-snapshot").toFile()
+        try {
+            val file = File(
+                directory,
+                "matches"
+            )
+            val writer = MockMatchRepository(file)
+            runBlocking {
+                writer.ensureProfile(
+                    "owner",
+                    "owner_login",
+                    "Owner"
+                ).getOrThrow()
+                writer.applyFilters(
+                    "owner",
+                    SearchFilters(breed = "Метис")
+                ).getOrThrow()
+            }
+            val queued = ArrayList<Runnable>()
+            val dispatcher = object : kotlinx.coroutines.CoroutineDispatcher() {
+                override fun dispatch(
+                    context: kotlin.coroutines.CoroutineContext,
+                    block: Runnable
+                ) {
+                    queued += block
+                }
+            }
+            val restored = MockMatchRepository(
+                file,
+                ioDispatcher = dispatcher
+            )
+            assertTrue(restored.data.value.profiles.isEmpty())
+            assertTrue(restored.data.value.listings.isEmpty())
+            queued.removeAt(0).run()
+            assertEquals(
+                writer.data.value,
+                restored.data.value
+            )
+        } finally {
+            directory.deleteRecursively()
+        }
+    }
+
 }

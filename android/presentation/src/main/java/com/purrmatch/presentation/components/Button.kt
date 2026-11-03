@@ -1,13 +1,17 @@
 package com.purrmatch.presentation.components
 
+import com.purrmatch.presentation.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,10 +25,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 
@@ -78,7 +81,6 @@ fun Button(
             .clip(shape).clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .heightIn(min = if (style == ButtonStyle.Destructive) 42.dp else if (primary) 54.dp else 52.dp)
             .padding(horizontal = when {
-                primary -> 0.dp
                 style == ButtonStyle.Text -> 10.dp
                 style == ButtonStyle.Destructive -> 16.dp
                 else -> 22.dp
@@ -86,28 +88,9 @@ fun Button(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
     ) {
-        if (primary) {
-            Text(text, Modifier.weight(1f).padding(start = 22.dp), style = Typography.Button, color = color)
-            if (trailingContent != null) trailingContent() else PawButtonDecoration()
-        } else {
-            if (leadingIcon != null) Icon(leadingIcon, null, Modifier.size(24.dp))
-            Text(text, style = Typography.Button, color = color)
-            trailingContent?.invoke(this)
-        }
-    }
-}
-
-@Composable
-private fun PawButtonDecoration() {
-    Box(Modifier.padding(end = 10.dp).size(41.dp), contentAlignment = Alignment.Center) {
-        Box(
-            Modifier.size(34.dp).graphicsLayer { rotationZ = -13f }
-                .dropShadow(CircleShape, Shadow(0.dp, Colors.PrimaryStep.copy(alpha = .32f), offset = DpOffset(0.dp, 2.dp)))
-                .background(Color.White.copy(alpha = .79f), CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(Icon.Paw, null, Modifier.size(23.dp))
-        }
+        if (leadingIcon != null) Icon(leadingIcon, null, Modifier.size(24.dp))
+        Text(text, style = Typography.Button, color = color)
+        trailingContent?.invoke(this)
     }
 }
 
@@ -127,5 +110,21 @@ fun IconButton(
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, contentDescription, Modifier.size(23.dp))
+    }
+}
+
+@Preview(name = "Buttons", widthDp = 376)
+@Composable
+private fun ButtonsPreview() {
+    Theme {
+        Background {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                ButtonStyle.entries.forEach { style ->
+                    Button(style.name, {}, Modifier.fillMaxWidth(), style = style)
+                }
+                Button(stringResource(R.string.disabled_button), {}, Modifier.fillMaxWidth(), enabled = false)
+                IconButton(Icon.Settings, stringResource(R.string.settings), {})
+            }
+        }
     }
 }

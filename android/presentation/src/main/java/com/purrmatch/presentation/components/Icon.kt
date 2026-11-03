@@ -2,11 +2,17 @@ package com.purrmatch.presentation.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.purrmatch.presentation.R
 
 /** Figma shapes shared across sizes and solid-color variants through [Icon]'s tint. */
@@ -47,4 +53,22 @@ fun Icon(
         modifier = modifier,
         colorFilter = if (tint == Color.Unspecified) null else ColorFilter.tint(tint),
     )
+}
+
+@Preview(name = "Icons", widthDp = 376)
+@Composable
+private fun IconsPreview() {
+    Theme {
+        Background {
+            FlowRow(
+                Modifier.padding(20.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Icon.entries.forEach { icon ->
+                    Icon(icon, icon.name, Modifier.size(32.dp))
+                }
+            }
+        }
+    }
 }

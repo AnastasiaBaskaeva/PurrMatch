@@ -1,5 +1,6 @@
 package com.purrmatch.presentation
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.listSaver
@@ -11,7 +12,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.purrmatch.data.match.MockMatchRepository
 import com.purrmatch.data.match.sampleMatchData
 import com.purrmatch.data.session.LocalSessionRepository
-import com.purrmatch.domain.match.MatchData
+import com.purrmatch.data.match.encodeMockMatchData
+import com.purrmatch.data.match.decodeMockMatchData
 import com.purrmatch.domain.match.UserSelection
 import com.purrmatch.domain.session.SessionState
 import com.purrmatch.presentation.browse.HomeScreen
@@ -36,9 +38,9 @@ private class SampleDependencies(val matches: MockMatchRepository, val sessions:
 private val sampleSaver = listSaver<SampleDependencies, Any>(
     save = {
         val session = it.sessions.session.value as? SessionState.SignedIn
-        listOf(it.matches.data.value, session?.userId.orEmpty(), session?.onboarding ?: false)
+        listOf(encodeMockMatchData(it.matches.data.value), session?.userId.orEmpty(), session?.onboarding ?: false)
     },
-    restore = { values -> SampleDependencies(MockMatchRepository(initialData = values[0] as MatchData),
+    restore = { values -> SampleDependencies(MockMatchRepository(initialData = decodeMockMatchData(values[0] as ByteArray)),
         LocalSessionRepository().also { sessions ->
             if ((values[1] as String).isNotEmpty()) runBlocking { sessions.signIn(values[1] as String, values[2] as Boolean) }
         }) },
@@ -52,6 +54,7 @@ fun SampleApp(
     onAddPhoto: () -> Unit = {},
     onContact: (String, ProfileData) -> Unit = { _, _ -> },
 ) {
+    val previewAbout = stringResource(R.string.preview_profile_about)
     val dependencies = rememberSaveable(initialScreen, saver = sampleSaver) {
         var data = sampleMatchData().let { it.copy(listings = it.listings.filterNot { listing -> listing.id == "barsik" }) }
         if (initialScreen == Screen.CompleteProfile) data = data.copy(profiles = data.profiles.map {
@@ -60,7 +63,7 @@ fun SampleApp(
         if (initialScreen == Screen.NoResults) data = data.copy(listings = emptyList())
         if (initialScreen == Screen.EmptyFavorites) data = data.copy(selections = mapOf("anna" to UserSelection()))
         if (initialScreen in listOf(Screen.Settings, Screen.Logout)) data = data.copy(profiles = data.profiles.map {
-            if (it.id == "anna") it.copy(about = "Помогаю кошкам находить дом") else it
+            if (it.id == "anna") it.copy(about = previewAbout) else it
         })
         SampleDependencies(MockMatchRepository(initialData = data), LocalSessionRepository().also { sessions ->
             if (initialScreen != Screen.Login && initialScreen != Screen.Registration) runBlocking { sessions.signIn("anna") }

@@ -1,5 +1,8 @@
 package com.purrmatch.presentation.components
 
+import androidx.compose.ui.res.stringArrayResource
+import com.purrmatch.presentation.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -8,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -37,15 +40,24 @@ fun FilterChip(
 ) {
     val shape = RoundedCornerShape(12.dp)
     Box(
-        modifier.heightIn(min = 39.dp).alpha(if (enabled) 1f else .45f)
+        modifier
+            .heightIn(min = 39.dp)
+            .alpha(if (enabled) 1f else .45f)
             .background(if (selected) Colors.ChipSelected else Colors.Chip, shape)
-            .border(1.dp, if (selected) Colors.ChipSelectedBorder else androidx.compose.ui.graphics.Color.White, shape)
-            .clip(shape).selectable(selected, enabled = enabled, role = Role.RadioButton, onClick = onClick)
+            .border(
+                1.dp,
+                if (selected) Colors.ChipSelectedBorder else androidx.compose.ui.graphics.Color.White,
+                shape
+            )
+            .clip(shape)
+            .selectable(selected, enabled = enabled, role = Role.RadioButton, onClick = onClick)
             .padding(horizontal = 13.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = Typography.Chip,
-            color = if (selected) Colors.ChipSelectedText else Colors.ChipText)
+        Text(
+            text, style = Typography.Chip,
+            color = if (selected) Colors.ChipSelectedText else Colors.ChipText
+        )
     }
 }
 
@@ -79,13 +91,23 @@ fun Switch(
     enabled: Boolean = true,
 ) {
     Box(
-        modifier.size(48.dp, 28.dp).alpha(if (enabled) 1f else .45f)
+        modifier
+            .size(48.dp, 28.dp)
+            .alpha(if (enabled) 1f else .45f)
             .background(if (checked) Colors.Accent else Colors.RadioBorder, CircleShape)
-            .clip(CircleShape).toggleable(checked, enabled = enabled, role = Role.Switch, onValueChange = onCheckedChange)
+            .clip(CircleShape)
+            .toggleable(
+                checked,
+                enabled = enabled,
+                role = Role.Switch,
+                onValueChange = onCheckedChange
+            )
             .padding(3.dp),
         contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
     ) {
-        Box(Modifier.size(22.dp).background(androidx.compose.ui.graphics.Color.White, CircleShape))
+        Box(Modifier
+            .size(22.dp)
+            .background(androidx.compose.ui.graphics.Color.White, CircleShape))
     }
 }
 
@@ -100,19 +122,37 @@ fun SwitchRow(
 ) {
     Column(modifier) {
         Row(
-            Modifier.fillMaxWidth().heightIn(min = 60.dp).clip(RoundedCornerShape(8.dp))
-                .toggleable(checked, enabled = enabled, role = Role.Switch, onValueChange = onCheckedChange)
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = 60.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .toggleable(
+                    value = checked,
+                    interactionSource = null,
+                    indication = null,
+                    enabled = enabled,
+                    role = Role.Switch,
+                    onValueChange = onCheckedChange,
+                )
                 .padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(label, style = Typography.Body, color = Colors.Ink)
             // The whole row owns the toggle semantics and touch target.
-            Box(Modifier.size(48.dp, 28.dp)
-                .background(if (checked) Colors.Accent else Colors.RadioBorder, CircleShape)
-                .padding(3.dp),
+            Box(
+                Modifier
+                    .size(48.dp, 28.dp)
+                    .background(if (checked) Colors.Accent else Colors.RadioBorder, CircleShape)
+                    .padding(3.dp),
                 contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
-            ) { Box(Modifier.size(22.dp).background(androidx.compose.ui.graphics.Color.White, CircleShape)) }
+            ) {
+                Box(
+                    Modifier
+                        .size(22.dp)
+                        .background(androidx.compose.ui.graphics.Color.White, CircleShape)
+                )
+            }
         }
         if (showDivider) HorizontalDivider(color = Colors.Divider)
     }
@@ -127,17 +167,46 @@ fun RadioOption(
     enabled: Boolean = true,
 ) {
     Row(
-        modifier.heightIn(min = 20.dp).alpha(if (enabled) 1f else .45f)
+        modifier
+            .heightIn(min = 20.dp)
+            .alpha(if (enabled) 1f else .45f)
             .selectable(selected, enabled = enabled, role = Role.RadioButton, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Box(
-            Modifier.size(20.dp).border(2.dp, if (selected) Colors.Accent else Colors.RadioBorder, CircleShape),
+            Modifier
+                .size(20.dp)
+                .border(2.dp, if (selected) Colors.Accent else Colors.RadioBorder, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
-            if (selected) Box(Modifier.size(10.dp).background(Colors.Accent, CircleShape))
+            if (selected) Box(Modifier
+                .size(10.dp)
+                .background(Colors.Accent, CircleShape))
         }
         Text(text, style = Typography.Body, color = Colors.Ink)
+    }
+}
+
+@Preview(name = "Selection", widthDp = 376)
+@Composable
+private fun SelectionPreview() {
+    Theme {
+        Background {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                ChipGroup(stringResource(R.string.sex_label), stringArrayResource(R.array.filter_sexes).toList(), 0, {})
+                FilterChip(stringResource(R.string.disabled), false, {}, enabled = false)
+                SwitchRow(stringResource(R.string.with_dogs), true, {})
+                SwitchRow(stringResource(R.string.with_children), false, {})
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Switch(true, {})
+                    Switch(false, {})
+                    Switch(true, {}, enabled = false)
+                }
+                RadioOption(stringResource(R.string.free), true, {})
+                RadioOption(stringResource(R.string.paid), false, {})
+                RadioOption(stringResource(R.string.disabled), false, {}, enabled = false)
+            }
+        }
     }
 }

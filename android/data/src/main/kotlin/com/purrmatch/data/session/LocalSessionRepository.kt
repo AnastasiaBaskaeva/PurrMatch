@@ -20,6 +20,7 @@ class LocalSessionRepository(
     private val file: File? = null,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : SessionRepository {
+
     private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
     private val mutex = Mutex()
     private val ready = CompletableDeferred<Unit>()
@@ -39,9 +40,20 @@ class LocalSessionRepository(
 
     internal suspend fun awaitReady() = ready.await()
 
-    override suspend fun signIn(userId: String, onboarding: Boolean): Result<Unit> = update(SessionState.SignedIn(userId, onboarding)) {
+    override suspend fun signIn(
+        userId: String,
+        onboarding: Boolean
+    ): Result<Unit> = update(
+        SessionState.SignedIn(
+            userId,
+            onboarding
+        )
+    ) {
         file?.let { target ->
-            val temporary = File(target.parentFile, "${target.name}.tmp")
+            val temporary = File(
+                target.parentFile,
+                "${target.name}.tmp"
+            )
             temporary.writeText(userId)
             if (!temporary.renameTo(target)) throw java.io.IOException("Cannot save session")
         }
@@ -51,7 +63,10 @@ class LocalSessionRepository(
         file?.takeIf { it.exists() }?.let { if (!it.delete()) throw IllegalStateException("Cannot clear session") }
     }
 
-    private suspend fun update(next: SessionState, write: () -> Unit): Result<Unit> = withContext(ioDispatcher) {
+    private suspend fun update(
+        next: SessionState,
+        write: () -> Unit
+    ): Result<Unit> = withContext(ioDispatcher) {
         ready.await()
         mutex.withLock {
             runCatching {

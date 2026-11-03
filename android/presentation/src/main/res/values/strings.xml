@@ -1,4 +1,6 @@
 <resources>
+    <string name="contact_missing">Контакт не указан</string>
+    <string name="contact_open_failed">Не удалось открыть контакт</string>
     <string name="tab_home">Главная</string>
     <string name="tab_favorites">Избранное</string>
     <string name="tab_profile">Профиль</string>
@@ -42,4 +44,226 @@
     <string name="back">Назад</string>
     <string name="empty_state">Пока ничего нет</string>
     <string name="retry">Повторить</string>
+    <string name="app_title" translatable="false">PurrMatch</string>
+    <string name="login_subtitle">Найдите своего нового друга</string>
+    <string name="login_label">Логин</string>
+    <string name="login_hint">Введите логин</string>
+    <string name="password_label">Пароль</string>
+    <string name="password_hint">Введите пароль</string>
+    <string name="signing_in">Входим…</string>
+    <string name="sign_in">Войти</string>
+    <string name="create_account">Создать аккаунт</string>
+    <string name="creating_account">Создаём аккаунт…</string>
+    <string name="register">Зарегистрироваться</string>
+    <string name="create_account_title">Создайте аккаунт</string>
+    <string name="name_label">Имя</string>
+    <string name="name_hint">Ваше имя</string>
+    <string name="name_required">Укажите имя</string>
+    <string name="unique_login_hint">Придумайте уникальный логин</string>
+    <string name="login_required">Укажите логин</string>
+    <string name="password_min_length">Не менее 8 символов</string>
+    <string name="repeat_password">Повторите пароль</string>
+    <string name="password_mismatch">Пароли не совпадают</string>
+    <string name="favorites_description">Здесь сохраняются все анкеты, которым вы поставили «Нравится».</string>
+    <string name="mixed_free">Метис · бесплатно</string>
+    <string name="listing_not_found">Анкета не найдена</string>
+    <string name="author_not_found">Автор не найден</string>
+    <string name="save_failed_title">Не удалось сохранить</string>
+    <string name="understood">Понятно</string>
+    <string name="profile_unavailable">Профиль пока недоступен</string>
+    <string name="edit_profile">Редактировать профиль</string>
+    <string name="save">Сохранить</string>
+    <string name="about_label">О себе</string>
+    <string name="contact_instruction">Расскажите, как с вами связаться.</string>
+    <string name="profile_data_visible">Данные видны в профиле</string>
+    <string name="disabled_button">Недоступная кнопка</string>
+    <string name="preview_mia_age">Мия, 2 года</string>
+    <string name="preview_breed_color">Британская короткошёрстная · серая</string>
+    <string name="city_moscow">Москва</string>
+    <string name="character_affectionate">Ласковая</string>
+    <string name="preview_anna">Анна</string>
+    <string name="disabled_field">Недоступное поле</string>
+    <string name="preview_about">Помогаю кошкам найти дом</string>
+    <string name="birthday_label">Дата рождения</string>
+    <string name="birthday_hint">ДД.ММ.ГГГГ</string>
+    <string name="city_label">Город</string>
+    <string name="city_saint_petersburg">Санкт-Петербург</string>
+    <string name="listings_load_failed">Не удалось загрузить анкеты</string>
+    <string name="listings_loaded">Анкеты загружены</string>
+    <string name="sex_label">Пол</string>
+    <string name="sex_any">Любой</string>
+    <string name="sex_female">Кошка</string>
+    <string name="sex_male">Кот</string>
+    <string name="disabled">Недоступно</string>
+    <string name="with_dogs">С собаками</string>
+    <string name="with_cats">С кошками</string>
+    <string name="with_children">С детьми</string>
+    <string name="free">Бесплатно</string>
+    <string name="paid">Платно</string>
+    <string name="show_listings">Показать анкеты</string>
+    <string name="favorites_empty_title">Пока пусто</string>
+    <string name="browse_empty_title">Новых анкет пока нет</string>
+    <string name="favorites_empty_message">Отмечайте понравившихся кошек на Главной. Они появятся здесь.</string>
+    <string name="browse_empty_message">Вы посмотрели всех кошек по выбранным условиям. Попробуйте расширить поиск.</string>
+    <string name="browse_cats">Смотреть кошек</string>
+    <string name="change_filters">Изменить фильтры</string>
+    <string name="complete_profile_notice">Заполните профиль, чтобы с вами могли связаться.</string>
+    <string name="listing_deleted">Автор удалил анкету.</string>
+    <string name="expand_search">Попробуйте расширить поиск.</string>
+    <string name="preview_breed_city">Британская · Москва</string>
+    <string name="remove_favorite">Убрать из Избранного</string>
+    <string name="preview_sonya_age">Соня, 4 года</string>
+    <string name="listing_deleted_title">Анкета удалена</string>
+    <string name="website_label">Сайт</string>
+    <string name="my_listings">Мои анкеты</string>
+    <string name="preview_active_listings">2 действующие</string>
+    <string name="color_label">Окрас</string>
+    <string name="color_grey">Серый</string>
+    <string name="character_calm">Спокойная</string>
+    <string name="about_you_title">Расскажите о себе</string>
+    <string name="save_profile">Сохранить профиль</string>
+    <string name="save_changes">Сохранить изменения</string>
+    <string name="complete_later">Заполнить позже</string>
+    <string name="profile_contact_notice">Профиль поможет другим пользователям связаться с вами по поводу кошек.</string>
+    <string name="account_data">Данные аккаунта</string>
+    <string name="city_district_label">Город и район</string>
+    <string name="location_hint">Где вы находитесь</string>
+    <string name="about_hint">Пара слов о вас</string>
+    <string name="author_contacts">Контакты автора</string>
+    <string name="phone_label">Телефон</string>
+    <string name="phone_hint">Номер телефона</string>
+    <string name="website_hint">Адрес сайта</string>
+    <string name="contacts_edit_later">Контакты можно изменить позже в Настройках.</string>
+    <string name="contacts_shared_notice">Актуальные контакты показываются во всех ваших опубликованных анкетах.</string>
+    <string name="logout_account">Выйти из аккаунта</string>
+    <string name="author_title">Автор анкеты</string>
+    <string name="contacts">Контакты</string>
+    <string name="call">Позвонить</string>
+    <string name="preview_profile_about">Помогаю кошкам находить дом</string>
+    <string name="preview_mia">Мия</string>
+    <string name="breed_british">Британская короткошёрстная</string>
+    <string name="eyes_amber">Янтарные</string>
+    <string name="preview_character">Спокойная, Ласковая</string>
+    <string name="preview_description">Ласковая кошка ищет дом и заботливую семью.</string>
+    <string name="preview_peach">Персик</string>
+    <string name="breed_mixed">Метис</string>
+    <string name="add_favorite">В Избранное</string>
+    <string name="author_profile_contacts">Профиль автора и контакты</string>
+    <string name="unavailable_listing_message">Автор удалил анкету. Она сохранена только в истории вашего Избранного.</string>
+    <string name="description_label">Описание</string>
+    <string name="eyes_label">Глаза</string>
+    <string name="character_label">Характер</string>
+    <string name="gets_along_with">Ладит с</string>
+    <string name="transfer_author">Передача и автор</string>
+    <string name="contact">Связаться</string>
+    <string name="new_listing_title">Новая анкета</string>
+    <string name="publish_listing">Опубликовать анкету</string>
+    <string name="photo_required">Добавьте хотя бы одну фотографию</string>
+    <string name="cat_name_label">Имя кошки</string>
+    <string name="cat_name_hint">Например, Мия</string>
+    <string name="cat_name_required">Укажите имя кошки</string>
+    <string name="breed_label">Порода</string>
+    <string name="select_breed">Выберите породу</string>
+    <string name="color_hint">Укажите окрас</string>
+    <string name="eye_color_label">Цвет глаз</string>
+    <string name="eye_color_hint">Укажите цвет</string>
+    <string name="character_hint">Например, спокойная, ласковая</string>
+    <string name="compatibility">Совместимость</string>
+    <string name="description_hint">Расскажите о привычках кошки</string>
+    <string name="transfer_terms">Условия передачи</string>
+    <string name="paid_price_label">Цена при платной передаче</string>
+    <string name="price_required">Укажите цену</string>
+    <string name="breed_domestic">Домашняя кошка</string>
+    <string name="breed_siberian">Сибирская</string>
+    <string name="breed_maine_coon">Мейн-кун</string>
+    <string name="city_kazan">Казань</string>
+    <string name="reset">Сбросить</string>
+    <string name="breed_any">Любая порода</string>
+    <string name="color_any">Любой окрас</string>
+    <string name="color_red">Рыжий</string>
+    <string name="color_white">Белый</string>
+    <string name="eyes_any">Любой цвет</string>
+    <string name="eyes_green">Зелёные</string>
+    <string name="eyes_blue">Голубые</string>
+    <string name="age_label">Возраст</string>
+    <string name="from_label">От</string>
+    <string name="min_age_hint">0 лет</string>
+    <string name="to_label">До</string>
+    <string name="max_age_hint">20 лет</string>
+    <string name="select_city">Выберите город</string>
+    <string name="terms_any">Любые</string>
+    <string name="max_price_label">Цена до</string>
+    <string name="price_any_hint">Любая цена ₽</string>
+    <string name="save_changes_failed">Не удалось сохранить изменения. Повторите попытку.</string>
+    <string name="registration_session_failed">Аккаунт создан, но не удалось сохранить вход. Войдите с указанными логином и паролем.</string>
+    <string name="sign_in_save_failed">Не удалось сохранить вход. Повторите попытку.</string>
+    <string name="login_occupied">Этот логин уже занят</string>
+    <string name="invalid_credentials">Неверный логин или пароль</string>
+    <string name="account_storage_failed">Не удалось прочитать или сохранить аккаунт. Повторите попытку.</string>
+    <string name="catalog_buttons">Кнопки и контакты</string>
+    <string name="catalog_fields">Поля и переключатели</string>
+    <string name="catalog_cat_card">Карточка кошки</string>
+    <string name="catalog_swipe_right">Свайп вправо</string>
+    <string name="catalog_swipe_left">Свайп влево</string>
+    <string name="catalog_list_cards">Карточки списка</string>
+    <string name="catalog_photos">Фотографии</string>
+    <string name="catalog_empty">Пустое состояние</string>
+    <string name="catalog_notices">Уведомления</string>
+    <string name="catalog_delete">Подтверждение удаления</string>
+    <string name="catalog_logout">Подтверждение выхода</string>
+    <string name="catalog_title">Компоненты</string>
+    <string name="open_dialog">Открыть диалог</string>
+    <string name="preview_profile_long_about">Помогаю кошкам находить заботливый дом. Отвечаю на сообщения каждый день.</string>
+    <string name="delete_listing">Удалить анкету</string>
+    <string name="value_hint">Введите значение</string>
+    <string name="preview_birthday">14 мая 2024</string>
+    <string name="telegram_label">Telegram</string>
+    <string name="whatsapp_label">WhatsApp</string>
+    <string name="username_hint">@username</string>
+    <string name="zero_price_hint">0 ₽</string>
+    <string name="preview_price">5 000 ₽</string>
+    <string name="password_mask">••••••••</string>
+    <string name="listing_author_notice">Автор: %1$s. Контакты и местоположение берутся из вашего профиля.</string>
+    <string name="remove_named_favorite">Убрать %1$s из Избранного</string>
+    <string name="active_listings_title">Действующие анкеты · %1$d</string>
+    <string name="active_listings_count">%1$d действующие</string>
+    <string name="mixed_price">Метис · %1$s</string>
+    <string name="delete_named_listing">Удалить анкету %1$s</string>
+    <string name="open_named_author">%1$s · открыть профиль</string>
+    <string name="dogs_compatibility">Собаками · %1$s</string>
+    <string name="cats_compatibility">Кошками · %1$s</string>
+    <string name="children_compatibility">Детьми · %1$s</string>
+    <string name="yes">да</string>
+    <string name="no">нет</string>
+    <string name="price_rubles">%1$s ₽</string>
+    <string name="age_months">%1$d мес.</string>
+    <string name="name_age">%1$s, %2$s</string>
+    <string name="detail_pair">%1$s · %2$s</string>
+    <string name="detail_triple">%1$s · %2$s · %3$s</string>
+    <string name="preview_theme_title">%1$s · Кошки рядом</string>
+    <string name="age_years_one">%1$d год</string>
+    <string name="age_years_few">%1$d года</string>
+    <string name="age_years_many">%1$d лет</string>
+    <string name="preview_login" translatable="false">anna_cats</string>
+    <string name="preview_telegram" translatable="false">@anna_cats</string>
+    <string name="preview_phone" translatable="false">+7 999 123-45-67</string>
+    <string name="preview_website" translatable="false">cats.example</string>
+    <string name="preview_password" translatable="false">12345678</string>
+    <string name="preview_masked_phone" translatable="false">+7 (•••) •••-••-••</string>
+    <string name="preview_typography_hero" translatable="false">Hero</string>
+    <string name="preview_typography_name" translatable="false">Name</string>
+    <string name="preview_typography_title" translatable="false">Title</string>
+    <string name="preview_typography_app_bar" translatable="false">AppBar</string>
+    <string name="preview_typography_heading" translatable="false">Heading</string>
+    <string name="preview_typography_button" translatable="false">Button</string>
+    <string name="preview_typography_body" translatable="false">Body</string>
+    <string name="preview_typography_subtitle" translatable="false">Subtitle</string>
+    <string name="preview_typography_field" translatable="false">Field</string>
+    <string name="preview_typography_field_label" translatable="false">FieldLabel</string>
+    <string name="preview_typography_read_only_label" translatable="false">ReadOnlyLabel</string>
+    <string name="preview_typography_caption" translatable="false">Caption</string>
+    <string name="preview_typography_tag" translatable="false">Tag</string>
+    <string name="preview_typography_chip" translatable="false">Chip</string>
+    <string name="preview_typography_group_label" translatable="false">GroupLabel</string>
+    <string name="preview_typography_navigation" translatable="false">Navigation</string>
 </resources>

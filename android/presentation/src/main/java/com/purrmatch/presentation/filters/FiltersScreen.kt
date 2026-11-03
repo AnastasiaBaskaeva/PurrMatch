@@ -1,5 +1,10 @@
 package com.purrmatch.presentation.filters
 
+import androidx.compose.ui.res.stringArrayResource
+import com.purrmatch.presentation.R
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import com.purrmatch.presentation.preview.ScreenPreview
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
@@ -13,29 +18,87 @@ import com.purrmatch.presentation.listing.cities
 
 @Composable
 fun FiltersScreen(filters: Filters, onChange: (Filters) -> Unit, onReset: () -> Unit, onBack: () -> Unit, onApply: () -> Unit, modifier: Modifier = Modifier) {
-    ScreenLayout("Фильтры", modifier, onBack, actions = {
-        Button("Сбросить", onReset, style = ButtonStyle.Text)
+    ScreenLayout(stringResource(R.string.filters), modifier, onBack, actions = {
+        Button(stringResource(R.string.reset), onReset, style = ButtonStyle.Text)
     }, footer = {
-        ActionFooter { Button("Показать анкеты", onApply, Modifier.fillMaxWidth()) }
+        ActionFooter { Button(stringResource(R.string.show_listings), onApply, Modifier.fillMaxWidth()) }
     }) {
         FormContent {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                DropdownField("Порода", filters.breed, listOf("Любая порода") + breeds, { onChange(filters.copy(breed = it)) })
-                ChipGroup("Пол", listOf("Любой", "Кошка", "Кот"), filters.sex, { onChange(filters.copy(sex = it)) })
-                DropdownField("Окрас", filters.color, listOf("Любой окрас", "Серый", "Рыжий", "Белый"), { onChange(filters.copy(color = it)) })
-                DropdownField("Цвет глаз", filters.eyes, listOf("Любой цвет", "Янтарные", "Зелёные", "Голубые"), { onChange(filters.copy(eyes = it)) })
+                DropdownField(
+                    stringResource(R.string.breed_label),
+                    filters.breed,
+                    listOf(stringResource(R.string.breed_any)) + breeds,
+                    { onChange(filters.copy(breed = it)) },
+                )
+                ChipGroup(
+                    stringResource(R.string.sex_label),
+                    stringArrayResource(R.array.filter_sexes).toList(),
+                    filters.sex,
+                    { onChange(filters.copy(sex = it)) },
+                )
+                DropdownField(
+                    stringResource(R.string.color_label),
+                    filters.color,
+                    stringArrayResource(R.array.filter_colors).toList(),
+                    { onChange(filters.copy(color = it)) },
+                )
+                DropdownField(
+                    stringResource(R.string.eye_color_label),
+                    filters.eyes,
+                    stringArrayResource(R.array.filter_eyes).toList(),
+                    { onChange(filters.copy(eyes = it)) },
+                )
                 Column(Modifier.padding(top = 5.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("Возраст", style = Typography.GroupLabel, color = Colors.GroupLabel)
+                    Text(stringResource(R.string.age_label), style = Typography.GroupLabel, color = Colors.GroupLabel)
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        TextField(filters.minAge, { onChange(filters.copy(minAge = it.filter(Char::isDigit))) }, "От", Modifier.weight(1f), "0 лет", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-                        TextField(filters.maxAge, { onChange(filters.copy(maxAge = it.filter(Char::isDigit))) }, "До", Modifier.weight(1f), "20 лет", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                        TextField(
+                            filters.minAge,
+                            { onChange(filters.copy(minAge = it.filter(Char::isDigit))) },
+                            stringResource(R.string.from_label),
+                            Modifier.weight(1f),
+                            stringResource(R.string.min_age_hint),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        )
+                        TextField(
+                            filters.maxAge,
+                            { onChange(filters.copy(maxAge = it.filter(Char::isDigit))) },
+                            stringResource(R.string.to_label),
+                            Modifier.weight(1f),
+                            stringResource(R.string.max_age_hint),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        )
                     }
                 }
-                DropdownField("Город", filters.city, listOf("Выберите город") + cities, { onChange(filters.copy(city = it)) })
-                ChipGroup("Условия передачи", listOf("Любые", "Бесплатно", "Платно"), filters.terms, { onChange(filters.copy(terms = it)) })
-                TextField(filters.price, { onChange(filters.copy(price = it.filter(Char::isDigit))) }, "Цена до", placeholder = "Любая цена ₽",
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                DropdownField(
+                    stringResource(R.string.city_label),
+                    filters.city,
+                    listOf(stringResource(R.string.select_city)) + cities,
+                    { onChange(filters.copy(city = it)) },
+                )
+                ChipGroup(
+                    stringResource(R.string.transfer_terms),
+                    stringArrayResource(R.array.filter_terms).toList(),
+                    filters.terms,
+                    { onChange(filters.copy(terms = it)) },
+                )
+                TextField(
+                    filters.price,
+                    { onChange(filters.copy(price = it.filter(Char::isDigit))) },
+                    stringResource(R.string.max_price_label),
+                    placeholder = stringResource(R.string.price_any_hint),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                )
             }
         }
+    }
+}
+
+@Preview(name = "Фильтры", widthDp = 376, heightDp = 803)
+@Composable
+private fun FiltersScreenPreview() {
+    var filters by remember { mutableStateOf(Filters()) }
+    ScreenPreview {
+        FiltersScreen(filters, { filters = it }, { filters = Filters() }, {}, {})
     }
 }

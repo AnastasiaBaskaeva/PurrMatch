@@ -1,5 +1,6 @@
 package com.purrmatch.presentation.components.preview
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,11 +32,11 @@ import com.purrmatch.presentation.R
 import com.purrmatch.presentation.components.*
 
 private val samples = linkedMapOf(
-    "login" to "Вход", "buttons" to "Кнопки и контакты", "fields" to "Поля и переключатели",
-    "filters" to "Фильтры", "home" to "Карточка кошки", "swipe-right" to "Свайп вправо",
-    "swipe-left" to "Свайп влево", "cards" to "Карточки списка", "profile" to "Профиль",
-    "photos" to "Фотографии", "empty" to "Пустое состояние", "notices" to "Уведомления",
-    "delete" to "Подтверждение удаления", "logout" to "Подтверждение выхода",
+    "login" to R.string.login, "buttons" to R.string.catalog_buttons, "fields" to R.string.catalog_fields,
+    "filters" to R.string.filters, "home" to R.string.catalog_cat_card, "swipe-right" to R.string.catalog_swipe_right,
+    "swipe-left" to R.string.catalog_swipe_left, "cards" to R.string.catalog_list_cards, "profile" to R.string.profile,
+    "photos" to R.string.catalog_photos, "empty" to R.string.catalog_empty, "notices" to R.string.catalog_notices,
+    "delete" to R.string.catalog_delete, "logout" to R.string.catalog_logout,
 )
 
 /** Debug-only, interactive catalogue. It is not part of the production library API. */
@@ -51,13 +52,13 @@ fun ComponentsCatalog(initialSample: String = "catalog") {
                 else -> Column(Modifier.fillMaxSize()) {
                     val home = sample in listOf("home", "empty", "swipe-right", "swipe-left")
                     TopBar(
-                        if (home) "Кошки рядом" else samples[sample] ?: "Компоненты",
+                        if (home) stringResource(R.string.app_title) else stringResource(samples[sample] ?: R.string.catalog_title),
                         navigationIcon = if (home || sample == "profile" || sample == "catalog") null else {
-                            { IconButton(Icon.Back, "Назад", { sample = "catalog" }) }
+                            { IconButton(Icon.Back, stringResource(R.string.back), { sample = "catalog" }) }
                         },
                         actions = {
-                            if (sample == "filters") Button("Сбросить", { sample = "catalog" }, style = ButtonStyle.Text)
-                            if (sample == "profile") IconButton(Icon.Settings, "Настройки", { sample = "fields" })
+                            if (sample == "filters") Button(stringResource(R.string.reset), { sample = "catalog" }, style = ButtonStyle.Text)
+                            if (sample == "profile") IconButton(Icon.Settings, stringResource(R.string.settings), { sample = "fields" })
                         },
                     )
                     Box(Modifier.weight(1f).fillMaxWidth()) {
@@ -75,7 +76,7 @@ fun ComponentsCatalog(initialSample: String = "catalog") {
                                             }
                                         }
                                     }
-                                    Button("Фильтры", { sample = "filters" },
+                                    Button(stringResource(R.string.filters), { sample = "filters" },
                                         Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 22.dp),
                                         ButtonStyle.Secondary, leadingIcon = Icon.Filters)
                                 }
@@ -83,18 +84,18 @@ fun ComponentsCatalog(initialSample: String = "catalog") {
                             "filters" -> Column(Modifier.fillMaxSize()) {
                                 SampleFilters(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 17.dp))
                                 ActionFooter {
-                                    Button("Показать анкеты", { sample = "home" }, Modifier.fillMaxWidth())
+                                    Button(stringResource(R.string.show_listings), { sample = "home" }, Modifier.fillMaxWidth())
                                 }
                             }
                             "empty" -> EmptyState(
-                                "Новых анкет пока нет",
-                                "Вы посмотрели всех кошек по выбранным условиям. Попробуйте расширить поиск.",
-                                "Изменить фильтры", { sample = "filters" },
+                                stringResource(R.string.browse_empty_title),
+                                stringResource(R.string.browse_empty_message),
+                                stringResource(R.string.change_filters), { sample = "filters" },
                                 Modifier.align(Alignment.Center).padding(horizontal = 20.dp),
                             )
                             "delete", "logout" -> Column(Modifier.padding(20.dp)) {
                                 SampleCards()
-                                Button("Открыть диалог", {
+                                Button(stringResource(R.string.open_dialog), {
                                     confirmation = if (sample == "delete") Confirmation.DeleteListing else Confirmation.Logout
                                 }, Modifier.padding(top = 24.dp).fillMaxWidth())
                             }
@@ -110,12 +111,21 @@ fun ComponentsCatalog(initialSample: String = "catalog") {
                                     "cards" -> SampleCards()
                                     "photos" -> SamplePhotos()
                                     "notices" -> {
-                                        Notice("Профиль поможет другим пользователям связаться с вами по поводу кошек.")
-                                        Notice("Автор удалил анкету. Она сохранена только в истории вашего Избранного.", title = "Неактуально", unavailable = true)
+                                        Notice(stringResource(R.string.profile_contact_notice))
+                                        Notice(
+                                            stringResource(R.string.unavailable_listing_message),
+                                            title = stringResource(R.string.unavailable),
+                                            unavailable = true,
+                                        )
                                         Mascot(Modifier.align(Alignment.CenterHorizontally))
                                     }
                                     else -> samples.forEach { (key, title) ->
-                                        Button(title, { sample = key }, Modifier.fillMaxWidth(), ButtonStyle.Outlined)
+                                        Button(
+                                            stringResource(title),
+                                            { sample = key },
+                                            Modifier.fillMaxWidth(),
+                                            ButtonStyle.Outlined,
+                                        )
                                     }
                                 }
                             }
@@ -145,7 +155,8 @@ fun ComponentsCatalog(initialSample: String = "catalog") {
 @Composable
 private fun SampleLogin(modifier: Modifier, onSubmit: () -> Unit, onRegister: () -> Unit) {
     var login by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("12345678") }
+    val passwordInitial = stringResource(R.string.preview_password)
+    var password by remember { mutableStateOf(passwordInitial) }
     var visible by remember { mutableStateOf(false) }
     Box(modifier) {
         Icon(Icon.Paw, null,
@@ -158,14 +169,19 @@ private fun SampleLogin(modifier: Modifier, onSubmit: () -> Unit, onRegister: ()
         ) {
             Spacer(Modifier.height(90.dp))
             Mascot()
-            Text("Кошки рядом", Modifier.padding(top = 0.dp), style = Typography.Hero, color = Colors.Ink)
-            Text("Найдите своего нового друга", Modifier.padding(top = 22.dp, bottom = 40.dp),
+            Text(stringResource(R.string.app_title), Modifier.padding(top = 0.dp), style = Typography.Hero, color = Colors.Ink)
+            Text(stringResource(R.string.login_subtitle), Modifier.padding(top = 22.dp, bottom = 40.dp),
                 style = Typography.Subtitle, color = Colors.Body, textAlign = TextAlign.Center)
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                TextField(login, { login = it }, "Логин", placeholder = "Введите логин")
-                PasswordField(password, { password = it }, "Пароль", visible, { visible = it })
-                Button("Войти", onSubmit, Modifier.fillMaxWidth())
-                Button("Создать аккаунт", onRegister, Modifier.fillMaxWidth(), ButtonStyle.Text)
+                TextField(
+                    login,
+                    { login = it },
+                    stringResource(R.string.login_label),
+                    placeholder = stringResource(R.string.login_hint),
+                )
+                PasswordField(password, { password = it }, stringResource(R.string.password_label), visible, { visible = it })
+                Button(stringResource(R.string.sign_in), onSubmit, Modifier.fillMaxWidth())
+                Button(stringResource(R.string.create_account), onRegister, Modifier.fillMaxWidth(), ButtonStyle.Text)
             }
         }
     }
@@ -174,24 +190,24 @@ private fun SampleLogin(modifier: Modifier, onSubmit: () -> Unit, onRegister: ()
 @Composable
 private fun SampleProfile(modifier: Modifier = Modifier, onDelete: () -> Unit) {
     Column(modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
-        ProfileHeader("Анна", "Москва")
-        Text("Помогаю кошкам находить заботливый дом. Отвечаю на сообщения каждый день.",
+        ProfileHeader(stringResource(R.string.preview_anna), stringResource(R.string.city_moscow))
+        Text(stringResource(R.string.preview_profile_long_about),
             style = Typography.Body, color = Colors.Body)
         Row(horizontalArrangement = Arrangement.spacedBy(23.dp)) {
-            ContactChip("Сайт", {}, compact = true)
-            ContactChip("Telegram", {}, compact = true)
-            ContactChip("+7 (•••) •••-••-••", {}, compact = true)
+            ContactChip(stringResource(R.string.website_label), {})
+            ContactChip(stringResource(R.string.telegram_label), {})
+            ContactChip(stringResource(R.string.preview_masked_phone), {})
         }
-        SectionHeader("Мои анкеты") {
-            Text("2 действующие", style = Typography.Caption, color = Colors.Body)
+        SectionHeader(stringResource(R.string.my_listings)) {
+            Text(stringResource(R.string.preview_active_listings), style = Typography.Caption, color = Colors.Body)
         }
-        CatListItem("Мия", "Бесплатно", {}) {
-            IconButton(Icon.Delete, "Удалить анкету", onDelete)
+        CatListItem(stringResource(R.string.preview_mia), stringResource(R.string.free), {}) {
+            IconButton(Icon.Delete, stringResource(R.string.delete_listing), onDelete)
         }
-        CatListItem("Персик", "5 000 ₽", {}) {
-            IconButton(Icon.Delete, "Удалить анкету", onDelete)
+        CatListItem(stringResource(R.string.preview_peach), stringResource(R.string.preview_price), {}) {
+            IconButton(Icon.Delete, stringResource(R.string.delete_listing), onDelete)
         }
-        Button("Добавить анкету", {}, Modifier.padding(top = 10.dp).fillMaxWidth(), ButtonStyle.Warm)
+        Button(stringResource(R.string.add_cat), {}, Modifier.padding(top = 10.dp).fillMaxWidth(), ButtonStyle.Warm)
     }
 }
 

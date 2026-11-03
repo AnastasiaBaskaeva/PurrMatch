@@ -4,11 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,18 +15,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -126,17 +123,61 @@ fun ConfirmationDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val deletion = confirmation == Confirmation.DeleteListing
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        val window = (LocalView.current.parent as? DialogWindowProvider)?.window
-        SideEffect { window?.setDimAmount(Colors.Scrim.alpha) }
-        ConfirmationCard(
-            title = stringResource(if (deletion) R.string.delete_title else R.string.logout_title),
-            message = stringResource(if (deletion) R.string.delete_message else R.string.logout_message),
-            confirmText = stringResource(if (deletion) R.string.delete else R.string.logout),
-            onConfirm = onConfirm, onDismiss = onDismiss,
-            modifier = modifier.padding(horizontal = 24.dp),
-            icon = if (deletion) Icon.Delete else Icon.Logout,
-        )
+        ConfirmationDialogContent(confirmation, onConfirm, onDismiss, modifier)
+    }
+}
+
+/** Shared body for standalone dialogs and Navigation 3's dialog scene. */
+@Composable
+internal fun ConfirmationDialogContent(
+    confirmation: Confirmation,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val deletion = confirmation == Confirmation.DeleteListing
+    val window = (LocalView.current.parent as? DialogWindowProvider)?.window
+    SideEffect { window?.setDimAmount(Colors.Scrim.alpha) }
+    ConfirmationCard(
+        title = stringResource(if (deletion) R.string.delete_title else R.string.logout_title),
+        message = stringResource(if (deletion) R.string.delete_message else R.string.logout_message),
+        confirmText = stringResource(if (deletion) R.string.delete else R.string.logout),
+        onConfirm = onConfirm, onDismiss = onDismiss,
+        modifier = modifier.padding(horizontal = 24.dp),
+        icon = if (deletion) Icon.Delete else Icon.Logout,
+    )
+}
+
+@Preview(name = "Feedback", widthDp = 376)
+@Composable
+private fun FeedbackPreview() {
+    Theme {
+        Background {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Notice(stringResource(R.string.complete_profile_notice))
+                Notice(stringResource(R.string.listing_deleted), title = stringResource(R.string.unavailable), unavailable = true)
+                Mascot()
+                EmptyState(
+                    stringResource(R.string.browse_empty_title),
+                    stringResource(R.string.expand_search),
+                    stringResource(R.string.change_filters),
+                    {},
+                )
+            }
+        }
+    }
+}
+
+@Preview(name = "Confirmations", widthDp = 376)
+@Composable
+private fun ConfirmationsPreview() {
+    Theme {
+        Background {
+            Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                ConfirmationDialogContent(Confirmation.DeleteListing, {}, {})
+                ConfirmationDialogContent(Confirmation.Logout, {}, {})
+            }
+        }
     }
 }

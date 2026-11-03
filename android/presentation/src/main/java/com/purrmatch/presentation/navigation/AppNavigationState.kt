@@ -14,7 +14,11 @@ internal class AppNavigationState(
     var tab by selected
     val stack get() = stacks.getValue(tab)
     val destination get() = stack.last()
-    val showsTabs get() = destination == Home || destination == Favorites || destination == Profile
+    val showsTabs: Boolean
+        get() {
+            val screen = stack.lastOrNull { it !is DeleteListing && it != Logout }
+            return screen == Home || screen == Favorites || screen == Profile
+        }
 
     fun open(destination: NavKey) {
         if (destination == this.destination) return
@@ -24,15 +28,13 @@ internal class AppNavigationState(
         if (stack.size > 1) stack.removeAt(stack.lastIndex)
         else tab = Tab.Home
     }
-    fun home() {
-        tab = Tab.Home
-        val home = stacks.getValue(Tab.Home)
-        while (home.size > 1) home.removeAt(home.lastIndex)
-    }
-    fun profile() {
-        tab = Tab.Profile
-        val profile = stacks.getValue(Tab.Profile)
-        while (profile.size > 1) profile.removeAt(profile.lastIndex)
+    fun home() = reset(Tab.Home)
+    fun profile() = reset(Tab.Profile)
+
+    private fun reset(target: Tab) {
+        tab = target
+        val stack = stacks.getValue(target)
+        while (stack.size > 1) stack.removeAt(stack.lastIndex)
     }
 
     @Composable
@@ -62,7 +64,11 @@ internal fun rememberAppNavigation(initial: NavKey = Home): AppNavigationState {
     val stacks = Tab.entries.associateWith { tab ->
         key(tab) {
             val root = when (tab) { Tab.Home -> Home; Tab.Favorites -> Favorites; Tab.Profile -> Profile }
-            val keys = if (tab == initialTab && initial != root) listOf(root, initial) else listOf(root)
+            val keys = when {
+                tab != initialTab || initial == root -> listOf(root)
+                initial == Logout -> listOf(root, Settings, Logout)
+                else -> listOf(root, initial)
+            }
             rememberNavBackStack(*keys.toTypedArray())
         }
     }

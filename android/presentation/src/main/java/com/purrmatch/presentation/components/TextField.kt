@@ -39,6 +39,7 @@ import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.purrmatch.presentation.R
@@ -62,6 +63,7 @@ fun TextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingContent: (@Composable () -> Unit)? = null,
     textColor: androidx.compose.ui.graphics.Color = Colors.Muted,
+    placeholderColor: androidx.compose.ui.graphics.Color = Colors.Muted,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
@@ -103,7 +105,7 @@ fun TextField(
                     interactionSource = interaction,
                     decorationBox = { innerTextField ->
                         Box {
-                            if (value.isEmpty()) Text(placeholder, style = Typography.Field, color = Colors.Muted)
+                            if (value.isEmpty()) Text(placeholder, style = Typography.Field, color = placeholderColor)
                             innerTextField()
                         }
                     },
@@ -123,7 +125,7 @@ fun PasswordField(
     visible: Boolean,
     onVisibilityChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "",
+    placeholder: String = stringResource(R.string.password_mask),
     enabled: Boolean = true,
     errorMessage: String? = null,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
@@ -131,6 +133,7 @@ fun PasswordField(
     TextField(
         value, onValueChange, label, modifier, placeholder = placeholder, enabled = enabled,
         errorMessage = errorMessage,
+        placeholderColor = Colors.Muted.copy(alpha = .5f),
         keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Password),
         keyboardActions = keyboardActions,
         visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation('•'),
@@ -208,5 +211,36 @@ fun ReadOnlyField(label: String, value: String, modifier: Modifier = Modifier,
             Text(value, style = Typography.Field, color = Colors.ReadOnlyText)
         }
         Icon(Icon.Lock, null, Modifier.size(19.dp))
+    }
+}
+
+@Preview(name = "TextFields", widthDp = 376)
+@Composable
+private fun TextFieldsPreview() {
+    Theme {
+        Background {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                TextField("", {}, stringResource(R.string.login_label), placeholder = stringResource(R.string.login_hint))
+                TextField(stringResource(R.string.preview_anna), {}, stringResource(R.string.name_label))
+                TextField("", {}, stringResource(R.string.name_label), errorMessage = stringResource(R.string.name_required))
+                TextField("", {}, stringResource(R.string.disabled_field), enabled = false)
+                TextField(stringResource(R.string.preview_about), {}, stringResource(R.string.about_label), multiline = true)
+                PasswordField(stringResource(R.string.preview_password), {}, stringResource(R.string.password_label), false, {})
+                PasswordField("", {}, stringResource(R.string.password_label), false, {})
+                ReadOnlyField(stringResource(R.string.login_label), stringResource(R.string.preview_login))
+                SelectField(
+                    stringResource(R.string.birthday_label),
+                    stringResource(R.string.birthday_hint),
+                    {},
+                    icon = Icon.Calendar,
+                )
+                DropdownField(
+                    stringResource(R.string.city_label),
+                    stringResource(R.string.city_moscow),
+                    listOf(stringResource(R.string.city_moscow), stringResource(R.string.city_saint_petersburg)),
+                    {},
+                )
+            }
+        }
     }
 }

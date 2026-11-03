@@ -7,6 +7,15 @@ import com.purrmatch.presentation.App
 import com.purrmatch.presentation.profile.Profile
 
 @Composable
-internal fun AppEntry(intent: Intent, photos: List<Painter>, onAddPhoto: () -> Unit, onContact: (String, Profile) -> Unit) {
-    App(pickedPhotos = photos, onAddPhoto = onAddPhoto, onContact = onContact)
+internal fun AppEntry(
+    intent: Intent,
+    photos: List<Painter>,
+    onAddPhoto: () -> Unit,
+    onContact: (String, Profile) -> Unit
+) {
+    App(
+        pickedPhotos = photos,
+        onAddPhoto = onAddPhoto,
+        onContact = onContact
+    )
 }

@@ -1,5 +1,6 @@
 package com.purrmatch.presentation.components
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -13,6 +14,7 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.purrmatch.presentation.R
 
@@ -29,7 +31,7 @@ internal fun ScreenLayout(
 ) {
     Column(modifier.fillMaxSize()) {
         TopBar(title, navigationIcon = onBack?.let { back ->
-            { IconButton(navigationIcon, "Назад", back) }
+            { IconButton(navigationIcon, stringResource(R.string.back), back) }
         }, actions = actions)
         Box(Modifier.weight(1f).fillMaxWidth(), content = content)
         footer()
@@ -90,6 +92,29 @@ internal fun designUploadPhoto(): Painter {
                     translate(-34.5f * scale, -13f * scale) {
                         with(original) { draw(Size(171f * scale, 128f * scale)) }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Preview(name = "ScreenLayout", widthDp = 376, heightDp = 803)
+@Composable
+private fun ScreenLayoutPreview() {
+    Theme {
+        Background {
+            ScreenLayout(
+                title = stringResource(R.string.edit_profile),
+                onBack = {},
+                footer = {
+                    ActionFooter { Button(stringResource(R.string.save), {}, Modifier.fillMaxWidth()) }
+                },
+            ) {
+                FormContent {
+                    Heading(stringResource(R.string.about_label))
+                    Body(stringResource(R.string.contact_instruction))
+                    Divider()
+                    Body(stringResource(R.string.profile_data_visible), caption = true)
                 }
             }
         }

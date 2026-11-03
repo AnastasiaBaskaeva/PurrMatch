@@ -1,0 +1,192 @@
+{
+  "fileKey": "X7Kp2gmSu5nTt3mpFwV7d0",
+  "pageId": "264:5",
+  "pageName": "Ии макет",
+  "icons": [
+    {
+      "source": "svg/paw.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_paw.xml",
+      "width": "23",
+      "height": "23",
+      "sha256": "b5456b9739cf762f192df810908367d6d2fec065d20b212b8612b1baaec0e27b"
+    },
+    {
+      "source": "svg/profile_selected.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_profile_selected.xml",
+      "width": "24.9952",
+      "height": "24.9952",
+      "sha256": "45925122ce0e864d0fced651914c7e1bf28be7dcc8cbfe300650e7a75c940a66"
+    },
+    {
+      "source": "svg/home_selected.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_home_selected.xml",
+      "width": "25.0052",
+      "height": "25.0052",
+      "sha256": "008990f14ad8603d5c64c5ec39a70cd744a2c769851c1968aa7bee4de1105b20"
+    },
+    {
+      "source": "svg/filters.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_filters.xml",
+      "width": "24",
+      "height": "24",
+      "sha256": "94cec2c98c05969e8ee7ad0e377b1bace8ba9c3585637c26600f47d3f59b86dc"
+    },
+    {
+      "source": "svg/chevron_down.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_chevron_down.xml",
+      "width": "21",
+      "height": "21",
+      "sha256": "21256031a0056c8dd7216edcd0bbb2aed356095e3cf1f58143804e6d8d978912"
+    },
+    {
+      "source": "svg/favorite_selected.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_favorite_selected.xml",
+      "width": "24.9952",
+      "height": "24.9952",
+      "sha256": "f21b01addb54fd2a001741ac86d6cd85593a2747ac16263b4c1f98c520cfeea7"
+    },
+    {
+      "source": "svg/logout.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_logout.xml",
+      "width": "24",
+      "height": "24",
+      "sha256": "085ca84acc9ef42cd4b8350dc8d5d79f1c9acf0047ed7f21ff73a66918888849"
+    },
+    {
+      "source": "svg/favorite.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_favorite.xml",
+      "width": "25",
+      "height": "25",
+      "sha256": "97d4f38548389b6d17532f60c3d2fcd6f7f02401138313ce49ba2823107a2bf2"
+    },
+    {
+      "source": "svg/plus.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_plus.xml",
+      "width": "48",
+      "height": "48",
+      "sha256": "d445dc57e4a34b6829274fa539b9607a83da8123a8ddbf2f262c0227cd2b4c67"
+    },
+    {
+      "source": "svg/lock.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_lock.xml",
+      "width": "19",
+      "height": "19",
+      "sha256": "f8517518f4c208b448587455c737edd6eaad8555ccba48ea4e68bcb5f7661f97"
+    },
+    {
+      "source": "svg/password_hidden.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_password_hidden.xml",
+      "width": "21",
+      "height": "21",
+      "sha256": "7fd081360e84f745d942a90ba163e2917f8ecf7216d291208c7d66ed9c584c36"
+    },
+    {
+      "source": "svg/favorite_filled.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_favorite_filled.xml",
+      "width": "23",
+      "height": "23",
+      "sha256": "d245bda9fc991724e3ab72e883aaff1b43f237a211602f5c40a90b81c89c7aef"
+    },
+    {
+      "source": "svg/calendar.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_calendar.xml",
+      "width": "21",
+      "height": "21",
+      "sha256": "029f78c2104e1f767b32c0f1c1ce0e12286b2e20979bb6582674b82f7a193481"
+    },
+    {
+      "source": "svg/profile.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_profile.xml",
+      "width": "25",
+      "height": "25",
+      "sha256": "65b47865087a0a998ced44c79986ca9dcc71585849c98ef2bd08af70fd11099e"
+    },
+    {
+      "source": "svg/home.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_home.xml",
+      "width": "25",
+      "height": "25",
+      "sha256": "73d9899f1f4e9e71d817eeb9e29240e3bd8952365f9749be8a41de347f1fd825"
+    },
+    {
+      "source": "svg/settings.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_settings.xml",
+      "width": "23",
+      "height": "23",
+      "sha256": "ba9971e9248147526c6fceb487f23fb72b490e3a122350478e46e16bc2132a02"
+    },
+    {
+      "source": "svg/back.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_back.xml",
+      "width": "23",
+      "height": "23",
+      "sha256": "89c0bb0d106527d25e804a68f90bde0c14e5e20a9f5f3a328ec6f495f6cd8b94"
+    },
+    {
+      "source": "svg/delete.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_delete.xml",
+      "width": "23",
+      "height": "23",
+      "sha256": "1efbbc90134efcf2defda5c910c0fddf4f67f0e113fea28962b29eee9e0b15b7"
+    },
+    {
+      "source": "svg/swipe_like.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_swipe_like.xml",
+      "width": "18.6911",
+      "height": "16.7546",
+      "sha256": "625e486b7bd0922b7216d46327092bcc88e3bcdb83c31327bec3a700142047aa"
+    },
+    {
+      "source": "svg/swipe_skip.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_swipe_skip.xml",
+      "width": "10.8167",
+      "height": "10.8167",
+      "sha256": "31d4d0663fb11ff80a6b4d8f89257b30cc7b5e18a2359d14276391cc6b15b1b4"
+    },
+    {
+      "source": "svg/close.svg",
+      "drawable": "presentation/src/main/res/drawable/ic_close.xml",
+      "width": "23",
+      "height": "23",
+      "sha256": "d2e9e9a1d1fad97191fc2141ce740abd1df18e25e71a3b70d1cffcef0a96288e"
+    }
+  ],
+  "illustrations": [
+    {
+      "nodeId": "264:29",
+      "source": "mascot.svg",
+      "resource": "presentation/src/main/res/drawable-nodpi/mascot.png",
+      "displayDp": [
+        177,
+        177
+      ]
+    },
+    {
+      "nodeId": "264:676",
+      "source": "empty_search.svg",
+      "resource": "presentation/src/main/res/drawable-nodpi/empty_search.png",
+      "displayDp": [
+        115,
+        120
+      ]
+    },
+    {
+      "nodeId": "264:497",
+      "resource": "presentation/src/main/res/drawable-nodpi/empty_favorites.png",
+      "displayDp": [
+        115,
+        120
+      ]
+    }
+  ],
+  "photos": [
+    {
+      "nodeId": "264:736",
+      "resource": "presentation/src/main/res/drawable-nodpi/sample_cat.png"
+    },
+    {
+      "nodeId": "264:279",
+      "resource": "presentation/src/main/res/drawable-nodpi/sample_upload.png"
+    }
+  ]
+}

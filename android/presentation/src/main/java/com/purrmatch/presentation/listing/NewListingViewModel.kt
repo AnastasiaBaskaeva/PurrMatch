@@ -10,7 +10,7 @@ import java.util.UUID
 
 data class NewListingState(
     val id: String = UUID.randomUUID().toString(),
-    val name: String = "", val breed: String = "Выберите породу", val sex: Int = 0,
+    val name: String = "", val breed: String = "", val sex: Int = 0,
     val birthday: String = "", val color: String = "", val eyes: String = "", val character: String = "",
     val description: String = "", val dogs: Boolean = true, val cats: Boolean = true,
     val children: Boolean = true, val paid: Boolean = false, val price: String = "",
@@ -26,6 +26,7 @@ class NewListingViewModel(
     private val repository: MatchRepository,
     private val userId: String,
     pickedCount: Int,
+    private val breeds: List<String>,
 ) : AsyncActionViewModel() {
     val profile = requireNotNull(repository.data.value.profile(userId))
     val state = savedState.getStateFlow("listing", NewListingState(pickedStartIndex = pickedCount))

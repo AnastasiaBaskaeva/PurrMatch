@@ -5,9 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.purrmatch.presentation.R
@@ -93,6 +94,23 @@ fun BottomBar(
                     style = Typography.Navigation.copy(fontWeight = if (selected) FontWeight.Black else FontWeight.ExtraBold),
                     color = if (selected) Colors.NavigationActive else Colors.NavigationInactive,
                 )
+            }
+        }
+    }
+}
+
+@Preview(name = "Navigation", widthDp = 376)
+@Composable
+private fun NavigationPreview() {
+    Theme {
+        Background {
+            Column {
+                TopBar(stringResource(R.string.cat_details), navigationIcon = {
+                    IconButton(Icon.Back, stringResource(R.string.back), {})
+                }, actions = {
+                    IconButton(Icon.Settings, stringResource(R.string.settings), {})
+                })
+                Tab.entries.forEach { tab -> BottomBar(tab, {}) }
             }
         }
     }

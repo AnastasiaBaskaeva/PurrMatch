@@ -1,0 +1,40 @@
+<resources>
+    <string-array name="breeds">
+        <item>@string/breed_british</item>
+        <item>@string/breed_mixed</item>
+        <item>@string/breed_domestic</item>
+        <item>@string/breed_siberian</item>
+        <item>@string/breed_maine_coon</item>
+    </string-array>
+    <string-array name="cities">
+        <item>@string/city_moscow</item>
+        <item>@string/city_saint_petersburg</item>
+        <item>@string/city_kazan</item>
+    </string-array>
+    <string-array name="filter_sexes">
+        <item>@string/sex_any</item>
+        <item>@string/sex_female</item>
+        <item>@string/sex_male</item>
+    </string-array>
+    <string-array name="listing_sexes">
+        <item>@string/sex_female</item>
+        <item>@string/sex_male</item>
+    </string-array>
+    <string-array name="filter_colors">
+        <item>@string/color_any</item>
+        <item>@string/color_grey</item>
+        <item>@string/color_red</item>
+        <item>@string/color_white</item>
+    </string-array>
+    <string-array name="filter_eyes">
+        <item>@string/eyes_any</item>
+        <item>@string/eyes_amber</item>
+        <item>@string/eyes_green</item>
+        <item>@string/eyes_blue</item>
+    </string-array>
+    <string-array name="filter_terms">
+        <item>@string/terms_any</item>
+        <item>@string/free</item>
+        <item>@string/paid</item>
+    </string-array>
+</resources>

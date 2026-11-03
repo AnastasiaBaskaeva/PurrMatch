@@ -1,16 +1,13 @@
 package com.purrmatch.presentation.components.preview
 
-import androidx.compose.foundation.Image
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,16 +15,13 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.purrmatch.presentation.R
 import com.purrmatch.presentation.components.*
@@ -72,62 +66,126 @@ internal fun sampleUploadPhoto(): Painter {
 @Composable
 internal fun SampleCatCard(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
     CatCard(
-        "Мия, 2 года", "Британская короткошёрстная · серая", sampleCatPhoto(), "Москва",
-        listOf(CatTag("Ласковая"), CatTag("Спокойная", TagStyle.Peach)),
+        stringResource(R.string.preview_mia_age), stringResource(R.string.preview_breed_color), sampleCatPhoto(), stringResource(R.string.city_moscow),
+        listOf(CatTag(stringResource(R.string.character_affectionate)), CatTag(stringResource(R.string.character_calm), TagStyle.Peach)),
         onClick, modifier,
     )
 }
 
 @Composable
 internal fun SampleFilters(modifier: Modifier = Modifier) {
-    var breed by remember { mutableStateOf("Любая порода") }
-    var color by remember { mutableStateOf("Любой окрас") }
-    var eyes by remember { mutableStateOf("Любой цвет") }
-    var city by remember { mutableStateOf("Выберите город") }
+    val breedInitial = stringResource(R.string.breed_any)
+    var breed by remember { mutableStateOf(breedInitial) }
+    val colorInitial = stringResource(R.string.color_any)
+    var color by remember { mutableStateOf(colorInitial) }
+    val eyesInitial = stringResource(R.string.eyes_any)
+    var eyes by remember { mutableStateOf(eyesInitial) }
+    val cityInitial = stringResource(R.string.select_city)
+    var city by remember { mutableStateOf(cityInitial) }
     var sex by remember { mutableIntStateOf(0) }
     var terms by remember { mutableIntStateOf(0) }
     var min by remember { mutableStateOf("") }
     var max by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        DropdownField("Порода", breed, listOf("Любая порода", "Британская короткошёрстная", "Метис"), { breed = it })
-        ChipGroup("Пол", listOf("Любой", "Кошка", "Кот"), sex, { sex = it })
-        DropdownField("Окрас", color, listOf("Любой окрас", "Серый", "Рыжий"), { color = it })
-        DropdownField("Цвет глаз", eyes, listOf("Любой цвет", "Янтарные", "Зелёные"), { eyes = it })
+        DropdownField(
+            stringResource(R.string.breed_label),
+            breed,
+            listOf(stringResource(R.string.breed_any), stringResource(R.string.breed_british), stringResource(R.string.breed_mixed)),
+            { breed = it },
+        )
+        ChipGroup(stringResource(R.string.sex_label), stringArrayResource(R.array.filter_sexes).toList(), sex, { sex = it })
+        DropdownField(
+            stringResource(R.string.color_label),
+            color,
+            listOf(stringResource(R.string.color_any), stringResource(R.string.color_grey), stringResource(R.string.color_red)),
+            { color = it },
+        )
+        DropdownField(
+            stringResource(R.string.eye_color_label),
+            eyes,
+            listOf(stringResource(R.string.eyes_any), stringResource(R.string.eyes_amber), stringResource(R.string.eyes_green)),
+            { eyes = it },
+        )
         Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(top = 5.dp)) {
-            Text("Возраст", style = Typography.GroupLabel, color = Colors.GroupLabel)
+            Text(stringResource(R.string.age_label), style = Typography.GroupLabel, color = Colors.GroupLabel)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                TextField(min, { min = it }, "От", Modifier.weight(1f), "0 лет")
-                TextField(max, { max = it }, "До", Modifier.weight(1f), "20 лет")
+                TextField(
+                    min,
+                    { min = it },
+                    stringResource(R.string.from_label),
+                    Modifier.weight(1f),
+                    stringResource(R.string.min_age_hint),
+                )
+                TextField(
+                    max,
+                    { max = it },
+                    stringResource(R.string.to_label),
+                    Modifier.weight(1f),
+                    stringResource(R.string.max_age_hint),
+                )
             }
         }
-        DropdownField("Город", city, listOf("Москва", "Санкт-Петербург"), { city = it })
-        ChipGroup("Условия передачи", listOf("Любые", "Бесплатно", "Платно"), terms, { terms = it })
-        TextField(price, { price = it }, "Цена до", placeholder = "Любая цена ₽")
+        DropdownField(
+            stringResource(R.string.city_label),
+            city,
+            listOf(stringResource(R.string.city_moscow), stringResource(R.string.city_saint_petersburg)),
+            { city = it },
+        )
+        ChipGroup(
+            stringResource(R.string.transfer_terms),
+            stringArrayResource(R.array.filter_terms).toList(),
+            terms,
+            { terms = it },
+        )
+        TextField(
+            price,
+            { price = it },
+            stringResource(R.string.max_price_label),
+            placeholder = stringResource(R.string.price_any_hint),
+        )
     }
 }
 
 @Composable
 internal fun SampleFields(modifier: Modifier = Modifier) {
     var value by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("12345678") }
+    val passwordInitial = stringResource(R.string.preview_password)
+    var password by remember { mutableStateOf(passwordInitial) }
     var visible by remember { mutableStateOf(false) }
     var checked by remember { mutableStateOf(true) }
     var radio by remember { mutableStateOf(true) }
     var errorValue by remember { mutableStateOf("") }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        TextField(value, { value = it }, "Логин", placeholder = "Введите логин")
-        PasswordField(password, { password = it }, "Пароль", visible, { visible = it })
-        TextField(value, { value = it }, "О себе", placeholder = "Пара слов о вас", multiline = true)
-        ReadOnlyField("Логин", "anna_cats")
-        SelectField("Дата рождения", "ДД.ММ.ГГГГ", {}, icon = Icon.Calendar)
-        TextField("", {}, "Недоступное поле", placeholder = "Введите значение", enabled = false)
-        TextField(errorValue, { errorValue = it }, "Имя", errorMessage = "Укажите имя")
-        SwitchRow("С собаками", checked, { checked = it })
+        TextField(value, { value = it }, stringResource(R.string.login_label), placeholder = stringResource(R.string.login_hint))
+        PasswordField(password, { password = it }, stringResource(R.string.password_label), visible, { visible = it })
+        TextField(
+            value,
+            { value = it },
+            stringResource(R.string.about_label),
+            placeholder = stringResource(R.string.about_hint),
+            multiline = true,
+        )
+        ReadOnlyField(stringResource(R.string.login_label), stringResource(R.string.preview_login))
+        SelectField(stringResource(R.string.birthday_label), stringResource(R.string.birthday_hint), {}, icon = Icon.Calendar)
+        TextField(
+            "",
+            {},
+            stringResource(R.string.disabled_field),
+            placeholder = stringResource(R.string.value_hint),
+            enabled = false,
+        )
+        TextField(
+            errorValue,
+            { errorValue = it },
+            stringResource(R.string.name_label),
+            errorMessage = stringResource(R.string.name_required),
+        )
+        SwitchRow(stringResource(R.string.with_dogs), checked, { checked = it })
         Switch(checked, { checked = it })
         Row(horizontalArrangement = Arrangement.spacedBy(25.dp)) {
-            RadioOption("Бесплатно", radio, { radio = true })
-            RadioOption("Платно", !radio, { radio = false })
+            RadioOption(stringResource(R.string.free), radio, { radio = true })
+            RadioOption(stringResource(R.string.paid), !radio, { radio = false })
         }
     }
 }
@@ -135,27 +193,23 @@ internal fun SampleFields(modifier: Modifier = Modifier) {
 @Composable
 internal fun SampleButtons(modifier: Modifier = Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        Button("Войти", {}, Modifier.fillMaxWidth())
-        Button("Опубликовать бесплатно", {}, Modifier.fillMaxWidth(), ButtonStyle.Warm)
-        Button("Фильтры", {}, Modifier.fillMaxWidth(), ButtonStyle.Secondary, leadingIcon = Icon.Filters)
-        Button("Убрать из Избранного", {}, Modifier.fillMaxWidth(), ButtonStyle.Outlined)
-        Button("Создать аккаунт", {}, Modifier.fillMaxWidth(), ButtonStyle.Text)
-        Button("Войти", {}, Modifier.fillMaxWidth(), enabled = false)
+        Button(stringResource(R.string.sign_in), {}, Modifier.fillMaxWidth())
+        Button(stringResource(R.string.publish_listing), {}, Modifier.fillMaxWidth(), ButtonStyle.Warm)
+        Button(stringResource(R.string.filters), {}, Modifier.fillMaxWidth(), ButtonStyle.Secondary, leadingIcon = Icon.Filters)
+        Button(stringResource(R.string.remove_favorite), {}, Modifier.fillMaxWidth(), ButtonStyle.Outlined)
+        Button(stringResource(R.string.create_account), {}, Modifier.fillMaxWidth(), ButtonStyle.Text)
+        Button(stringResource(R.string.sign_in), {}, Modifier.fillMaxWidth(), enabled = false)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button("Удалить", {}, style = ButtonStyle.Destructive)
-            IconButton(Icon.Back, "Назад", {})
-            IconButton(Icon.Settings, "Настройки", {})
-            IconButton(Icon.FavoriteFilled, "Избранное", {})
-            IconButton(Icon.Delete, "Удалить", {})
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-            ContactChip("Сайт", {}, compact = true)
-            ContactChip("Telegram", {}, compact = true)
+            Button(stringResource(R.string.delete), {}, style = ButtonStyle.Destructive)
+            IconButton(Icon.Back, stringResource(R.string.back), {})
+            IconButton(Icon.Settings, stringResource(R.string.settings), {})
+            IconButton(Icon.FavoriteFilled, stringResource(R.string.favorites), {})
+            IconButton(Icon.Delete, stringResource(R.string.delete), {})
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ContactChip("Сайт", {})
-            ContactChip("Telegram", {})
-            ContactChip("Позвонить", {})
+            ContactChip(stringResource(R.string.website_label), {})
+            ContactChip(stringResource(R.string.telegram_label), {})
+            ContactChip(stringResource(R.string.call), {})
         }
     }
 }
@@ -163,68 +217,21 @@ internal fun SampleButtons(modifier: Modifier = Modifier) {
 @Composable
 internal fun SampleCards(modifier: Modifier = Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        ProfileHeader("Анна", "Москва")
-        CatListItem("Мия, 2 года", "Британская · Москва", {}) {
-            IconButton(Icon.FavoriteFilled, "Убрать из Избранного", {})
+        ProfileHeader(stringResource(R.string.preview_anna), stringResource(R.string.city_moscow))
+        CatListItem(stringResource(R.string.preview_mia_age), stringResource(R.string.preview_breed_city), {}) {
+            IconButton(Icon.FavoriteFilled, stringResource(R.string.remove_favorite), {})
         }
-        CatListItem("Соня, 4 года", "", {}, available = false) {
-            IconButton(Icon.FavoriteFilled, "Убрать из Избранного", {})
+        CatListItem(stringResource(R.string.preview_sonya_age), "", {}, available = false) {
+            IconButton(Icon.FavoriteFilled, stringResource(R.string.remove_favorite), {})
         }
-        CatListItem("Персик", "5 000 ₽", {}) {
-            IconButton(Icon.Delete, "Удалить анкету", {})
+        CatListItem(stringResource(R.string.preview_peach), stringResource(R.string.preview_price), {}) {
+            IconButton(Icon.Delete, stringResource(R.string.delete_listing), {})
         }
-        TagRow(listOf(CatTag("Бесплатно"), CatTag("Спокойная", TagStyle.Peach)))
-        SectionHeader("Мои анкеты") {
-            Text("2 действующие", style = Typography.Caption, color = Colors.Body)
+        TagRow(listOf(CatTag(stringResource(R.string.free)), CatTag(stringResource(R.string.character_calm), TagStyle.Peach)))
+        SectionHeader(stringResource(R.string.my_listings)) {
+            Text(stringResource(R.string.preview_active_listings), style = Typography.Caption, color = Colors.Body)
         }
-        DetailRow("Дата рождения", "14 мая 2024")
-        DetailRow("Окрас", "Серый")
+        DetailRow(stringResource(R.string.birthday_label), stringResource(R.string.preview_birthday))
+        DetailRow(stringResource(R.string.color_label), stringResource(R.string.color_grey))
     }
-}
-
-@Preview(name = "Buttons and contacts", widthDp = 376)
-@Composable
-private fun ButtonsPreview() {
-    Theme { Background { SampleButtons(Modifier.padding(20.dp)) } }
-}
-
-@Preview(name = "Text fields and selection", widthDp = 376, heightDp = 900)
-@Composable
-private fun FieldsPreview() {
-    Theme { Background { SampleFields(Modifier.padding(20.dp)) } }
-}
-
-@Preview(name = "Cards and profile", widthDp = 376)
-@Composable
-private fun CardsPreview() {
-    Theme { Background { SampleCards(Modifier.padding(20.dp)) } }
-}
-
-@Preview(name = "Cat card", widthDp = 376)
-@Composable
-private fun CatCardPreview() {
-    Theme { Background { SampleCatCard(Modifier.padding(20.dp)) } }
-}
-
-@Preview(name = "Navigation", widthDp = 376)
-@Composable
-private fun NavigationPreview() {
-    Theme {
-        Background {
-            Column {
-                TopBar("Анкета кошки", navigationIcon = {
-                    IconButton(Icon.Back, "Назад", {})
-                })
-                BottomBar(Tab.Favorites, {})
-            }
-        }
-    }
-}
-
-@Preview(name = "Delete confirmation", widthDp = 376)
-@Composable
-private fun ConfirmationPreview() {
-    Theme { Background {
-        ConfirmationCard("Удалить анкету?", "Она исчезнет из общего подбора и ваших действующих анкет.", "Удалить", {}, {}, Modifier.padding(24.dp))
-    } }
 }

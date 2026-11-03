@@ -1,15 +1,22 @@
 package com.purrmatch.presentation.components
 
+import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.Typography as MaterialTypography
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.purrmatch.presentation.R
@@ -156,4 +163,35 @@ fun Theme(content: @Composable () -> Unit) {
         ),
         content = content,
     )
+}
+
+@Preview(name = "Typography", widthDp = 376)
+@Composable
+private fun TypographyPreview() {
+    Theme {
+        Background {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                listOf(
+                    stringResource(R.string.preview_typography_hero) to Typography.Hero,
+                    stringResource(R.string.preview_typography_name) to Typography.Name,
+                    stringResource(R.string.preview_typography_title) to Typography.Title,
+                    stringResource(R.string.preview_typography_app_bar) to Typography.AppBar,
+                    stringResource(R.string.preview_typography_heading) to Typography.Heading,
+                    stringResource(R.string.preview_typography_button) to Typography.Button,
+                    stringResource(R.string.preview_typography_body) to Typography.Body,
+                    stringResource(R.string.preview_typography_subtitle) to Typography.Subtitle,
+                    stringResource(R.string.preview_typography_field) to Typography.Field,
+                    stringResource(R.string.preview_typography_field_label) to Typography.FieldLabel,
+                    stringResource(R.string.preview_typography_read_only_label) to Typography.ReadOnlyLabel,
+                    stringResource(R.string.preview_typography_caption) to Typography.Caption,
+                    stringResource(R.string.preview_typography_tag) to Typography.Tag,
+                    stringResource(R.string.preview_typography_chip) to Typography.Chip,
+                    stringResource(R.string.preview_typography_group_label) to Typography.GroupLabel,
+                    stringResource(R.string.preview_typography_navigation) to Typography.Navigation,
+                ).forEach { (name, style) ->
+                    Text(stringResource(R.string.preview_theme_title, name), style = style, color = Colors.Ink)
+                }
+            }
+        }
+    }
 }

@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="25.0052" height="25.0052"
+        viewBox="0 0 25.0052 25.0052" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g id="SVG">
+        <path id="Vector"
+                d="M3.12565 10.4188L5.20942 3.12565L11.4607 6.2513H13.5445L19.7958 3.12565L21.8796 10.4188V19.7958C21.8796 20.3484 21.66 20.8785 21.2692 21.2692C20.8785 21.66 20.3484 21.8796 19.7958 21.8796H15.6283V15.6283H9.37695V21.8796H5.20942C4.65677 21.8796 4.12675 21.66 3.73597 21.2692C3.34519 20.8785 3.12565 20.3484 3.12565 19.7958V10.4188Z"
+                fill="#E5D9FF" stroke-width="1.87539" stroke-linecap="round" stroke-linejoin="round" stroke="#7551BC" />
+        <g id="Vector_2">
+            <path d="M8.33507 10.4188H8.34549ZM16.6701 10.4188H16.6806Z" fill="#E5D9FF" />
+            <path d="M8.33507 10.4188H8.34549M16.6701 10.4188H16.6806" stroke-width="1.87539" stroke-linecap="round"
+                    stroke-linejoin="round" stroke="#7551BC" />
+        </g>
+    </g>
+</svg>

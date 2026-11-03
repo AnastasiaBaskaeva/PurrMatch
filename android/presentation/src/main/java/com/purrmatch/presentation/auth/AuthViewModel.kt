@@ -1,5 +1,6 @@
 package com.purrmatch.presentation.auth
 
+import com.purrmatch.presentation.R
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,7 +30,7 @@ class AuthViewModel(
     val state = mutableState.asStateFlow()
     private val mutableLoading = MutableStateFlow(false)
     val loading = mutableLoading.asStateFlow()
-    private val mutableError = MutableStateFlow<String?>(null)
+    private val mutableError = MutableStateFlow<Int?>(null)
     val error = mutableError.asStateFlow()
 
     fun edit(value: AuthState) {
@@ -56,14 +57,14 @@ class AuthViewModel(
                 account.fold(onSuccess = { id ->
                     sessions.signIn(id, onboarding = registration).onFailure {
                         mutableError.value = if (registration)
-                            "Аккаунт создан, но не удалось сохранить вход. Войдите с указанными логином и паролем."
-                        else "Не удалось сохранить вход. Повторите попытку."
+                            R.string.registration_session_failed
+                        else R.string.sign_in_save_failed
                     }
                 }, onFailure = {
                     mutableError.value = when (it) {
-                        is LoginOccupiedException -> "Этот логин уже занят"
-                        is InvalidCredentialsException -> "Неверный логин или пароль"
-                        else -> "Не удалось прочитать или сохранить аккаунт. Повторите попытку."
+                        is LoginOccupiedException -> R.string.login_occupied
+                        is InvalidCredentialsException -> R.string.invalid_credentials
+                        else -> R.string.account_storage_failed
                     }
                 })
             } finally { mutableLoading.value = false }

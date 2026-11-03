@@ -16,13 +16,24 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object SessionModule {
+
     @Provides
     @Singleton
     fun provideSessionRepository(@ApplicationContext context: Context): SessionRepository =
-        LocalSessionRepository(File(context.filesDir, "session"))
+        LocalSessionRepository(
+            File(
+                context.filesDir,
+                "session"
+            )
+        )
 
     @Provides
     @Singleton
     fun provideMatchRepository(@ApplicationContext context: Context): MatchRepository =
-        MockMatchRepository(File(context.filesDir, "mock-matches-v1"))
+        MockMatchRepository(
+            File(
+                context.filesDir,
+                "mock-matches-v1"
+            )
+        )
 }

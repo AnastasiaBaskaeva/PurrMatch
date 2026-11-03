@@ -30,6 +30,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.purrmatch.presentation.R
@@ -41,20 +42,13 @@ fun ContactChip(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    compact: Boolean = false,
 ) {
-    if (compact) {
-        Tag(text, modifier.clip(RoundedCornerShape(12.dp))
-            .clickable(role = Role.Button, onClick = onClick))
-    } else {
-        Box(
-            modifier.heightIn(min = 39.dp)
-                .background(Colors.Chip, RoundedCornerShape(12.dp))
-                .border(1.dp, Color.White, RoundedCornerShape(12.dp)).clip(RoundedCornerShape(12.dp))
-                .clickable(role = Role.Button, onClick = onClick).padding(horizontal = 13.dp, vertical = 10.dp),
-            contentAlignment = Alignment.Center,
-        ) { Text(text, style = Typography.Chip, color = Colors.ChipText) }
-    }
+    Tag(
+        text,
+        modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(role = Role.Button, onClick = onClick),
+    )
 }
 
 @Immutable
@@ -216,5 +210,56 @@ fun SectionHeader(
         horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(title, Modifier.weight(1f), style = Typography.Heading, color = Colors.Ink)
         trailingContent?.invoke()
+    }
+}
+
+@Preview(name = "Cards", widthDp = 376)
+@Composable
+private fun CardsPreview() {
+    Theme {
+        Background {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                ProfileHeader(stringResource(R.string.preview_anna), stringResource(R.string.city_moscow))
+                Avatar(photo = designUploadPhoto())
+                CatListItem(
+                    stringResource(R.string.preview_mia_age),
+                    stringResource(R.string.preview_breed_city),
+                    {},
+                    photo = designCatPhoto(),
+                ) {
+                    IconButton(Icon.FavoriteFilled, stringResource(R.string.remove_favorite), {})
+                }
+                CatListItem(
+                    stringResource(R.string.preview_sonya_age),
+                    stringResource(R.string.listing_deleted_title),
+                    {},
+                    available = false,
+                )
+                TagRow(TagStyle.entries.map { CatTag(it.name, it) })
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ContactChip(stringResource(R.string.telegram_label), {})
+                    ContactChip(stringResource(R.string.website_label), {})
+                }
+                SectionHeader(stringResource(R.string.my_listings)) {
+                    Text(stringResource(R.string.preview_active_listings), style = Typography.Caption, color = Colors.Body)
+                }
+                DetailRow(stringResource(R.string.color_label), stringResource(R.string.color_grey))
+            }
+        }
+    }
+}
+
+@Preview(name = "CatCard", widthDp = 376)
+@Composable
+private fun CatCardPreview() {
+    Theme {
+        Background {
+            CatCard(
+                stringResource(R.string.preview_mia_age), stringResource(R.string.preview_breed_color),
+                designCatPhoto(), stringResource(R.string.city_moscow),
+                listOf(CatTag(stringResource(R.string.character_affectionate)), CatTag(stringResource(R.string.character_calm), TagStyle.Peach)),
+                {}, Modifier.padding(20.dp),
+            )
+        }
     }
 }

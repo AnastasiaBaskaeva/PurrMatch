@@ -1,5 +1,11 @@
 package com.purrmatch.presentation.listing
 
+import androidx.compose.ui.res.stringArrayResource
+import com.purrmatch.presentation.R
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import com.purrmatch.presentation.preview.ScreenPreview
+import com.purrmatch.presentation.preview.ScreenPreviewData
 import android.app.DatePickerDialog
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,22 +35,42 @@ fun NewListingScreen(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    ScreenLayout("Новая анкета", modifier, onBack, navigationIcon = Icon.Close, footer = {
+    ScreenLayout(stringResource(R.string.new_listing_title), modifier, onBack, navigationIcon = Icon.Close, footer = {
         ActionFooter {
-            Button(if (state.paid) "Опубликовать анкету" else "Опубликовать бесплатно", onPublish, Modifier.fillMaxWidth(), ButtonStyle.Warm)
+            Button(
+                stringResource(R.string.publish_listing),
+                onPublish,
+                Modifier.fillMaxWidth(),
+                ButtonStyle.Warm,
+            )
         }
     }) {
         FormContent {
             PhotoPicker(photos, onAddPhoto, onRemovePhoto)
-            if (state.submitted && photos.isEmpty()) Body("Добавьте хотя бы одну фотографию")
+            if (state.submitted && photos.isEmpty()) Body(stringResource(R.string.photo_required))
             Spacer(Modifier.height(13.dp))
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                TextField(state.name, { onChange(state.copy(name = it)) }, "Имя кошки", placeholder = "Например, Мия",
-                    errorMessage = if (state.submitted && state.name.isBlank()) "Укажите имя кошки" else null)
-                DropdownField("Порода", state.breed, breeds, { onChange(state.copy(breed = it)) })
-                if (state.submitted && state.breed !in breeds) Body("Выберите породу")
-                ChipGroup("Пол", listOf("Кошка", "Кот"), state.sex, { onChange(state.copy(sex = it)) })
-                SelectField("Дата рождения", state.birthday.ifEmpty { "ДД.ММ.ГГГГ" }, {
+                TextField(
+                    state.name,
+                    { onChange(state.copy(name = it)) },
+                    stringResource(R.string.cat_name_label),
+                    placeholder = stringResource(R.string.cat_name_hint),
+                    errorMessage = if (state.submitted && state.name.isBlank()) stringResource(R.string.cat_name_required) else null,
+                )
+                DropdownField(
+                    stringResource(R.string.breed_label),
+                    state.breed.ifEmpty { stringResource(R.string.select_breed) },
+                    breeds,
+                    { onChange(state.copy(breed = it)) },
+                )
+                if (state.submitted && state.breed !in breeds) Body(stringResource(R.string.select_breed))
+                ChipGroup(
+                    stringResource(R.string.sex_label),
+                    stringArrayResource(R.array.listing_sexes).toList(),
+                    state.sex,
+                    { onChange(state.copy(sex = it)) },
+                )
+                SelectField(stringResource(R.string.birthday_label), state.birthday.ifEmpty { stringResource(R.string.birthday_hint) }, {
                     val now = Calendar.getInstance()
                     DatePickerDialog(context, { _, year, month, day ->
                         onChange(state.copy(birthday = String.format(Locale.ROOT, "%02d.%02d.%04d", day, month + 1, year)))
@@ -52,28 +78,72 @@ fun NewListingScreen(
                         datePicker.maxDate = now.timeInMillis
                     }.show()
                 }, icon = Icon.Calendar)
-                TextField(state.color, { onChange(state.copy(color = it)) }, "Окрас", placeholder = "Укажите окрас")
-                TextField(state.eyes, { onChange(state.copy(eyes = it)) }, "Цвет глаз", placeholder = "Укажите цвет")
-                TextField(state.character, { onChange(state.copy(character = it)) }, "Характер", placeholder = "Например, спокойная, ласковая")
+                TextField(
+                    state.color,
+                    { onChange(state.copy(color = it)) },
+                    stringResource(R.string.color_label),
+                    placeholder = stringResource(R.string.color_hint),
+                )
+                TextField(
+                    state.eyes,
+                    { onChange(state.copy(eyes = it)) },
+                    stringResource(R.string.eye_color_label),
+                    placeholder = stringResource(R.string.eye_color_hint),
+                )
+                TextField(
+                    state.character,
+                    { onChange(state.copy(character = it)) },
+                    stringResource(R.string.character_label),
+                    placeholder = stringResource(R.string.character_hint),
+                )
                 Column(Modifier.padding(top = 5.dp)) {
-                    Heading("Совместимость", Modifier.padding(bottom = 10.dp))
-                    SwitchRow("С собаками", state.dogs, { onChange(state.copy(dogs = it)) })
-                    SwitchRow("С кошками", state.cats, { onChange(state.copy(cats = it)) })
-                    SwitchRow("С детьми", state.children, { onChange(state.copy(children = it)) })
+                    Heading(stringResource(R.string.compatibility), Modifier.padding(bottom = 10.dp))
+                    SwitchRow(stringResource(R.string.with_dogs), state.dogs, { onChange(state.copy(dogs = it)) })
+                    SwitchRow(stringResource(R.string.with_cats), state.cats, { onChange(state.copy(cats = it)) })
+                    SwitchRow(stringResource(R.string.with_children), state.children, { onChange(state.copy(children = it)) })
                 }
-                TextField(state.description, { onChange(state.copy(description = it)) }, "Описание", placeholder = "Расскажите о привычках кошки", multiline = true)
+                TextField(
+                    state.description,
+                    { onChange(state.copy(description = it)) },
+                    stringResource(R.string.description_label),
+                    placeholder = stringResource(R.string.description_hint),
+                    multiline = true,
+                )
                 Column(Modifier.padding(top = 5.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("Условия передачи", style = Typography.GroupLabel, color = Colors.GroupLabel)
+                    Text(stringResource(R.string.transfer_terms), style = Typography.GroupLabel, color = Colors.GroupLabel)
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        RadioOption("Бесплатно", !state.paid, { onChange(state.copy(paid = false)) })
-                        RadioOption("Платно", state.paid, { onChange(state.copy(paid = true)) })
+                        RadioOption(stringResource(R.string.free), !state.paid, { onChange(state.copy(paid = false)) })
+                        RadioOption(stringResource(R.string.paid), state.paid, { onChange(state.copy(paid = true)) })
                     }
                 }
-                TextField(state.price, { onChange(state.copy(price = it.filter(Char::isDigit))) }, "Цена при платной передаче", placeholder = "0 ₽",
+                TextField(
+                    state.price,
+                    { onChange(state.copy(price = it.filter(Char::isDigit))) },
+                    stringResource(R.string.paid_price_label),
+                    placeholder = stringResource(R.string.zero_price_hint),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    errorMessage = if (state.submitted && state.paid && (state.price.toLongOrNull() ?: 0) <= 0) "Укажите цену" else null)
-                Notice("Автор: ${profile.displayName}. Контакты и местоположение берутся из вашего профиля.")
+                    errorMessage = if (state.submitted && state.paid && (state.price.toLongOrNull() ?: 0) <= 0) stringResource(R.string.price_required) else null,
+                )
+                Notice(stringResource(R.string.listing_author_notice, profile.displayName))
             }
         }
+    }
+}
+
+@Preview(name = "Новая анкета", widthDp = 376, heightDp = 803)
+@Composable
+private fun NewListingScreenPreview() {
+    var state by remember { mutableStateOf(NewListingState(id = "preview-new-cat")) }
+    ScreenPreview {
+        NewListingScreen(
+            state = state,
+            onChange = { state = it },
+            profile = ScreenPreviewData.profile,
+            photos = listOf(designUploadPhoto()),
+            onAddPhoto = {},
+            onRemovePhoto = {},
+            onBack = {},
+            onPublish = {},
+        )
     }
 }

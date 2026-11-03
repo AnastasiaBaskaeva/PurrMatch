@@ -59,8 +59,9 @@ class NavigationTest {
         val context = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().targetContext
         val file = java.io.File(context.cacheDir, "typed-listing-${java.util.UUID.randomUUID()}")
         val matches = MockMatchRepository(file)
+        runBlocking { matches.authenticate("anna_cats", "purrmatch-demo").getOrThrow() }
         val model = com.purrmatch.presentation.listing.NewListingViewModel(
-            androidx.lifecycle.SavedStateHandle(), matches, "anna", 0)
+            androidx.lifecycle.SavedStateHandle(), matches, "anna", 0, context.resources.getStringArray(R.array.breeds).toList())
         val form = com.purrmatch.presentation.listing.NewListingState(
             name = "Луна", breed = "Метис", birthday = "29.02.2024", paid = true, price = "5000")
         model.edit(form)
@@ -86,20 +87,21 @@ class NavigationTest {
         file.delete()
     }
 
-    @Test fun editingPhoneKeepsWhatsAppFallbackOnTheCurrentAuthor() {
+    @Test fun editingPhoneShowsPhoneAndHidesEmptyWhatsAppOnTheCurrentAuthor() {
         val matches = MockMatchRepository()
         val sessions = LocalSessionRepository().also { runBlocking { it.signIn("anna") } }
         var contactProfile: com.purrmatch.presentation.profile.Profile? = null
         compose.setContent {
             PurrMatchApp(sessions, matches, initialDestination = Settings,
-                onContact = { type, author -> if (type == "whatsapp") contactProfile = author })
+                onContact = { type, author -> if (type == "phone") contactProfile = author })
         }
         val phone = "+79991234567"
         compose.onNodeWithContentDescription("Телефон").performScrollTo().performTextReplacement(phone)
         compose.onNodeWithText("Сохранить изменения", substring = false).performClick()
         compose.waitUntil { matches.data.value.profile("anna")?.phone == phone }
         compose.onNodeWithText("Мия", substring = false).performScrollTo().performClick()
-        compose.onNodeWithText("WhatsApp", substring = false).performScrollTo().performClick()
+        compose.onNodeWithText("WhatsApp", substring = false).assertDoesNotExist()
+        compose.onNodeWithText("Телефон", substring = false).performScrollTo().performClick()
         compose.runOnIdle {
             assertEquals(phone, contactProfile?.phone)
             assertEquals("", contactProfile?.whatsapp)
@@ -169,4 +171,38 @@ class NavigationTest {
         pressBack()
         compose.onNodeWithText("Мия", substring = false).assertIsDisplayed()
     }
+    @Test fun savingProfileDraftKeepsVerificationUpdatedWhileFormWasOpen() {
+        val matches = MockMatchRepository()
+        runBlocking { matches.authenticate("anna_cats", "purrmatch-demo").getOrThrow() }
+        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("anna") } }
+        compose.setContent { PurrMatchApp(sessions, matches, initialDestination = Settings) }
+        compose.onNodeWithContentDescription("Имя").performTextReplacement("Черновик")
+        val latest = matches.data.value.profile("anna")!!.copy(
+            verification = com.purrmatch.domain.match.VerificationStatus.APPROVED, catteryName = "Одобренный питомник",
+        )
+        runBlocking { matches.saveProfile(latest).getOrThrow() }
+        compose.onNodeWithText("Сохранить изменения").performClick()
+        compose.waitUntil(10_000) { matches.data.value.profile("anna")?.name == "Черновик" }
+        assertEquals(latest.copy(name = "Черновик"), matches.data.value.profile("anna"))
+    }
+
+    @Test fun settingsWaitForAccountDataBeforeCreatingTheDraft() {
+        val backing = MockMatchRepository()
+        runBlocking { backing.authenticate("anna_cats", "purrmatch-demo").getOrThrow() }
+        val pending = kotlinx.coroutines.flow.MutableStateFlow(
+            com.purrmatch.domain.match.MatchData(emptyList(), emptyList()),
+        )
+        val matches = object : com.purrmatch.domain.match.MatchRepository by backing {
+            override val data = pending
+        }
+        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("anna") } }
+        compose.setContent { PurrMatchApp(sessions, matches, initialDestination = Settings) }
+        compose.onAllNodesWithText("Профиль пока недоступен").onFirst().assertIsDisplayed()
+        compose.runOnIdle { pending.value = backing.data.value }
+        compose.onNodeWithContentDescription("Имя").assertTextContains("Анна")
+        compose.onNodeWithContentDescription("Имя").performTextReplacement("Черновик после загрузки")
+        compose.onNodeWithText("Сохранить изменения").performClick()
+        compose.waitUntil(10_000) { backing.data.value.profile("anna")?.name == "Черновик после загрузки" }
+    }
+
 }

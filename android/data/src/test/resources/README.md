@@ -24,3 +24,17 @@ compile or dynamically load those original classes. The source generator uses
 only JDK reflection and does not participate in the Gradle test source sets.
 The same #18 binary is packaged only in instrumentation-test assets to check the
 real Android ObjectInputStream, login UI, profile updates and combined restart.
+
+`typed19-wrapped-arrays-v2.bin` was generated with the unchanged domain/data sources
+from `09effbf3a7732b1d6bb859c1d90f3e96f2b7832f`, compiled in a temporary directory.
+Run the generator with `typed19-arrays <destination>` against those original classes.
+It wraps the same typed data in `StoredMatches`, preserves original PBKDF2 credentials
+(password `typed19-password-🐈` for `typed19_owner`), and stores photos in an authentic
+`ListingPhoto[]` backing array. It covers migration of typed wrappers and arrays after
+removing Serializable from domain. No historical classes enter production or test classpaths.
+
+The JVM compatibility suite also reads a copy with the date proxy descriptor renamed
+from `java.time.Ser` to `j$.time.Ser` (the same LocalDate external payload), ensuring
+migration never requires platform/desugared date classes on the receiving runtime.
+Both original auth18 and typed photo-array wrappers are exercised through Android UI,
+profile saving, and credential-preserving restart.

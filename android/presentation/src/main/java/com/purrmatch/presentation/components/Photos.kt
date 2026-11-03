@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.purrmatch.presentation.R
 
@@ -111,5 +112,21 @@ fun PhotoGallery(
                 Modifier.fillMaxWidth().aspectRatio(336f / 297f), contentScale = ContentScale.Crop)
         }
         PageIndicator(photos.size, pagerState.currentPage)
+    }
+}
+
+@Preview(name = "Photos", widthDp = 376)
+@Composable
+private fun PhotosPreview() {
+    Theme {
+        Background {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                PhotoPicker(emptyList(), {}, {})
+                PhotoPicker(listOf(designUploadPhoto()), {}, {})
+                PhotoPicker(List(4) { designUploadPhoto() }, {}, {})
+                PhotoGallery(listOf(designCatPhoto(detail = true), designUploadPhoto()))
+                PageIndicator(4, 1)
+            }
+        }
     }
 }

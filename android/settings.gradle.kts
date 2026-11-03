@@ -15,4 +15,9 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "PurrMatch"
-include(":app", ":domain", ":data", ":presentation")
+include(
+    ":app",
+    ":domain",
+    ":data",
+    ":presentation"
+)
