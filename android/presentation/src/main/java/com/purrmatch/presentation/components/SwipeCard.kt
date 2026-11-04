@@ -4,20 +4,22 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.key
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -31,10 +33,10 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.purrmatch.presentation.R
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.sign
@@ -58,7 +60,7 @@ private fun SwipeCardFrame(
     val currentProgress by rememberUpdatedState(progress)
     val direction by remember { derivedStateOf { sign(currentProgress()) } }
     Box(modifier) {
-        if (direction != 0f) Box(Modifier.fillMaxWidth().height(535.dp).drawWithCache {
+        if (direction != 0f) Box(Modifier.matchParentSize().drawWithCache {
             val like = Brush.horizontalGradient(0f to Colors.Like,
                 .48f to Colors.LikeFade.copy(alpha = .75f), 1f to Colors.LikeFade.copy(alpha = 0f))
             val skip = Brush.horizontalGradient(0f to Colors.SkipFade.copy(alpha = 0f),
@@ -72,7 +74,7 @@ private fun SwipeCardFrame(
             val liking = direction > 0
             Icon(
                 if (liking) Icon.SwipeLike else Icon.SwipeSkip,
-                stringResource(if (liking) R.string.swipe_like else R.string.swipe_skip),
+                null,
                 Modifier.align(if (liking) Alignment.TopStart else Alignment.TopEnd)
                     .padding(horizontal = 23.dp, vertical = 127.dp).size(40.dp)
                     .background(Colors.SwipeIconSurface, androidx.compose.foundation.shape.RoundedCornerShape(15.dp))
@@ -91,10 +93,9 @@ private fun SwipeCardFrame(
 }
 
 /**
- * [cardKey] identifies the displayed listing. [onSwipe] runs after exit and reports whether
- * the deck advanced. A failed or unchanged selection springs back; an advanced card stays
- * outside the viewport until its identity changes. [pendingLike] restores an in-flight
- * selection when returning to the screen. The simple callbacks support previews.
+ * Gestures and action buttons share exit, entrance and async completion locks.
+ * [cardKey] identifies the displayed listing; [onSwipe] reports whether the deck advanced.
+ * Failed or unchanged selections spring back. [pendingLike] restores an in-flight selection.
  */
 @Composable
 fun SwipeCard(
@@ -104,8 +105,13 @@ fun SwipeCard(
     cardKey: String = "",
     onSwipe: ((like: Boolean, complete: (Boolean) -> Unit) -> Unit)? = null,
     pendingLike: Boolean? = null,
+    actions: (@Composable (enabled: Boolean, select: (Boolean) -> Unit) -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
+    // Keep the double-tap window across a fast repository result and card replacement.
+    var buttonCooldown by remember { mutableStateOf(false) }
+    val actionScope = rememberCoroutineScope()
+    val doubleTapTimeout = LocalViewConfiguration.current.doubleTapTimeoutMillis
     key(cardKey) {
         var progress by remember { mutableFloatStateOf(pendingLike?.let { if (it) 1.5f else -1.5f } ?: 0f) }
         var settling by remember { mutableStateOf(true) }
@@ -131,10 +137,10 @@ fun SwipeCard(
         }
         BoxWithConstraints(modifier) {
             val width = with(LocalDensity.current) { maxWidth.toPx() }
-            fun settle(cancelled: Boolean = false) {
+            fun settle(cancelled: Boolean = false, selection: Boolean? = null) {
                 if (settling || currentPendingLike != null) return
-                val commit = !cancelled && abs(progress) >= .25f
-                val direction = sign(progress)
+                val commit = selection != null || (!cancelled && abs(progress) >= .25f)
+                val direction = selection?.let { if (it) 1f else -1f } ?: sign(progress)
                 settling = true
                 scope.launch {
                     if (!commit) {
@@ -148,39 +154,55 @@ fun SwipeCard(
                         if (direction > 0) currentLike() else currentSkip()
                     } else {
                         var completed = false
-                        select(direction > 0) { success ->
+                        select(direction > 0) { advanced ->
                             if (!completed) {
                                 completed = true
-                                if (!success) scope.launch {
+                                if (!advanced) scope.launch {
                                     animate(progress, 0f, animationSpec = spring()) { value, _ -> progress = value }
                                     settling = false
                                 }
                             }
                         }
+                        // Keep the completed card outside the viewport until cardKey changes.
                     }
-                    // Keep the old card outside the viewport until cardKey changes.
                 }
             }
-            SwipeCardFrame(
-                { progress },
-                Modifier.fillMaxSize().graphicsLayer {
-                    alpha = entrance.value
-                    scaleX = .94f + .06f * entrance.value
-                    scaleY = scaleX
-                }.pointerInput(width) {
-                    detectHorizontalDragGestures(
-                        onDragEnd = { settle() },
-                        onDragCancel = { settle(cancelled = true) },
-                        onHorizontalDrag = { change, amount ->
-                            if (!settling && currentPendingLike == null && width > 0f) {
-                                change.consume()
-                                progress += amount / width
-                            }
-                        },
-                    )
-                },
-                content,
-            )
+            val card: @Composable () -> Unit = {
+                SwipeCardFrame(
+                    { progress },
+                    (if (actions == null) Modifier.fillMaxSize() else Modifier.fillMaxWidth()).graphicsLayer {
+                        alpha = entrance.value
+                        scaleX = .94f + .06f * entrance.value
+                        scaleY = scaleX
+                    }.pointerInput(width) {
+                        detectHorizontalDragGestures(
+                            onDragEnd = { settle() },
+                            onDragCancel = { settle(cancelled = true) },
+                            onHorizontalDrag = { change, amount ->
+                                if (!settling && currentPendingLike == null && width > 0f) {
+                                    change.consume()
+                                    progress += amount / width
+                                }
+                            },
+                        )
+                    },
+                    content,
+                )
+            }
+            if (actions == null) card()
+            else Column(Modifier.fillMaxSize()) {
+                Box(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) { card() }
+                actions(!settling && pendingLike == null && !buttonCooldown) { like ->
+                    if (!buttonCooldown && !settling && currentPendingLike == null) {
+                        buttonCooldown = true
+                        actionScope.launch {
+                            delay(doubleTapTimeout)
+                            buttonCooldown = false
+                        }
+                        settle(selection = like)
+                    }
+                }
+            }
         }
     }
 }

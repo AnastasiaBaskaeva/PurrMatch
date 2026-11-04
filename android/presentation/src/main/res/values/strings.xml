@@ -17,7 +17,7 @@
     <string name="logout_title">Выйти из аккаунта?</string>
     <string name="logout_message">Чтобы снова открыть избранное и свои анкеты, потребуется войти в аккаунт.</string>
     <string name="swipe_like">Нравится</string>
-    <string name="swipe_skip">Пропустить</string>
+    <string name="swipe_skip">Не нравится</string>
 
     <string name="home">Главная</string>
     <string name="favorites">Избранное</string>
