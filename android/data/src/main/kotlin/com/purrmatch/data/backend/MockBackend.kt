@@ -1,6 +1,7 @@
 package com.purrmatch.data.backend
 
 import com.purrmatch.data.backend.dto.*
+import com.purrmatch.domain.match.MIN_PASSWORD_LENGTH
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeParseException
@@ -41,7 +42,7 @@ class MockBackend(
     suspend fun register(request: RegisterRequestDto): BackendResponse<AuthResponseDto> =
         request("POST", "/auth/register", request.login.trim(), status = 201) {
             val login = request.login.trim()
-            validate(login.isNotEmpty() && request.name.isNotBlank() && request.password.length >= 8)
+            validate(login.isNotEmpty() && request.name.isNotBlank() && request.password.length >= MIN_PASSWORD_LENGTH)
             if (store.profiles.any { it.login == login }) fail(409, "LOGIN_OCCUPIED", "Login is already registered")
             val id = UUID.randomUUID().toString()
             val profile = ProfileDto(id = id, login = login, name = request.name.trim())
@@ -105,7 +106,7 @@ class MockBackend(
     }
 
     /**
-     * The next portion for the user's feed: available, unseen listings matching the user's saved filters, in
+     * The next portion for the user's feed: available, unseen listings of other authors matching the user's saved filters, in
      * publication order. [after] is the id of the last listing from the previous portion (null for the first one).
      * Listings are only ever appended, so the bookmark stays valid while new ones are published.
      */
@@ -117,7 +118,7 @@ class MockBackend(
                 .also { validate(it >= 0) } + 1
             val selection = selection(userId)
             val page = store.listings.asSequence().drop(start)
-                .filter { it.available && it.id !in selection.seen && matches(it, selection.filters) }
+                .filter { it.available && it.authorId != userId && it.id !in selection.seen && matches(it, selection.filters) }
                 .take(limit).toList()
             ListingPageDto(page, nextCursor = page.lastOrNull()?.id ?: after, endReached = page.size < limit)
         }

@@ -41,7 +41,7 @@ The mock returns `BackendResponse<T>(status, body, error)`. A successful respons
 | `GET /listings` | Query filters, optional `userId` and `authorId` | `ListingDto[]` | Available listings matching filters; excludes that user's seen listings |
 | `GET /users/{id}/selection` | — | `SelectionDto` | The user's favorites, seen listings and saved filters |
 | `GET /users/{id}/favorites` | — | `ListingDto[]` | Favorites in the order added, including unavailable listings |
-| `GET /listings/browse` | Query `userId`, `limit` (1–50), optional `after` | `ListingPageDto` | Next portion of the user's feed: available, unseen listings matching the user's saved filters, in publication order |
+| `GET /listings/browse` | Query `userId`, `limit` (1–50), optional `after` | `ListingPageDto` | Next portion of the user's feed: available, unseen listings of other authors matching the user's saved filters, in publication order |
 | `GET /listings/{id}` | — | `ListingDto` | Includes unavailable listings so saved favorites remain viewable |
 | `POST /listings?userId={id}` | `ListingDto` | `ListingDto` | Publishes a listing; author is forced to `userId` |
 | `DELETE /listings/{id}?userId={id}` | — | — | Owner-only soft deletion: sets `available=false` |

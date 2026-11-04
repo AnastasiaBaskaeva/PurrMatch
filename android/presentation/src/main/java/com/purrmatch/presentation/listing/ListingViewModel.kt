@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 data class ListingState(
     val listing: Listing?, val author: Profile?, val favorite: Boolean,
-    /** The listing is not known yet and is being requested. */
+    /** The listing or its author is not known yet and is being requested. */
     val loading: Boolean = false,
 )
 
@@ -21,7 +21,9 @@ class ListingViewModel(
     private val userId: String,
     private val listingId: String,
 ) : AsyncActionViewModel() {
-    private val loading = MutableStateFlow(repository.data.value.listing(listingId) == null)
+    private val loading = MutableStateFlow(repository.data.value.let { data ->
+        data.listing(listingId)?.let { data.profile(it.authorId) } == null
+    })
     private fun state(data: com.purrmatch.domain.match.MatchData, loading: Boolean): ListingState {
         val listing = data.listing(listingId)
         return ListingState(listing, listing?.let { data.profile(it.authorId) },
@@ -33,8 +35,9 @@ class ListingViewModel(
     init {
         viewModelScope.launch {
             val listing = repository.getListing(listingId).getOrNull()
-            loading.value = false
+            // The listing shows as soon as it is cached; "no author" is only reported once the author was requested.
             listing?.let { repository.getProfile(it.authorId) }
+            loading.value = false
         }
     }
 

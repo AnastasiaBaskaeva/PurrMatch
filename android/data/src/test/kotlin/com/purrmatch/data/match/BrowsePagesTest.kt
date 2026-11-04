@@ -23,9 +23,11 @@ class BrowsePagesTest {
         return pages
     }
 
+    private suspend fun MockMatchRepository.newReader() = register("reader", "reader-password", "Reader").getOrThrow()
+
     @Test fun pagesCoverAllAvailableListingsOnceInOrderWithoutUnavailableOnes() = runBlocking {
         val repository = repository()
-        val pages = repository.browseAll("anna", 10)
+        val pages = repository.browseAll(repository.newReader(), 10)
         assertEquals(listOf(10, 10, 6), pages.map { it.listings.size })
         val ids = pages.flatMap { page -> page.listings.map { it.id } }
         assertEquals(26, ids.size)
@@ -45,9 +47,23 @@ class BrowsePagesTest {
 
     @Test fun seenListingsAreSkippedForThatUserOnly() = runBlocking {
         val repository = repository()
-        repository.swipe("anna", "mia", false).getOrThrow()
-        assertEquals("peach", repository.browse("anna", 3).getOrThrow().listings.first().id)
+        val reader = repository.newReader()
+        repository.swipe(reader, "mia", false).getOrThrow()
+        assertEquals("peach", repository.browse(reader, 3).getOrThrow().listings.first().id)
         assertEquals("mia", repository.browse("olga", 3).getOrThrow().listings.first().id)
+    }
+
+    @Test fun ownAndDeletedListingsAreLeftOutOfTheFeed() = runBlocking {
+        val repository = repository()
+        val reader = repository.newReader()
+        val annasFeed = repository.browseAll("anna", 50).flatMap { it.listings }
+        assertTrue(annasFeed.isNotEmpty() && annasFeed.none { it.authorId == "anna" })
+        assertTrue("barsik" in repository.browseAll(reader, 50).flatMap { page -> page.listings.map { it.id } })
+        repository.delete("olga", "barsik").getOrThrow()
+        assertFalse("barsik" in repository.browseAll(reader, 50).flatMap { page -> page.listings.map { it.id } })
+        repository.publish(reader, Listing("reader-cat", "Кот")).getOrThrow()
+        assertFalse("reader-cat" in repository.browseAll(reader, 50).flatMap { page -> page.listings.map { it.id } })
+        assertTrue("reader-cat" in repository.browseAll("anna", 50).flatMap { page -> page.listings.map { it.id } })
     }
 
     @Test fun savedFiltersDecideWhichListingsArrive() = runBlocking {

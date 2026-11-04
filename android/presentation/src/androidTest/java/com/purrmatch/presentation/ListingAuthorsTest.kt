@@ -3,10 +3,9 @@ package com.purrmatch.presentation
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.espresso.Espresso.pressBack
-import com.purrmatch.data.match.MockMatchRepository
-import com.purrmatch.data.match.sampleMatchData
-import com.purrmatch.data.session.LocalSessionRepository
+import com.purrmatch.domain.match.MatchRepository
 import com.purrmatch.domain.match.Profile
+import com.purrmatch.domain.match.RequestFailedException
 import com.purrmatch.presentation.navigation.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -17,29 +16,38 @@ import org.junit.Test
 class ListingAuthorsTest {
     @get:Rule val compose = createComposeRule()
 
-    private val sessions = LocalSessionRepository().also { runBlocking { it.signIn("anna") } }
-    private val fixture = sampleMatchData().let { data ->
-        data.copy(profiles = data.profiles.map { profile ->
-            profile.copy(phone = if (profile.id == "anna") "+79991111111" else "+79992222222")
-        })
+    /** Anna and Olga get different phones, so a mix-up of authors shows in the contacted profile. */
+    private fun dependencies(fixtureName: String = "default"): MockRepositories {
+        val dependencies = MockRepositories(fixtureName, userId = "anna")
+        runBlocking {
+            for ((id, phone) in listOf("anna" to "+79991111111", "olga" to "+79992222222")) {
+                val profile = dependencies.matches.getProfile(id).getOrThrow()
+                dependencies.matches.upsertProfile(profile.copy(phone = phone)).getOrThrow()
+            }
+        }
+        return dependencies
     }
 
     @Test fun differentListingsUseTheirOwnAuthorAndContacts() {
-        val matches = MockMatchRepository(initialData = fixture)
+        val dependencies = dependencies()
+        val matches = dependencies.matches
         runBlocking { matches.toggleFavorite("anna", "barsik").getOrThrow() }
         var contacted: Pair<String, Profile>? = null
         compose.setContent {
-            PurrMatchApp(sessions, matches, initialDestination = Favorites,
+            PurrMatchApp(dependencies.sessions, matches, initialDestination = Favorites,
                 onContact = { type, author -> contacted = type to author })
         }
+        compose.waitForText("Барсик, 2 года")
         for ((name, id) in listOf("Мия, 2 года" to "anna", "Барсик, 2 года" to "olga")) {
+            val author = runBlocking { matches.getProfile(id).getOrThrow() }
             compose.onNodeWithText(name).performScrollTo().performClick()
+            compose.waitForText("Телефон")
             compose.onNodeWithText("Телефон", substring = false).performScrollTo().performClick()
-            compose.runOnIdle { assertEquals("phone" to fixture.profile(id), contacted) }
+            compose.runOnIdle { assertEquals("phone" to author, contacted) }
             compose.onNodeWithText("Профиль автора и контакты").performClick()
-            compose.onNodeWithText(fixture.profile(id)!!.name, substring = false).assertIsDisplayed()
+            compose.onNodeWithText(author.name, substring = false).assertIsDisplayed()
             compose.onNodeWithText("Telegram", substring = false).performClick()
-            compose.runOnIdle { assertEquals("telegram" to fixture.profile(id), contacted) }
+            compose.runOnIdle { assertEquals("telegram" to author, contacted) }
             pressBack()
             compose.onNodeWithText(name.substringBefore(',')).assertExists()
             pressBack()
@@ -48,16 +56,18 @@ class ListingAuthorsTest {
     }
 
     @Test fun editedContactsReachOpenListingAndAuthorProfile() {
-        val matches = MockMatchRepository(initialData = fixture)
+        val dependencies = dependencies()
+        val matches = dependencies.matches
         var contacted: Profile? = null
         compose.setContent {
-            PurrMatchApp(sessions, matches, initialDestination = ListingDetails("barsik"),
+            PurrMatchApp(dependencies.sessions, matches, initialDestination = ListingDetails("barsik"),
                 onContact = { _, author -> contacted = author })
         }
+        compose.waitForText("Телефон")
         compose.onNodeWithText("Барсик", substring = false).assertExists()
-        val updated = fixture.profile("olga")!!.copy(name = "Ольга Новая", phone = "+79993333333",
-            telegram = "@new_olga", website = "new.example.com")
-        runBlocking { matches.saveProfile(updated).getOrThrow() }
+        val updated = runBlocking { matches.getProfile("olga").getOrThrow() }.copy(name = "Ольга Новая",
+            phone = "+79993333333", telegram = "@new_olga", website = "new.example.com")
+        runBlocking { matches.upsertProfile(updated).getOrThrow() }
         compose.onNodeWithText("Телефон", substring = false).performScrollTo().performClick()
         compose.runOnIdle { assertEquals(updated, contacted) }
         compose.onNodeWithText("Ольга Новая · открыть профиль").assertExists()
@@ -66,21 +76,19 @@ class ListingAuthorsTest {
         compose.onNodeWithText("Сайт", substring = false).performClick()
         compose.runOnIdle { assertEquals(updated, contacted) }
         val editedAgain = updated.copy(telegram = "@latest_olga")
-        runBlocking { matches.saveProfile(editedAgain).getOrThrow() }
+        runBlocking { matches.upsertProfile(editedAgain).getOrThrow() }
         compose.onNodeWithText("Telegram", substring = false).performClick()
         compose.runOnIdle { assertEquals(editedAgain, contacted) }
     }
 
     @Test fun publicListUsesActualBreedAndPriceAndRemovesDeletedListings() {
-        val data = fixture.copy(listings = fixture.listings.map {
-            if (it.id == "peach") it.copy(breed = "Сибирская", price = 12000L) else it
-        })
-        val matches = MockMatchRepository(initialData = data)
-        compose.setContent { PurrMatchApp(sessions, matches, initialDestination = AuthorProfile("anna")) }
-        compose.onNodeWithText("Действующие анкеты · 2").assertExists()
+        val dependencies = dependencies("catalog")
+        val matches = dependencies.matches
+        compose.setContent { PurrMatchApp(dependencies.sessions, matches, initialDestination = AuthorProfile("anna")) }
+        compose.waitForText("Действующие анкеты · 2")
         compose.onNodeWithText("Соня", substring = false).assertDoesNotExist()
         compose.onNodeWithText("Барсик", substring = false).assertDoesNotExist()
-        compose.onNodeWithText("Сибирская · 12 000 ₽").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Метис · 5 000 ₽").performScrollTo().assertIsDisplayed()
         runBlocking { matches.delete("anna", "peach").getOrThrow() }
         compose.onNodeWithText("Действующие анкеты · 1").assertExists()
         compose.onNodeWithText("Персик", substring = false).assertDoesNotExist()
@@ -88,19 +96,28 @@ class ListingAuthorsTest {
     }
 
     @Test fun missingPublicAuthorShowsExplicitStateAndBackWorks() {
-        compose.setContent { PurrMatchApp(LocalSessionRepository().also { runBlocking { it.signIn("reader") } }, MockMatchRepository(), initialDestination = AuthorProfile("missing")) }
-        compose.onAllNodesWithText("Автор не найден").assertCountEquals(2)
+        val dependencies = MockRepositories(newUser = "reader")
+        compose.setContent { PurrMatchApp(dependencies.sessions, dependencies.matches, initialDestination = AuthorProfile("missing")) }
+        compose.waitUntil(10_000) { compose.onAllNodesWithText("Автор не найден").fetchSemanticsNodes().size == 2 }
         compose.onNodeWithText("Анна", substring = false).assertDoesNotExist()
         pressBack()
+        compose.waitForText("Мия, 2 года")
         compose.onNodeWithText("Мия, 2 года").assertIsDisplayed()
     }
 
     @Test fun listingWithMissingAuthorShowsExplicitStateInsteadOfEmptyContacts() {
-        val data = fixture.copy(profiles = fixture.profiles.filterNot { it.id == "olga" })
-        compose.setContent { PurrMatchApp(LocalSessionRepository().also { runBlocking { it.signIn("reader") } }, MockMatchRepository(initialData = data), initialDestination = ListingDetails("barsik")) }
-        compose.onAllNodesWithText("Автор не найден").assertCountEquals(2)
+        val dependencies = MockRepositories(newUser = "reader")
+        // The mock server cannot hold a listing without its author, so the author's request fails.
+        val matches = object : MatchRepository by dependencies.matches {
+            override suspend fun getProfile(id: String): Result<Profile> =
+                if (id == "olga") Result.failure(RequestFailedException(404, "PROFILE_NOT_FOUND", "Profile not found"))
+                else dependencies.matches.getProfile(id)
+        }
+        compose.setContent { PurrMatchApp(dependencies.sessions, matches, initialDestination = ListingDetails("barsik")) }
+        compose.waitUntil(10_000) { compose.onAllNodesWithText("Автор не найден").fetchSemanticsNodes().size == 2 }
         compose.onNodeWithText("Телефон", substring = false).assertDoesNotExist()
         pressBack()
+        compose.waitForText("Мия, 2 года")
         compose.onNodeWithText("Мия, 2 года").assertIsDisplayed()
     }
 }

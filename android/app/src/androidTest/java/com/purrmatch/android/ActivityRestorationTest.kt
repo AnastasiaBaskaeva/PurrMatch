@@ -41,6 +41,7 @@ class ActivityRestorationTest {
             compose.onNodeWithText("Мия, 2 года").performClick()
             compose.onNodeWithText("Профиль автора и контакты").performClick()
             scenario.recreate()
+            waitForText("Анна")
             compose.onNodeWithText("Анна", substring = false).assertIsDisplayed()
             pressBack()
             compose.onNodeWithText("Мия", substring = false).assertIsDisplayed()

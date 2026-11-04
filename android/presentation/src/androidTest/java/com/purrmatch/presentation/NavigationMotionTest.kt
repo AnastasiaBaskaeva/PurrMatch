@@ -53,7 +53,7 @@ class NavigationMotionTest {
     }
 
     @Test fun tabChangeCrossfadesWithoutSlidingAndKeepsTheCurrentCard() {
-        val dependencies = MockRepositories(fixtureName = "empty-favorites", userId = "anna")
+        val dependencies = MockRepositories(fixtureName = "empty-favorites", userId = "olga")
         compose.setContent { PurrMatchApp(dependencies.sessions, dependencies.matches, initialDestination = Favorites) }
         compose.onNodeWithText("Главная", substring = false).performClick()
         compose.waitForIdle()
