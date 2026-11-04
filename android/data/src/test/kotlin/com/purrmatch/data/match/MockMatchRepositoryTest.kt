@@ -5,7 +5,6 @@ import com.purrmatch.domain.match.BrowseListings
 import com.purrmatch.domain.match.Listing
 import com.purrmatch.domain.match.ListingPhoto
 import com.purrmatch.domain.match.Coordinates
-import com.purrmatch.domain.match.VerificationStatus
 import java.time.LocalDate
 import com.purrmatch.domain.match.SearchFilters
 import com.purrmatch.domain.session.SessionState
@@ -24,8 +23,7 @@ class MockMatchRepositoryTest {
             runBlocking {
                 repository.ensureProfile("maria", "maria_cats", "Мария")
                 repository.saveProfile(repository.data.value.profile("maria")!!.copy(city = "Казань",
-                    surname = "Иванова", coordinates = Coordinates(55.8, 49.1), whatsapp = "+79991234567",
-                    verification = VerificationStatus.PENDING, catteryName = "Луна"))
+                    surname = "Иванова", coordinates = Coordinates(55.8, 49.1), whatsapp = "+79991234567"))
                 repository.publish("maria", Listing("luna", "Луна", birthday = LocalDate.of(2025, 3, 4),
                     price = 1000, photos = listOf(ListingPhoto("local:luna"))))
                 repository.toggleFavorite("maria", "mia")
@@ -37,7 +35,6 @@ class MockMatchRepositoryTest {
             assertEquals("Иванова", restored.data.value.profile("maria")!!.surname)
             assertEquals(Coordinates(55.8, 49.1), restored.data.value.profile("maria")!!.coordinates)
             assertEquals("+79991234567", restored.data.value.profile("maria")!!.whatsapp)
-            assertEquals(VerificationStatus.PENDING, restored.data.value.profile("maria")!!.verification)
             assertEquals("maria", restored.data.value.listing("luna")!!.authorId)
             assertEquals(listOf(ListingPhoto("local:luna")), restored.data.value.listing("luna")!!.photos)
             assertEquals(LocalDate.of(2025, 3, 4), restored.data.value.listing("luna")!!.birthday)

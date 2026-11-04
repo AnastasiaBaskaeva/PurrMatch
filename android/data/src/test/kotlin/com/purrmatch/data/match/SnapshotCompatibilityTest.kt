@@ -34,8 +34,7 @@ class SnapshotCompatibilityTest {
                 listings = legacy.listings + cat(authId), selections = legacy.selections + (authId to selection))),
             Fixture("typed19-matches-v2.bin", typedId, "typed19_owner", "purrmatch-demo", typed.copy(
                 profiles = typed.profiles + owner(typedId, "typed19_owner").copy(surname = "Иванова",
-                    coordinates = Coordinates(54.193, 37.617), whatsapp = "+79997654321",
-                    verification = VerificationStatus.APPROVED, catteryName = "Питомник"),
+                    coordinates = Coordinates(54.193, 37.617), whatsapp = "+79997654321"),
                 listings = typed.listings + cat(typedId).copy(photos = listOf(ListingPhoto("local:typed-cover"),
                     ListingPhoto("sample:upload")), coordinates = Coordinates(56.0, 37.0)),
                 selections = typed.selections + (typedId to selection))),
