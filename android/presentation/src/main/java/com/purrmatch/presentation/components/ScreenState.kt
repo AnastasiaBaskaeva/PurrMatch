@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.purrmatch.presentation.R
@@ -24,7 +25,7 @@ fun StateContent(
     onRetry: () -> Unit = {},
     content: @Composable () -> Unit = {},
 ) {
-    Box(modifier) {
+    Box(modifier, contentAlignment = Alignment.Center) {
         when (state) {
             ScreenState.Loading -> CircularProgressIndicator()
             ScreenState.Empty -> Text(stringResource(R.string.empty_state))

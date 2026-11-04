@@ -1,0 +1,1058 @@
+{
+  "profiles": [
+    {
+      "id": "anna",
+      "name": "Анна",
+      "login": "anna_cats",
+      "city": "Москва",
+      "about": "Помогаю кошкам находить заботливый дом. Отвечаю на сообщения каждый день.",
+      "telegram": "@anna_cats",
+      "phone": "+7 (•••) •••-••-••",
+      "website": "example.com",
+      "surname": "",
+      "coordinates": {
+        "latitude": 55.7558,
+        "longitude": 37.6173
+      },
+      "whatsapp": ""
+    },
+    {
+      "id": "olga",
+      "name": "Ольга",
+      "login": "olga_cats",
+      "city": "Казань",
+      "about": "Забочусь о кошках из приюта.",
+      "telegram": "@olga_cats",
+      "phone": "",
+      "website": "shelter.example.com",
+      "surname": "",
+      "coordinates": {
+        "latitude": 55.7961,
+        "longitude": 49.1064
+      },
+      "whatsapp": ""
+    },
+    {
+      "id": "maria",
+      "name": "Мария",
+      "login": "maria_cats",
+      "city": "Санкт-Петербург",
+      "about": "Знакомлю будущих хозяев с характером каждой кошки.",
+      "telegram": "@maria_cats",
+      "phone": "",
+      "website": "",
+      "surname": "",
+      "coordinates": {
+        "latitude": 59.9343,
+        "longitude": 30.3351
+      },
+      "whatsapp": ""
+    },
+    {
+      "id": "ivan",
+      "name": "Иван",
+      "login": "ivan_cats",
+      "city": "Екатеринбург",
+      "about": "Помогаю кошкам после передержки найти семью.",
+      "telegram": "@ivan_cats",
+      "phone": "",
+      "website": "",
+      "surname": "",
+      "coordinates": {
+        "latitude": 56.8389,
+        "longitude": 60.6057
+      },
+      "whatsapp": ""
+    },
+    {
+      "id": "elena",
+      "name": "Елена",
+      "login": "elena_cats",
+      "city": "Новосибирск",
+      "about": "Расскажу об уходе и привычках питомца.",
+      "telegram": "@elena_cats",
+      "phone": "",
+      "website": "",
+      "surname": "",
+      "coordinates": {
+        "latitude": 55.0084,
+        "longitude": 82.9357
+      },
+      "whatsapp": ""
+    },
+    {
+      "id": "dmitry",
+      "name": "Дмитрий",
+      "login": "dmitry_cats",
+      "city": "Нижний Новгород",
+      "about": "Подбираю дом для домашних кошек.",
+      "telegram": "@dmitry_cats",
+      "phone": "",
+      "website": "",
+      "surname": "",
+      "coordinates": {
+        "latitude": 56.2965,
+        "longitude": 43.9361
+      },
+      "whatsapp": ""
+    },
+    {
+      "id": "sofia",
+      "name": "София",
+      "login": "sofia_cats",
+      "city": "Самара",
+      "about": "Забочусь о кошках и помогаю с переездом.",
+      "telegram": "@sofia_cats",
+      "phone": "",
+      "website": "",
+      "surname": "",
+      "coordinates": {
+        "latitude": 53.1959,
+        "longitude": 50.1002
+      },
+      "whatsapp": ""
+    },
+    {
+      "id": "irina",
+      "name": "Ирина",
+      "login": "irina_cats",
+      "city": "Ростов-на-Дону",
+      "about": "Ищу заботливых хозяев для кошек.",
+      "telegram": "@irina_cats",
+      "phone": "",
+      "website": "",
+      "surname": "",
+      "coordinates": {
+        "latitude": 47.2357,
+        "longitude": 39.7015
+      },
+      "whatsapp": ""
+    }
+  ],
+  "listings": [
+    {
+      "id": "mia",
+      "name": "Мия",
+      "authorId": "anna",
+      "breed": "Британская короткошёрстная",
+      "sex": "кошка",
+      "birthday": "2024-05-14",
+      "color": "Серый",
+      "eyes": "Янтарные",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Мия любит играть и тихо мурлыкать рядом с человеком. Приучена к лотку.",
+      "city": "Москва",
+      "price": 0,
+      "photos": [
+        "mock://listing/mia/1.jpg",
+        "mock://listing/mia/2.jpg",
+        "mock://listing/mia/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.7558,
+        "longitude": 37.6173
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "peach",
+      "name": "Персик",
+      "authorId": "anna",
+      "breed": "Метис",
+      "sex": "кот",
+      "birthday": "2026-03-14",
+      "color": "Серый",
+      "eyes": "Янтарные",
+      "character": "Общительный, Игривый",
+      "description": "Мия любит играть и тихо мурлыкать рядом с человеком. Приучена к лотку.",
+      "city": "Москва",
+      "price": 5000,
+      "photos": [
+        "mock://listing/peach/1.jpg",
+        "mock://listing/peach/2.jpg",
+        "mock://listing/peach/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.7558,
+        "longitude": 37.6173
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "sonya",
+      "name": "Соня",
+      "authorId": "anna",
+      "breed": "Домашняя кошка",
+      "sex": "кошка",
+      "birthday": "2022-05-14",
+      "color": "Рыжая",
+      "eyes": "Янтарные",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Спокойная и дружелюбная кошка.",
+      "city": "Москва",
+      "price": 0,
+      "photos": [
+        "mock://listing/sonya/1.jpg",
+        "mock://listing/sonya/2.jpg",
+        "mock://listing/sonya/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.7558,
+        "longitude": 37.6173
+      },
+      "available": false,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "barsik",
+      "name": "Барсик",
+      "authorId": "olga",
+      "breed": "Метис",
+      "sex": "кот",
+      "birthday": "2024-05-14",
+      "color": "Серый",
+      "eyes": "Янтарные",
+      "character": "Общительный, Игривый",
+      "description": "Барсик ищет заботливый дом. Приучен к лотку. Подробности расскажет автор объявления.",
+      "city": "Казань",
+      "price": 0,
+      "photos": [
+        "mock://listing/barsik/1.jpg",
+        "mock://listing/barsik/2.jpg",
+        "mock://listing/barsik/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.7961,
+        "longitude": 49.1064
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "luna",
+      "name": "Луна",
+      "authorId": "maria",
+      "breed": "Мейн-кун",
+      "sex": "кошка",
+      "birthday": "2023-02-21",
+      "color": "Трёхцветный",
+      "eyes": "Зелёные",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Луна ищет заботливый дом. Приучена к лотку. Подробности расскажет автор объявления.",
+      "city": "Санкт-Петербург",
+      "price": 15000,
+      "photos": [
+        "mock://listing/luna/1.jpg",
+        "mock://listing/luna/2.jpg",
+        "mock://listing/luna/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 59.9343,
+        "longitude": 30.3351
+      },
+      "available": true,
+      "dogs": false,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "oscar",
+      "name": "Оскар",
+      "authorId": "ivan",
+      "breed": "Сибирская",
+      "sex": "кот",
+      "birthday": "2021-08-09",
+      "color": "Полосатый",
+      "eyes": "Зелёные",
+      "character": "Общительный, Игривый",
+      "description": "Оскар ищет заботливый дом. Приучен к лотку. Подробности расскажет автор объявления.",
+      "city": "Екатеринбург",
+      "price": 8000,
+      "photos": [
+        "mock://listing/oscar/1.jpg",
+        "mock://listing/oscar/2.jpg",
+        "mock://listing/oscar/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 56.8389,
+        "longitude": 60.6057
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": false
+    },
+    {
+      "id": "busya",
+      "name": "Буся",
+      "authorId": "elena",
+      "breed": "Домашняя кошка",
+      "sex": "кошка",
+      "birthday": "2026-07-12",
+      "color": "Белый",
+      "eyes": "Голубые",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Буся ищет заботливый дом. Приучена к лотку. Подробности расскажет автор объявления.",
+      "city": "Новосибирск",
+      "price": 0,
+      "photos": [
+        "mock://listing/busya/1.jpg",
+        "mock://listing/busya/2.jpg",
+        "mock://listing/busya/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.0084,
+        "longitude": 82.9357
+      },
+      "available": true,
+      "dogs": true,
+      "cats": false,
+      "children": true
+    },
+    {
+      "id": "simba",
+      "name": "Симба",
+      "authorId": "dmitry",
+      "breed": "Абиссинская",
+      "sex": "кот",
+      "birthday": "2025-01-17",
+      "color": "Рыжий",
+      "eyes": "Янтарные",
+      "character": "Общительный, Игривый",
+      "description": "Симба ищет заботливый дом. Приучен к лотку. Подробности расскажет автор объявления.",
+      "city": "Нижний Новгород",
+      "price": 23000,
+      "photos": [
+        "mock://listing/simba/1.jpg",
+        "mock://listing/simba/2.jpg",
+        "mock://listing/simba/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 56.2965,
+        "longitude": 43.9361
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "asya",
+      "name": "Ася",
+      "authorId": "sofia",
+      "breed": "Метис",
+      "sex": "кошка",
+      "birthday": "2020-11-01",
+      "color": "Чёрный",
+      "eyes": "Зелёные",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Ася ищет заботливый дом. Приучена к лотку. Подробности расскажет автор объявления.",
+      "city": "Самара",
+      "price": 0,
+      "photos": [
+        "mock://listing/asya/1.jpg",
+        "mock://listing/asya/2.jpg",
+        "mock://listing/asya/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 53.1959,
+        "longitude": 50.1002
+      },
+      "available": true,
+      "dogs": false,
+      "cats": false,
+      "children": true
+    },
+    {
+      "id": "richard",
+      "name": "Ричард",
+      "authorId": "irina",
+      "breed": "Шотландская вислоухая",
+      "sex": "кот",
+      "birthday": "2024-04-03",
+      "color": "Серый",
+      "eyes": "Жёлтые",
+      "character": "Общительный, Игривый",
+      "description": "Ричард ищет заботливый дом. Приучен к лотку. Подробности расскажет автор объявления.",
+      "city": "Ростов-на-Дону",
+      "price": 12000,
+      "photos": [
+        "mock://listing/richard/1.jpg",
+        "mock://listing/richard/2.jpg",
+        "mock://listing/richard/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 47.2357,
+        "longitude": 39.7015
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "snezhka",
+      "name": "Снежка",
+      "authorId": "anna",
+      "breed": "Домашняя кошка",
+      "sex": "кошка",
+      "birthday": "2018-12-20",
+      "color": "Белый",
+      "eyes": "Голубые",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Снежка ищет заботливый дом. Приучена к лотку. Подробности расскажет автор объявления.",
+      "city": "Москва",
+      "price": 0,
+      "photos": [
+        "mock://listing/snezhka/1.jpg",
+        "mock://listing/snezhka/2.jpg",
+        "mock://listing/snezhka/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.7558,
+        "longitude": 37.6173
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": false
+    },
+    {
+      "id": "tim",
+      "name": "Тим",
+      "authorId": "olga",
+      "breed": "Русская голубая",
+      "sex": "кот",
+      "birthday": "2025-06-18",
+      "color": "Серый",
+      "eyes": "Зелёные",
+      "character": "Общительный, Игривый",
+      "description": "Тим ищет заботливый дом. Приучен к лотку. Подробности расскажет автор объявления.",
+      "city": "Казань",
+      "price": 18000,
+      "photos": [
+        "mock://listing/tim/1.jpg",
+        "mock://listing/tim/2.jpg",
+        "mock://listing/tim/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.7961,
+        "longitude": 49.1064
+      },
+      "available": true,
+      "dogs": false,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "nora",
+      "name": "Нора",
+      "authorId": "maria",
+      "breed": "Сфинкс",
+      "sex": "кошка",
+      "birthday": "2022-09-11",
+      "color": "Кремовый",
+      "eyes": "Голубые",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Нора ищет заботливый дом. Приучена к лотку. Подробности расскажет автор объявления.",
+      "city": "Санкт-Петербург",
+      "price": 20000,
+      "photos": [
+        "mock://listing/nora/1.jpg",
+        "mock://listing/nora/2.jpg",
+        "mock://listing/nora/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 59.9343,
+        "longitude": 30.3351
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "felix",
+      "name": "Феликс",
+      "authorId": "ivan",
+      "breed": "Метис",
+      "sex": "кот",
+      "birthday": "2019-03-05",
+      "color": "Чёрно-белый",
+      "eyes": "Жёлтые",
+      "character": "Общительный, Игривый",
+      "description": "Феликс ищет заботливый дом. Приучен к лотку. Подробности расскажет автор объявления.",
+      "city": "Екатеринбург",
+      "price": 0,
+      "photos": [
+        "mock://listing/felix/1.jpg",
+        "mock://listing/felix/2.jpg",
+        "mock://listing/felix/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 56.8389,
+        "longitude": 60.6057
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "marta",
+      "name": "Марта",
+      "authorId": "elena",
+      "breed": "Бенгальская",
+      "sex": "кошка",
+      "birthday": "2023-10-23",
+      "color": "Пятнистый",
+      "eyes": "Зелёные",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Марта ищет заботливый дом. Приучена к лотку. Подробности расскажет автор объявления.",
+      "city": "Новосибирск",
+      "price": 35000,
+      "photos": [
+        "mock://listing/marta/1.jpg",
+        "mock://listing/marta/2.jpg",
+        "mock://listing/marta/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.0084,
+        "longitude": 82.9357
+      },
+      "available": true,
+      "dogs": true,
+      "cats": false,
+      "children": true
+    },
+    {
+      "id": "leo",
+      "name": "Лео",
+      "authorId": "dmitry",
+      "breed": "Мейн-кун",
+      "sex": "кот",
+      "birthday": "2026-05-04",
+      "color": "Рыжий",
+      "eyes": "Янтарные",
+      "character": "Общительный, Игривый",
+      "description": "Лео ищет заботливый дом. Приучен к лотку. Подробности расскажет автор объявления.",
+      "city": "Нижний Новгород",
+      "price": 45000,
+      "photos": [
+        "mock://listing/leo/1.jpg",
+        "mock://listing/leo/2.jpg",
+        "mock://listing/leo/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 56.2965,
+        "longitude": 43.9361
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "nyusha",
+      "name": "Нюша",
+      "authorId": "sofia",
+      "breed": "Домашняя кошка",
+      "sex": "кошка",
+      "birthday": null,
+      "color": "Черепаховый",
+      "eyes": "Зелёные",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Нюша ищет заботливый дом. Приучена к лотку. Подробности расскажет автор объявления.",
+      "city": "Самара",
+      "price": 0,
+      "photos": [
+        "mock://listing/nyusha/1.jpg",
+        "mock://listing/nyusha/2.jpg",
+        "mock://listing/nyusha/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 53.1959,
+        "longitude": 50.1002
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "tisha",
+      "name": "Тиша",
+      "authorId": "irina",
+      "breed": "Британская короткошёрстная",
+      "sex": "кот",
+      "birthday": "2017-07-29",
+      "color": "Серый",
+      "eyes": "Янтарные",
+      "character": "Общительный, Игривый",
+      "description": "Тиша ищет заботливый дом. Приучен к лотку. Подробности расскажет автор объявления.",
+      "city": "Ростов-на-Дону",
+      "price": 3000,
+      "photos": [
+        "mock://listing/tisha/1.jpg",
+        "mock://listing/tisha/2.jpg",
+        "mock://listing/tisha/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 47.2357,
+        "longitude": 39.7015
+      },
+      "available": true,
+      "dogs": false,
+      "cats": true,
+      "children": false
+    },
+    {
+      "id": "sima",
+      "name": "Сима",
+      "authorId": "anna",
+      "breed": "Сиамская",
+      "sex": "кошка",
+      "birthday": "2025-12-01",
+      "color": "Колор-пойнт",
+      "eyes": "Голубые",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Сима ищет заботливый дом. Приучена к лотку. Подробности расскажет автор объявления.",
+      "city": "Москва",
+      "price": 9000,
+      "photos": [
+        "mock://listing/sima/1.jpg",
+        "mock://listing/sima/2.jpg",
+        "mock://listing/sima/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.7558,
+        "longitude": 37.6173
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "kuzya",
+      "name": "Кузя",
+      "authorId": "olga",
+      "breed": "Домашняя кошка",
+      "sex": "кот",
+      "birthday": "2026-08-16",
+      "color": "Полосатый",
+      "eyes": "Зелёные",
+      "character": "Общительный, Игривый",
+      "description": "Кузя ищет заботливый дом. Приучен к лотку. Подробности расскажет автор объявления.",
+      "city": "Казань",
+      "price": 0,
+      "photos": [
+        "mock://listing/kuzya/1.jpg",
+        "mock://listing/kuzya/2.jpg",
+        "mock://listing/kuzya/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.7961,
+        "longitude": 49.1064
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "bonya",
+      "name": "Боня",
+      "authorId": "maria",
+      "breed": "Персидская",
+      "sex": "кошка",
+      "birthday": "2020-02-14",
+      "color": "Кремовый",
+      "eyes": "Жёлтые",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Боня ищет заботливый дом. Приучена к лотку. Подробности расскажет автор объявления.",
+      "city": "Санкт-Петербург",
+      "price": 6000,
+      "photos": [
+        "mock://listing/bonya/1.jpg",
+        "mock://listing/bonya/2.jpg",
+        "mock://listing/bonya/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 59.9343,
+        "longitude": 30.3351
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": false
+    },
+    {
+      "id": "max",
+      "name": "Макс",
+      "authorId": "ivan",
+      "breed": "Сибирская",
+      "sex": "кот",
+      "birthday": "2024-11-30",
+      "color": "Белый",
+      "eyes": "Голубые",
+      "character": "Общительный, Игривый",
+      "description": "Макс ищет заботливый дом. Приучен к лотку. Подробности расскажет автор объявления.",
+      "city": "Екатеринбург",
+      "price": 7000,
+      "photos": [
+        "mock://listing/max/1.jpg",
+        "mock://listing/max/2.jpg",
+        "mock://listing/max/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 56.8389,
+        "longitude": 60.6057
+      },
+      "available": true,
+      "dogs": false,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "iris",
+      "name": "Ирис",
+      "authorId": "elena",
+      "breed": "Метис",
+      "sex": "кот",
+      "birthday": "2022-01-07",
+      "color": "Рыжий",
+      "eyes": "Янтарные",
+      "character": "Общительный, Игривый",
+      "description": "Ирис ищет заботливый дом. Приучен к лотку. Подробности расскажет автор объявления.",
+      "city": "Новосибирск",
+      "price": 0,
+      "photos": [
+        "mock://listing/iris/1.jpg",
+        "mock://listing/iris/2.jpg",
+        "mock://listing/iris/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.0084,
+        "longitude": 82.9357
+      },
+      "available": false,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "plushka",
+      "name": "Плюшка",
+      "authorId": "dmitry",
+      "breed": "Шотландская прямоухая",
+      "sex": "кошка",
+      "birthday": "2023-06-10",
+      "color": "Серый",
+      "eyes": "Жёлтые",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Плюшка ищет заботливый дом. Приучена к лотку. Подробности расскажет автор объявления.",
+      "city": "Нижний Новгород",
+      "price": 11000,
+      "photos": [
+        "mock://listing/plushka/1.jpg",
+        "mock://listing/plushka/2.jpg",
+        "mock://listing/plushka/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 56.2965,
+        "longitude": 43.9361
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "grom",
+      "name": "Гром",
+      "authorId": "sofia",
+      "breed": "Норвежская лесная",
+      "sex": "кот",
+      "birthday": "2016-04-22",
+      "color": "Полосатый",
+      "eyes": "Зелёные",
+      "character": "Общительный, Игривый",
+      "description": "Гром ищет заботливый дом. Приучен к лотку. Подробности расскажет автор объявления.",
+      "city": "Самара",
+      "price": 0,
+      "photos": [
+        "mock://listing/grom/1.jpg",
+        "mock://listing/grom/2.jpg",
+        "mock://listing/grom/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 53.1959,
+        "longitude": 50.1002
+      },
+      "available": true,
+      "dogs": true,
+      "cats": false,
+      "children": true
+    },
+    {
+      "id": "zoya",
+      "name": "Зоя",
+      "authorId": "irina",
+      "breed": "Домашняя кошка",
+      "sex": "кошка",
+      "birthday": "2025-09-19",
+      "color": "Чёрно-белый",
+      "eyes": "Зелёные",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Зоя ищет заботливый дом. Приучена к лотку. Подробности расскажет автор объявления.",
+      "city": "Ростов-на-Дону",
+      "price": 0,
+      "photos": [
+        "mock://listing/zoya/1.jpg",
+        "mock://listing/zoya/2.jpg",
+        "mock://listing/zoya/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 47.2357,
+        "longitude": 39.7015
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "ponchik",
+      "name": "Пончик",
+      "authorId": "olga",
+      "breed": "Метис",
+      "sex": "кот",
+      "birthday": "2026-09-02",
+      "color": "Кремовый",
+      "eyes": "Голубые",
+      "character": "Общительный, Игривый",
+      "description": "Пончик ищет заботливый дом. Приучен к лотку. Подробности расскажет автор объявления.",
+      "city": "Казань",
+      "price": 1500,
+      "photos": [
+        "mock://listing/ponchik/1.jpg",
+        "mock://listing/ponchik/2.jpg",
+        "mock://listing/ponchik/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.7961,
+        "longitude": 49.1064
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "varya",
+      "name": "Варя",
+      "authorId": "maria",
+      "breed": "Рэгдолл",
+      "sex": "кошка",
+      "birthday": "2024-01-15",
+      "color": "Колор-пойнт",
+      "eyes": "Голубые",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Варя ищет заботливый дом. Приучена к лотку. Подробности расскажет автор объявления.",
+      "city": "Санкт-Петербург",
+      "price": 28000,
+      "photos": [
+        "mock://listing/varya/1.jpg",
+        "mock://listing/varya/2.jpg",
+        "mock://listing/varya/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 59.9343,
+        "longitude": 30.3351
+      },
+      "available": true,
+      "dogs": false,
+      "cats": true,
+      "children": true
+    }
+  ],
+  "selections": {
+    "anna": {
+      "favorites": [
+        "mia",
+        "peach",
+        "sonya"
+      ],
+      "seen": [],
+      "filters": {
+        "breed": null,
+        "sex": null,
+        "color": null,
+        "eyes": null,
+        "city": null,
+        "minAge": null,
+        "maxAge": null,
+        "maxPrice": null,
+        "freeOnly": null
+      }
+    },
+    "olga": {
+      "favorites": [],
+      "seen": [],
+      "filters": {
+        "breed": null,
+        "sex": null,
+        "color": null,
+        "eyes": null,
+        "city": null,
+        "minAge": null,
+        "maxAge": null,
+        "maxPrice": null,
+        "freeOnly": null
+      }
+    },
+    "maria": {
+      "favorites": [],
+      "seen": [],
+      "filters": {
+        "breed": null,
+        "sex": null,
+        "color": null,
+        "eyes": null,
+        "city": null,
+        "minAge": null,
+        "maxAge": null,
+        "maxPrice": null,
+        "freeOnly": null
+      }
+    },
+    "ivan": {
+      "favorites": [],
+      "seen": [],
+      "filters": {
+        "breed": null,
+        "sex": null,
+        "color": null,
+        "eyes": null,
+        "city": null,
+        "minAge": null,
+        "maxAge": null,
+        "maxPrice": null,
+        "freeOnly": null
+      }
+    },
+    "elena": {
+      "favorites": [],
+      "seen": [],
+      "filters": {
+        "breed": null,
+        "sex": null,
+        "color": null,
+        "eyes": null,
+        "city": null,
+        "minAge": null,
+        "maxAge": null,
+        "maxPrice": null,
+        "freeOnly": null
+      }
+    },
+    "dmitry": {
+      "favorites": [],
+      "seen": [],
+      "filters": {
+        "breed": null,
+        "sex": null,
+        "color": null,
+        "eyes": null,
+        "city": null,
+        "minAge": null,
+        "maxAge": null,
+        "maxPrice": null,
+        "freeOnly": null
+      }
+    },
+    "sofia": {
+      "favorites": [],
+      "seen": [],
+      "filters": {
+        "breed": null,
+        "sex": null,
+        "color": null,
+        "eyes": null,
+        "city": null,
+        "minAge": null,
+        "maxAge": null,
+        "maxPrice": null,
+        "freeOnly": null
+      }
+    },
+    "irina": {
+      "favorites": [],
+      "seen": [],
+      "filters": {
+        "breed": null,
+        "sex": null,
+        "color": null,
+        "eyes": null,
+        "city": null,
+        "minAge": null,
+        "maxAge": null,
+        "maxPrice": null,
+        "freeOnly": null
+      }
+    }
+  },
+  "credentials": [
+    {
+      "userId": "anna",
+      "login": "anna_cats",
+      "password": "purrmatch-demo"
+    },
+    {
+      "userId": "olga",
+      "login": "olga_cats",
+      "password": "purrmatch-demo"
+    },
+    {
+      "userId": "maria",
+      "login": "maria_cats",
+      "password": "purrmatch-demo"
+    },
+    {
+      "userId": "ivan",
+      "login": "ivan_cats",
+      "password": "purrmatch-demo"
+    },
+    {
+      "userId": "elena",
+      "login": "elena_cats",
+      "password": "purrmatch-demo"
+    },
+    {
+      "userId": "dmitry",
+      "login": "dmitry_cats",
+      "password": "purrmatch-demo"
+    },
+    {
+      "userId": "sofia",
+      "login": "sofia_cats",
+      "password": "purrmatch-demo"
+    },
+    {
+      "userId": "irina",
+      "login": "irina_cats",
+      "password": "purrmatch-demo"
+    }
+  ]
+}

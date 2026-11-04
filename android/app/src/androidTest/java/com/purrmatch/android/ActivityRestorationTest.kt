@@ -5,7 +5,6 @@ import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.Espresso.pressBackUnconditionally
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.lifecycle.Lifecycle
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -16,9 +15,7 @@ class ActivityRestorationTest {
     @get:Rule val compose = createEmptyComposeRule()
 
     @Test fun formsRoutesAndLogoutSurviveActivityRecreation() {
-        clearAppFiles()
-        try {
-            ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             compose.waitUntil(5_000) {
                 compose.onAllNodesWithContentDescription("Логин").fetchSemanticsNodes().isNotEmpty()
             }
@@ -34,14 +31,17 @@ class ActivityRestorationTest {
             compose.onNodeWithText("Зарегистрироваться").performClick()
             compose.waitUntil(10_000) { compose.onAllNodesWithText("Расскажите о себе").fetchSemanticsNodes().isNotEmpty() }
             compose.onNodeWithText("Заполнить позже").performClick()
+            waitForText("Фильтры") // the first portion of cards comes from the server
             compose.onNodeWithText("Фильтры").performClick()
             compose.onNodeWithContentDescription("От").performTextInput("1")
             scenario.recreate()
             compose.onNodeWithContentDescription("От").assertTextContains("1")
             compose.onNodeWithContentDescription("Назад").performClick()
+            waitForText("Мия, 2 года")
             compose.onNodeWithText("Мия, 2 года").performClick()
             compose.onNodeWithText("Профиль автора и контакты").performClick()
             scenario.recreate()
+            waitForText("Анна")
             compose.onNodeWithText("Анна", substring = false).assertIsDisplayed()
             pressBack()
             compose.onNodeWithText("Мия", substring = false).assertIsDisplayed()
@@ -53,7 +53,11 @@ class ActivityRestorationTest {
             scenario.recreate()
             compose.onNodeWithContentDescription("Имя").assertTextContains("Мария")
             compose.onNodeWithText("Сохранить изменения").performClick()
+            compose.waitUntil(5_000) {
+                compose.onAllNodesWithText("Мария", substring = false).fetchSemanticsNodes().isNotEmpty()
+            }
             compose.onNodeWithText("Мария", substring = false).assertIsDisplayed()
+            waitForText("Добавить анкету") // the profile screen replaces the form once the save is confirmed
             compose.onNodeWithText("Добавить анкету").performScrollTo().performClick()
             compose.onNodeWithContentDescription("Имя кошки").performTextInput("Луна")
             scenario.recreate()
@@ -63,19 +67,18 @@ class ActivityRestorationTest {
             compose.onNodeWithText("Выйти из аккаунта").performScrollTo().performClick()
             scenario.recreate()
             compose.onNodeWithText("Выйти", substring = false).performClick()
+            compose.waitUntil(5_000) {
+                compose.onAllNodesWithText("Войти", substring = false).fetchSemanticsNodes().isNotEmpty()
+            }
             scenario.recreate()
             compose.onNodeWithText("Войти", substring = false).assertIsDisplayed()
             pressBackUnconditionally()
             compose.waitUntil(5_000) { scenario.state == Lifecycle.State.DESTROYED }
             assertEquals(Lifecycle.State.DESTROYED, scenario.state)
         }
-        } finally {
-            clearAppFiles()
-        }
     }
 
-    private fun clearAppFiles() {
-        InstrumentationRegistry.getInstrumentation().targetContext.filesDir.listFiles()
-            ?.forEach { it.deleteRecursively() }
+    private fun waitForText(text: String) = compose.waitUntil(10_000) {
+        compose.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
     }
 }

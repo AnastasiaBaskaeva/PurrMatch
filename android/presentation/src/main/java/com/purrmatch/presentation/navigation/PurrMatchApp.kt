@@ -16,6 +16,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.*
 import androidx.navigation3.ui.NavDisplay
+import kotlinx.coroutines.launch
+import com.purrmatch.domain.match.ListingPhoto
 import com.purrmatch.domain.match.MatchRepository
 import com.purrmatch.domain.session.SessionRepository
 import com.purrmatch.domain.session.SessionState
@@ -47,12 +49,31 @@ internal fun PurrMatchApp(
     Theme {
         Background(modifier.fillMaxSize()) {
             when (val current = session) {
-                SessionState.Loading -> Unit
+                SessionState.Loading -> StateContent(ScreenState.Loading, Modifier.fillMaxSize())
                 SessionState.Guest -> AuthNavigation(sessions, matches, initialDestination)
                 is SessionState.SignedIn -> key(current.userId) {
-                    MainNavigation(sessions, matches, current.userId,
-                        initialDestination?.takeUnless { it == Login || it == Registration } ?: if (current.onboarding) CompleteProfile else Home,
-                        pickedPhotos, onAddPhoto, onContact)
+                    // The user's own profile and selection are loaded before the main screens appear.
+                    var attempt by remember { mutableIntStateOf(0) }
+                    var state by remember {
+                        mutableStateOf<ScreenState>(
+                            if (matches.data.value.profile(current.userId) != null) ScreenState.Content else ScreenState.Loading)
+                    }
+                    LaunchedEffect(attempt) {
+                        val result = matches.load(current.userId)
+                        if (state !is ScreenState.Content) state = result.fold(
+                            onSuccess = { ScreenState.Content },
+                            onFailure = { ScreenState.Error("Не удалось загрузить данные. Повторите попытку.") },
+                        )
+                    }
+                    StateContent(
+                        state = state,
+                        modifier = Modifier.fillMaxSize(),
+                        onRetry = { state = ScreenState.Loading; attempt++ },
+                    ) {
+                        MainNavigation(sessions, matches, current.userId,
+                            initialDestination?.takeUnless { it == Login || it == Registration } ?: if (current.onboarding) CompleteProfile else Home,
+                            pickedPhotos, onAddPhoto, onContact)
+                    }
                 }
             }
         }
@@ -96,18 +117,8 @@ private fun MainNavigation(
 ) {
     val navigation = rememberAppNavigation(initial)
     val openListing: (Listing) -> Unit = { navigation.open(ListingDetails(it.id)) }
-    val upload = designUploadPhoto()
     val catPhoto = designCatPhoto()
     val detailPhoto = designCatPhoto(detail = true)
-    fun photos(references: List<com.purrmatch.domain.match.ListingPhoto>, detail: Boolean = true) = references.mapNotNull {
-        when (it.reference) {
-            "sample:upload" -> upload
-            "sample:cat" -> catPhoto
-            "sample:detail" -> if (detail) detailPhoto else catPhoto
-            else -> it.reference.removePrefix("picked:").toIntOrNull()?.let(pickedPhotos::getOrNull)
-        }
-    }
-    fun draftPhotos(slots: List<Int>) = slots.mapNotNull { if (it == -1) upload else pickedPhotos.getOrNull(it) }
     val provider = entryProvider<NavKey> {
         entry<Home>(metadata = mapOf(TAB_ROOT to Tab.Home)) {
             val model = screenModel { BrowseViewModel(matches, userId) }
@@ -115,16 +126,28 @@ private fun MainNavigation(
             val error by model.error.collectAsStateWithLifecycle()
             val current = state.current
             val pending by model.pendingSwipe.collectAsStateWithLifecycle()
-            Box { HomeScreen(current, photos(current?.photos.orEmpty(), detail = false).firstOrNull() ?: catPhoto,
-                { current?.let(openListing) }, {}, {}, { navigation.open(Filters) },
-                onSwipe = { like, complete -> current?.let { model.swipe(it.id, like, complete) } },
-                pendingLike = pending?.takeIf { it.listingId == current?.id }?.like); ActionError(error, model::dismissError) }
+            LaunchedEffect(Unit) { model.reload() }
+            when {
+                current == null && state.loading -> StateContent(ScreenState.Loading, Modifier.fillMaxSize())
+                current == null && state.failed -> StateContent(
+                    ScreenState.Error("Не удалось загрузить анкеты. Повторите попытку."),
+                    Modifier.fillMaxSize(), onRetry = model::reload,
+                )
+                else -> Box { HomeScreen(current, listingPhotos(current?.photos.orEmpty(), pickedPhotos, detail = false).firstOrNull() ?: catPhoto,
+                    { current?.let { matches.remember(it); openListing(it) } }, {}, {}, { navigation.open(Filters) },
+                    onSwipe = { like, complete -> current?.let { model.swipe(it.id, like, complete) } },
+                    pendingLike = pending?.takeIf { it.listingId == current?.id }?.like); ActionError(error, model::dismissError) }
+            }
         }
         entry<Favorites>(metadata = mapOf(TAB_ROOT to Tab.Favorites)) {
             val model = screenModel { FavoritesViewModel(matches, userId) }
-            val listings by model.listings.collectAsStateWithLifecycle()
+            val state by model.state.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
-            Box { FavoritesScreen(listings, openListing, { model.toggle(it.id) }, navigation::home); ActionError(error, model::dismissError) }
+            Box {
+                if (state.loading && state.listings.isEmpty()) StateContent(ScreenState.Loading, Modifier.fillMaxSize())
+                else FavoritesScreen(state.listings, openListing, { model.toggle(it.id) }, navigation::home)
+                ActionError(error, model::dismissError)
+            }
         }
         entry<Profile>(metadata = mapOf(TAB_ROOT to Tab.Profile)) {
             ProfileDestination(matches, userId, false, navigation, openListing, onContact)
@@ -133,7 +156,7 @@ private fun MainNavigation(
             ProfileDestination(matches, route.authorId, true, navigation, openListing, onContact)
         }
         entry<com.purrmatch.presentation.navigation.Filters> {
-            val model = screenModel { FiltersViewModel(it, matches, userId) }
+            val model = screenModel { FiltersViewModel(matches, userId) }
             val filters by model.state.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
             Box { FiltersScreen(filters, model::edit, model::reset, navigation::back, { model.apply(navigation::back) }); ActionError(error, model::dismissError) }
@@ -144,9 +167,10 @@ private fun MainNavigation(
             val error by model.error.collectAsStateWithLifecycle()
             val listing = state.listing
             val author = state.author
-            if (listing == null) MissingDestination("Анкета не найдена", navigation::back)
-            else if (listing.available && author == null) MissingDestination("Автор не найден", navigation::back)
-            else Box { ListingScreen(listing, author?.displayName.orEmpty(), photos(listing.photos).ifEmpty { List(3) { detailPhoto } },
+            if (listing == null && state.loading) StateContent(ScreenState.Loading, Modifier.fillMaxSize())
+            else if (listing == null) MissingDestination("Анкета не найдена", navigation::back)
+            else if (listing.available && author == null && !state.loading) MissingDestination("Автор не найден", navigation::back)
+            else Box { ListingScreen(listing, author?.displayName.orEmpty(), listingPhotos(listing.photos, pickedPhotos).ifEmpty { List(3) { detailPhoto } },
                 state.favorite, navigation::back,
                 { model.toggleFavorite { if (!listing.available) navigation.back() } },
                 { navigation.open(AuthorProfile(listing.authorId)) },
@@ -158,7 +182,7 @@ private fun MainNavigation(
             val model = screenModel { NewListingViewModel(it, matches, userId, pickedPhotos.size) }
             val state by model.state.collectAsStateWithLifecycle()
             val error by model.error.collectAsStateWithLifecycle()
-            Box { NewListingScreen(state, model::edit, model.profile, draftPhotos(state.photoSlots(pickedPhotos.size)),
+            Box { NewListingScreen(state, model::edit, model.profile, listingPhotos(state.photoSlots(pickedPhotos.size).map { ListingPhoto(localPhotoReference(it)) }, pickedPhotos),
                 onAddPhoto, { model.removePhoto(it, pickedPhotos.size) }, navigation::back,
                 { model.publish(pickedPhotos.size, navigation::profile) }); ActionError(error, model::dismissError) }
         }
@@ -211,7 +235,8 @@ private fun ProfileDestination(
     val model = screenModel { ProfileViewModel(matches, authorId) }
     val state by model.state.collectAsStateWithLifecycle()
     val profile = state.profile
-    if (profile == null) MissingDestination("Автор не найден", navigation::back)
+    if (profile == null && state.loading) StateContent(ScreenState.Loading, Modifier.fillMaxSize())
+    else if (profile == null) MissingDestination("Автор не найден", navigation::back)
     else ProfileScreen(profile, state.listings, public, navigation::back,
         { navigation.open(Settings) }, onOpen, { navigation.open(DeleteListing(it.id)) },
         { navigation.open(CreateListing) }, { onContact(it, profile) })

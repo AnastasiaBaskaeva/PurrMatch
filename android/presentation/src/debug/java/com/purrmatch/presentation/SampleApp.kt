@@ -2,18 +2,17 @@ package com.purrmatch.presentation
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.purrmatch.data.match.MockMatchRepository
-import com.purrmatch.data.match.sampleMatchData
-import com.purrmatch.data.session.LocalSessionRepository
-import com.purrmatch.domain.match.MatchData
-import com.purrmatch.domain.match.UserSelection
-import com.purrmatch.domain.session.SessionState
+import com.purrmatch.data.backend.MockBackend
+import com.purrmatch.data.session.MockSessionRepository
 import com.purrmatch.presentation.browse.HomeScreen
 import com.purrmatch.presentation.components.*
 import com.purrmatch.presentation.navigation.*
@@ -32,17 +31,33 @@ enum class Screen(val route: String) {
     }
 }
 
-private class SampleDependencies(val matches: MockMatchRepository, val sessions: LocalSessionRepository)
-private val sampleSaver = listSaver<SampleDependencies, Any>(
-    save = {
-        val session = it.sessions.session.value as? SessionState.SignedIn
-        listOf(it.matches.data.value, session?.userId.orEmpty(), session?.onboarding ?: false)
-    },
-    restore = { values -> SampleDependencies(MockMatchRepository(initialData = values[0] as MatchData),
-        LocalSessionRepository().also { sessions ->
-            if ((values[1] as String).isNotEmpty()) runBlocking { sessions.signIn(values[1] as String, values[2] as Boolean) }
-        }) },
-)
+private class SampleDependencies(screen: Screen) : ViewModel() {
+    private val backend = MockBackend(
+        fixtureName = when (screen) {
+            Screen.CompleteProfile -> "complete-profile"
+            Screen.NoResults -> "no-results"
+            Screen.EmptyFavorites -> "empty-favorites"
+            else -> "catalog"
+        },
+        latencyMillis = 0,
+    )
+    val matches = MockMatchRepository(backend)
+    val sessions = MockSessionRepository(backend)
+
+    init {
+        // Debug-only setup is deterministic, with no simulated network delay.
+        runBlocking {
+            if (screen != Screen.Login && screen != Screen.Registration) {
+                // The deck leaves out the reader's own listings, and in the catalog they all belong to Anna.
+                val user = if (screen in listOf(Screen.Home, Screen.Filters)) "olga" else "anna"
+                matches.load(user).getOrThrow()
+                // The swipe previews draw this listing without going through the feed.
+                if (screen == Screen.SwipeRight || screen == Screen.SwipeLeft) matches.getListing("mia").getOrThrow()
+                sessions.signIn(user).getOrThrow()
+            }
+        }
+    }
+}
 
 @Composable
 fun SampleApp(
@@ -52,22 +67,10 @@ fun SampleApp(
     onAddPhoto: () -> Unit = {},
     onContact: (String, ProfileData) -> Unit = { _, _ -> },
 ) {
-    val dependencies = rememberSaveable(initialScreen, saver = sampleSaver) {
-        var data = sampleMatchData().let { it.copy(listings = it.listings.filterNot { listing -> listing.id == "barsik" }) }
-        if (initialScreen == Screen.CompleteProfile) data = data.copy(profiles = data.profiles.map {
-            if (it.id == "anna") it.copy(city = "", about = "", telegram = "", phone = "", website = "") else it
-        })
-        if (initialScreen == Screen.NoResults) data = data.copy(listings = emptyList())
-        if (initialScreen == Screen.EmptyFavorites) data = data.copy(selections = mapOf("anna" to UserSelection()))
-        if (initialScreen in listOf(Screen.Settings, Screen.Logout)) data = data.copy(profiles = data.profiles.map {
-            if (it.id == "anna") it.copy(about = "Помогаю кошкам находить дом") else it
-        })
-        SampleDependencies(MockMatchRepository(initialData = data), LocalSessionRepository().also { sessions ->
-            if (initialScreen != Screen.Login && initialScreen != Screen.Registration) runBlocking {
-                sessions.signIn(if (initialScreen in listOf(Screen.Home, Screen.Filters)) "olga" else "anna")
-            }
-        })
-    }
+    val dependencies = viewModel<SampleDependencies>(
+        key = "sample-${initialScreen.route}",
+        factory = viewModelFactory { initializer { SampleDependencies(initialScreen) } },
+    )
     val data by dependencies.matches.data.collectAsStateWithLifecycle()
     if (initialScreen == Screen.SwipeRight || initialScreen == Screen.SwipeLeft) {
         Theme { Background(modifier.fillMaxSize()) {

@@ -48,7 +48,7 @@ class NewListingViewModel(
             sex = if (form.sex == 0) "кошка" else "кот", birthday = birthday,
             color = form.color, eyes = form.eyes, character = form.character, description = form.description,
             city = profile.city, coordinates = profile.coordinates, price = if (form.paid) form.price.toLong() else 0,
-            photos = photos.map { ListingPhoto(if (it == -1) "sample:upload" else "picked:$it") },
+            photos = photos.map { ListingPhoto(localPhotoReference(it)) },
             dogs = form.dogs, cats = form.cats, children = form.children)) }
     }
 }

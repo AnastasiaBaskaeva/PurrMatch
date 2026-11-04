@@ -11,14 +11,10 @@ data class Coordinates(val latitude: Double, val longitude: Double) : Serializab
     }
 }
 
-enum class VerificationStatus { UNVERIFIED, PENDING, APPROVED, REJECTED }
-
 data class Profile(
     val id: String = "", val name: String = "", val login: String = "", val city: String = "",
     val about: String = "", val telegram: String = "", val phone: String = "", val website: String = "",
     val surname: String = "", val coordinates: Coordinates? = null, val whatsapp: String = "",
-    val verification: VerificationStatus = VerificationStatus.UNVERIFIED,
-    val catteryName: String = "",
 ) : Serializable {
     private companion object { private const val serialVersionUID = 2L }
 }

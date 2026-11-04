@@ -57,14 +57,14 @@ class AuthViewModel(
                 account.fold(onSuccess = { id ->
                     sessions.signIn(id, onboarding = registration).onFailure {
                         mutableError.value = if (registration)
-                            "Аккаунт создан, но не удалось сохранить вход. Войдите с указанными логином и паролем."
-                        else "Не удалось сохранить вход. Повторите попытку."
+                            "Аккаунт создан, но не удалось войти. Повторите вход с указанными логином и паролем."
+                        else "Не удалось войти. Повторите попытку."
                     }
                 }, onFailure = {
                     mutableError.value = when (it) {
                         is LoginOccupiedException -> "Этот логин уже занят"
                         is InvalidCredentialsException -> "Неверный логин или пароль"
-                        else -> "Не удалось прочитать или сохранить аккаунт. Повторите попытку."
+                        else -> "Сервис временно недоступен. Повторите попытку."
                     }
                 })
             } finally { mutableLoading.value = false }

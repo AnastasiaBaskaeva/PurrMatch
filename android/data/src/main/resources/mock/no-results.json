@@ -1,0 +1,81 @@
+{
+  "profiles": [
+    {
+      "id": "anna",
+      "name": "Анна",
+      "login": "anna_cats",
+      "city": "Москва",
+      "about": "Помогаю кошкам находить дом",
+      "telegram": "@anna_cats",
+      "phone": "+7 (•••) •••-••-••",
+      "website": "example.com",
+      "surname": "",
+      "coordinates": {
+        "latitude": 55.7558,
+        "longitude": 37.6173
+      },
+      "whatsapp": ""
+    },
+    {
+      "id": "olga",
+      "name": "Ольга",
+      "login": "olga_cats",
+      "city": "Казань",
+      "about": "Забочусь о кошках из приюта.",
+      "telegram": "@olga_cats",
+      "phone": "",
+      "website": "shelter.example.com",
+      "surname": "",
+      "coordinates": {
+        "latitude": 55.7961,
+        "longitude": 49.1064
+      },
+      "whatsapp": ""
+    }
+  ],
+  "listings": [],
+  "selections": {
+    "anna": {
+      "favorites": [],
+      "seen": [],
+      "filters": {
+        "breed": null,
+        "sex": null,
+        "color": null,
+        "eyes": null,
+        "city": null,
+        "minAge": null,
+        "maxAge": null,
+        "maxPrice": null,
+        "freeOnly": null
+      }
+    },
+    "olga": {
+      "favorites": [],
+      "seen": [],
+      "filters": {
+        "breed": null,
+        "sex": null,
+        "color": null,
+        "eyes": null,
+        "city": null,
+        "minAge": null,
+        "maxAge": null,
+        "maxPrice": null,
+        "freeOnly": null
+      }
+    }
+  },
+  "credentials": [
+    {
+      "userId": "anna",
+      "login": "anna_cats",
+      "password": "purrmatch-demo"
+    },
+    {
+      "userId": "olga",
+      "login": "olga_cats",
+      "password": "purrmatch-demo"
+    }
+  ]
+}

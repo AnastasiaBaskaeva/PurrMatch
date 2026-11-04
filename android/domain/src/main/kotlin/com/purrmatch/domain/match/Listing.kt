@@ -1,13 +1,10 @@
 package com.purrmatch.domain.match
 
-import java.io.Serializable
 import java.time.LocalDate
 import java.time.Period
 
 /** An opaque photo reference resolved by the data/presentation adapter. */
-data class ListingPhoto(val reference: String) : Serializable {
-    private companion object { private const val serialVersionUID = 1L }
-}
+data class ListingPhoto(val reference: String)
 
 data class Listing(
     val id: String, val name: String, val authorId: String = "", val breed: String = "",
@@ -20,9 +17,7 @@ data class Listing(
     val coordinates: Coordinates? = null,
     val available: Boolean = true,
     val dogs: Boolean = true, val cats: Boolean = true, val children: Boolean = true,
-) : Serializable {
-    private companion object { private const val serialVersionUID = 2L }
-
+) {
     init { require(price >= 0) }
 
     /** Null means an unknown or future birth date, never a guessed age. */

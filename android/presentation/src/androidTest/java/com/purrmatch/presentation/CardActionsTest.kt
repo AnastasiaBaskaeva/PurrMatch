@@ -18,7 +18,6 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.unit.dp
 import androidx.test.espresso.Espresso.pressBack
 import com.purrmatch.data.match.MockMatchRepository
-import com.purrmatch.data.session.LocalSessionRepository
 import com.purrmatch.domain.match.MatchRepository
 import com.purrmatch.presentation.navigation.PurrMatchApp
 import kotlinx.coroutines.CompletableDeferred
@@ -30,9 +29,9 @@ import org.junit.Test
 class CardActionsTest {
     @get:Rule val compose = createComposeRule()
 
-    private fun launch(matches: MatchRepository) {
-        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("viewer") } }
-        compose.setContent { PurrMatchApp(sessions, matches) }
+    private fun launch(dependencies: MockRepositories, matches: MatchRepository = dependencies.matches) {
+        compose.setContent { PurrMatchApp(dependencies.sessions, matches) }
+        compose.waitForText("Мия, 2 года")
         compose.onNodeWithText("Мия, 2 года").assertIsDisplayed()
     }
 
@@ -41,54 +40,56 @@ class CardActionsTest {
     )
 
     @Test fun accessibleButtonsLikeAndSkipPersistAndDoubleTapDoesNotSelectNextCard() {
-        val matches = MockMatchRepository()
-        launch(matches)
+        val dependencies = MockRepositories(newUser = "viewer")
+        val matches = dependencies.matches
+        launch(dependencies, matches)
         action(true).assertIsEnabled().assertHeightIsAtLeast(48.dp).assertWidthIsAtLeast(48.dp)
         action(false).assertIsEnabled().assertHeightIsAtLeast(48.dp).assertWidthIsAtLeast(48.dp)
         action(true).performTouchInput { doubleClick(delayMillis = 80) }
-        compose.waitUntil(5_000) { matches.data.value.selection("viewer").seen.isNotEmpty() }
+        compose.waitUntil(5_000) { matches.data.value.selection(dependencies.user!!).seen.isNotEmpty() }
         compose.mainClock.advanceTimeBy(500)
         compose.onNodeWithText("Персик, 7 мес.").assertIsDisplayed()
         compose.runOnIdle {
-            assertEquals(listOf("mia"), matches.data.value.selection("viewer").seen)
-            assertEquals(listOf("mia"), matches.data.value.selection("viewer").favorites)
+            assertEquals(listOf("mia"), matches.data.value.selection(dependencies.user!!).seen)
+            assertEquals(listOf("mia"), matches.data.value.selection(dependencies.user!!).favorites)
         }
         // A semantic click is the same activation exposed to TalkBack.
         action(false).performClick()
-        compose.waitUntil(5_000) { matches.data.value.selection("viewer").seen.size == 2 }
+        compose.waitUntil(5_000) { matches.data.value.selection(dependencies.user!!).seen.size == 2 }
         compose.onNodeWithText("Барсик, 2 года").assertIsDisplayed()
-        compose.runOnIdle { assertEquals(listOf("mia"), matches.data.value.selection("viewer").favorites) }
+        compose.runOnIdle { assertEquals(listOf("mia"), matches.data.value.selection(dependencies.user!!).favorites) }
     }
 
     @Test fun secondPressAfterFastWriteAndCardReplacementIsStillIgnored() {
-        val matches = MockMatchRepository()
-        launch(matches)
+        val dependencies = MockRepositories(newUser = "viewer")
+        val matches = dependencies.matches
+        launch(dependencies, matches)
         action(true)
         compose.mainClock.autoAdvance = false
         action(true).performClick()
         compose.mainClock.advanceTimeBy(240)
-        compose.waitUntil(5_000) { matches.data.value.selection("viewer").seen == listOf("mia") }
+        compose.waitUntil(5_000) { matches.data.value.selection(dependencies.user!!).seen == listOf("mia") }
         compose.mainClock.advanceTimeByFrame()
         compose.onNodeWithText("Персик, 7 мес.").assertIsDisplayed()
         action(true).assertIsNotEnabled().performTouchInput { click() }
         compose.mainClock.advanceTimeBy(500)
         compose.mainClock.autoAdvance = true
         compose.runOnIdle {
-            assertEquals(listOf("mia"), matches.data.value.selection("viewer").seen)
-            assertEquals(listOf("mia"), matches.data.value.selection("viewer").favorites)
+            assertEquals(listOf("mia"), matches.data.value.selection(dependencies.user!!).seen)
+            assertEquals(listOf("mia"), matches.data.value.selection(dependencies.user!!).favorites)
         }
         action(false).assertIsEnabled().performClick()
-        compose.waitUntil(5_000) { matches.data.value.selection("viewer").seen == listOf("mia", "peach") }
+        compose.waitUntil(5_000) { matches.data.value.selection(dependencies.user!!).seen == listOf("mia", "peach") }
     }
 
     @Test fun buttonsAndFiltersRemainReachableOnShortScreen() {
-        val matches = MockMatchRepository()
-        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("viewer") } }
+        val dependencies = MockRepositories(newUser = "viewer")
+        val matches = dependencies.matches
         val height = mutableStateOf(803.dp)
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(1f, 1f)) {
                 Box(Modifier.requiredSize(376.dp, height.value).testTag("home")) {
-                    PurrMatchApp(sessions, matches)
+                    PurrMatchApp(dependencies.sessions, matches)
                 }
             }
         }
@@ -104,7 +105,7 @@ class CardActionsTest {
         compose.onNodeWithText("Ласковая", useUnmergedTree = true).assertIsDisplayed()
         capture("card-actions-376x600-scrolled")
         action(false).performClick()
-        compose.waitUntil(5_000) { matches.data.value.selection("viewer").seen == listOf("mia") }
+        compose.waitUntil(5_000) { matches.data.value.selection(dependencies.user!!).seen == listOf("mia") }
         compose.onNodeWithText("Фильтры").performClick()
         compose.onNodeWithText("Любая порода").assertIsDisplayed()
     }
@@ -119,7 +120,8 @@ class CardActionsTest {
     }
 
     @Test fun buttonWaitsForExitAndWriteAndLocksBothDirections() {
-        val backing = MockMatchRepository()
+        val dependencies = MockRepositories(newUser = "viewer")
+        val backing = dependencies.matches
         val gate = CompletableDeferred<Unit>()
         var writes = 0
         val matches = object : MatchRepository by backing {
@@ -129,14 +131,14 @@ class CardActionsTest {
                 return backing.swipe(userId, listingId, like)
             }
         }
-        launch(matches)
+        launch(dependencies, matches)
         action(true)
         compose.mainClock.autoAdvance = false
         action(true).performClick()
         compose.mainClock.advanceTimeBy(80)
         compose.runOnIdle {
             assertEquals(0, writes)
-            assertTrue(backing.data.value.selection("viewer").seen.isEmpty())
+            assertTrue(backing.data.value.selection(dependencies.user!!).seen.isEmpty())
         }
         action(true).assertIsNotEnabled()
         action(false).assertIsNotEnabled()
@@ -147,13 +149,14 @@ class CardActionsTest {
         action(false).performTouchInput { click() }
         compose.runOnIdle { assertEquals(1, writes); gate.complete(Unit) }
         compose.mainClock.autoAdvance = true
-        compose.waitUntil(5_000) { backing.data.value.selection("viewer").seen == listOf("mia") }
+        compose.waitUntil(5_000) { backing.data.value.selection(dependencies.user!!).seen == listOf("mia") }
         compose.onNodeWithText("Персик, 7 мес.").assertIsDisplayed()
     }
 
     @Test fun shortAndCancelledGesturesLeaveHistoryUntouchedAndFullSwipesUseSameSelection() {
-        val matches = MockMatchRepository()
-        launch(matches)
+        val dependencies = MockRepositories(newUser = "viewer")
+        val matches = dependencies.matches
+        launch(dependencies, matches)
         val card = compose.onNodeWithText("Мия, 2 года")
         card.performTouchInput { swipe(center, center + Offset(width * .1f, 0f), 300) }
         compose.waitForIdle()
@@ -165,16 +168,17 @@ class CardActionsTest {
         }
         compose.waitForIdle()
         card.assertIsDisplayed()
-        compose.runOnIdle { assertTrue(matches.data.value.selection("viewer").seen.isEmpty()) }
+        compose.runOnIdle { assertTrue(matches.data.value.selection(dependencies.user!!).seen.isEmpty()) }
         card.performTouchInput { swipeRight(durationMillis = 300) }
-        compose.waitUntil(5_000) { matches.data.value.selection("viewer").seen == listOf("mia") }
+        compose.waitUntil(5_000) { matches.data.value.selection(dependencies.user!!).seen == listOf("mia") }
         compose.onNodeWithText("Персик, 7 мес.").performTouchInput { swipeLeft(durationMillis = 300) }
-        compose.waitUntil(5_000) { matches.data.value.selection("viewer").seen.size == 2 }
-        compose.runOnIdle { assertEquals(listOf("mia"), matches.data.value.selection("viewer").favorites) }
+        compose.waitUntil(5_000) { matches.data.value.selection(dependencies.user!!).seen.size == 2 }
+        compose.runOnIdle { assertEquals(listOf("mia"), matches.data.value.selection(dependencies.user!!).favorites) }
     }
 
     @Test fun pendingButtonRemainsLockedAcrossFiltersAndTabReentry() {
-        val backing = MockMatchRepository()
+        val dependencies = MockRepositories(newUser = "viewer")
+        val backing = dependencies.matches
         val gate = CompletableDeferred<Unit>()
         var writes = 0
         val matches = object : MatchRepository by backing {
@@ -184,7 +188,7 @@ class CardActionsTest {
                 return backing.swipe(userId, listingId, like)
             }
         }
-        launch(matches)
+        launch(dependencies, matches)
         action(true).performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Фильтры").performClick()
@@ -194,13 +198,14 @@ class CardActionsTest {
         compose.onNodeWithText("Главная", substring = false).performClick()
         action(false).assertIsNotEnabled()
         compose.runOnIdle { assertEquals(1, writes); gate.complete(Unit) }
-        compose.waitUntil(5_000) { backing.data.value.selection("viewer").seen == listOf("mia") }
+        compose.waitUntil(5_000) { backing.data.value.selection(dependencies.user!!).seen == listOf("mia") }
         action(false).assertIsEnabled()
         compose.onNodeWithText("Персик, 7 мес.").assertIsDisplayed()
     }
 
     @Test fun filteredReplacementRejectedDuringWriteReturnsAndCanBeChosenLater() {
-        val backing = MockMatchRepository()
+        val dependencies = MockRepositories(newUser = "viewer")
+        val backing = dependencies.matches
         val gate = CompletableDeferred<Unit>()
         var writes = 0
         val matches = object : MatchRepository by backing {
@@ -210,7 +215,7 @@ class CardActionsTest {
                 return backing.swipe(userId, listingId, like)
             }
         }
-        launch(matches)
+        launch(dependencies, matches)
         action(true).performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Фильтры").performClick()
@@ -222,14 +227,15 @@ class CardActionsTest {
         compose.onNodeWithText("Персик, 7 мес.").assertIsDisplayed()
         action(false).assertIsEnabled()
         compose.runOnIdle { assertEquals(1, writes); gate.complete(Unit) }
-        compose.waitUntil(5_000) { backing.data.value.selection("viewer").seen == listOf("mia") }
+        compose.waitUntil(5_000) { backing.data.value.selection(dependencies.user!!).seen == listOf("mia") }
         action(false).performClick()
-        compose.waitUntil(5_000) { backing.data.value.selection("viewer").seen == listOf("mia", "peach") }
+        compose.waitUntil(5_000) { backing.data.value.selection(dependencies.user!!).seen == listOf("mia", "peach") }
         compose.onNodeWithText("Барсик, 2 года").assertIsDisplayed()
     }
 
     @Test fun failureAfterReturningHomeRestoresButtonsAndRetry() {
-        val backing = MockMatchRepository()
+        val dependencies = MockRepositories(newUser = "viewer")
+        val backing = dependencies.matches
         val gate = CompletableDeferred<Unit>()
         var writes = 0
         val matches = object : MatchRepository by backing {
@@ -239,7 +245,7 @@ class CardActionsTest {
                 return backing.swipe(userId, listingId, like)
             }
         }
-        launch(matches)
+        launch(dependencies, matches)
         action(true).performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Фильтры").performClick()
@@ -249,7 +255,7 @@ class CardActionsTest {
         compose.onNodeWithText("Понятно").performClick()
         compose.onNodeWithText("Мия, 2 года").assertIsDisplayed()
         action(true).assertIsEnabled().performClick()
-        compose.waitUntil(5_000) { backing.data.value.selection("viewer").seen == listOf("mia") }
+        compose.waitUntil(5_000) { backing.data.value.selection(dependencies.user!!).seen == listOf("mia") }
         compose.runOnIdle { assertEquals(2, writes) }
     }
 }
