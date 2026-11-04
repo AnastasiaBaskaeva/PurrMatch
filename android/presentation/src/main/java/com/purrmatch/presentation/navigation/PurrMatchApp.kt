@@ -177,7 +177,7 @@ private fun MainNavigation(
             }; ActionError(error, model::dismissError) }
         }
         entry<Logout>(metadata = mapOf(CONFIRMATION to true)) {
-            val model = screenModel { SessionViewModel(sessions, matches) }
+            val model = screenModel { SessionViewModel(sessions) }
             val error by model.error.collectAsStateWithLifecycle()
             val profileModel = screenModel { ProfileViewModel(matches, userId) }
             val state by profileModel.state.collectAsStateWithLifecycle()

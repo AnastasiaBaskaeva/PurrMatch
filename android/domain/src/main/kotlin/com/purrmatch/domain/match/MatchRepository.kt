@@ -33,6 +33,9 @@ data class MatchData(
 class LoginOccupiedException : IllegalArgumentException()
 class InvalidCredentialsException : IllegalArgumentException()
 
+/** Single source of truth so presentation and storage agree on what a valid password is. */
+const val MIN_PASSWORD_LENGTH = 8
+
 interface MatchRepository {
     /** Logins are case-sensitive, with surrounding whitespace removed. */
     suspend fun register(login: String, password: String, name: String): Result<String>

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.purrmatch.domain.match.InvalidCredentialsException
 import com.purrmatch.domain.match.LoginOccupiedException
+import com.purrmatch.domain.match.MIN_PASSWORD_LENGTH
 import com.purrmatch.domain.match.MatchRepository
 import com.purrmatch.domain.session.SessionRepository
 import java.io.Serializable
@@ -47,7 +48,7 @@ class AuthViewModel(
         edit(state.value.copy(submitted = true))
         val form = state.value
         if (form.login.isBlank() || form.password.isEmpty()) return
-        if (registration && (form.name.isBlank() || form.password.length < 8 || form.repeat != form.password)) return
+        if (registration && (form.name.isBlank() || form.password.length < MIN_PASSWORD_LENGTH || form.repeat != form.password)) return
         mutableLoading.value = true
         viewModelScope.launch {
             try {
