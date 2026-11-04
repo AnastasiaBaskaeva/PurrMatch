@@ -1,0 +1,16 @@
+{
+  "id": "anna",
+  "name": "Анна",
+  "login": "anna_cats",
+  "city": "Москва",
+  "about": "Помогаю кошкам находить заботливый дом. Отвечаю на сообщения каждый день.",
+  "telegram": "@anna_cats",
+  "phone": "+7 (•••) •••-••-••",
+  "website": "example.com",
+  "surname": "",
+  "coordinates": {
+    "latitude": 55.7558,
+    "longitude": 37.6173
+  },
+  "whatsapp": ""
+}

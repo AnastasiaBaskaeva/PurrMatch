@@ -8,7 +8,7 @@ sealed interface SessionState {
     data class SignedIn(val userId: String, val onboarding: Boolean = false) : SessionState
 }
 
-/** Local authentication boundary; server authentication will replace signIn. */
+/** Client session state; a real backend integration will use the authentication token here. */
 interface SessionRepository {
     val session: StateFlow<SessionState>
     suspend fun signIn(userId: String, onboarding: Boolean = false): Result<Unit>

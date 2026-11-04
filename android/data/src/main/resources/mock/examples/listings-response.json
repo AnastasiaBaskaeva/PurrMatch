@@ -1,0 +1,56 @@
+[
+  {
+    "id": "mia",
+    "name": "Мия",
+    "authorId": "anna",
+    "breed": "Британская короткошёрстная",
+    "sex": "кошка",
+    "birthday": "2024-05-14",
+    "color": "Серый",
+    "eyes": "Янтарные",
+    "character": "Ласковая, Спокойная, Любопытная",
+    "description": "Мия любит играть и тихо мурлыкать рядом с человеком. Приучена к лотку.",
+    "city": "Москва",
+    "price": 0,
+    "photos": [
+      "mock://listing/mia/1.jpg",
+      "mock://listing/mia/2.jpg",
+      "mock://listing/mia/3.jpg"
+    ],
+    "coordinates": {
+      "latitude": 55.7558,
+      "longitude": 37.6173
+    },
+    "available": true,
+    "dogs": true,
+    "cats": true,
+    "children": true
+  },
+  {
+    "id": "peach",
+    "name": "Персик",
+    "authorId": "anna",
+    "breed": "Метис",
+    "sex": "кот",
+    "birthday": "2026-03-14",
+    "color": "Серый",
+    "eyes": "Янтарные",
+    "character": "Общительный, Игривый",
+    "description": "Мия любит играть и тихо мурлыкать рядом с человеком. Приучена к лотку.",
+    "city": "Москва",
+    "price": 5000,
+    "photos": [
+      "mock://listing/peach/1.jpg",
+      "mock://listing/peach/2.jpg",
+      "mock://listing/peach/3.jpg"
+    ],
+    "coordinates": {
+      "latitude": 55.7558,
+      "longitude": 37.6173
+    },
+    "available": true,
+    "dogs": true,
+    "cats": true,
+    "children": true
+  }
+]

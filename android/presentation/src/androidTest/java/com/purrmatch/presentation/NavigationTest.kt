@@ -6,7 +6,6 @@ import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.espresso.Espresso.pressBack
 import com.purrmatch.data.match.MockMatchRepository
-import com.purrmatch.data.session.LocalSessionRepository
 import com.purrmatch.presentation.navigation.*
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -17,8 +16,9 @@ class NavigationTest {
     @get:Rule val compose = createComposeRule()
 
     @Test fun specificListingOpensItsAuthorAndBackRestoresBothRoutes() {
-        val matches = MockMatchRepository().also { runBlocking { it.toggleFavorite("anna", "barsik") } }
-        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("anna") } }
+        val dependencies = MockRepositories(userId = "anna")
+        val matches = dependencies.matches.also { runBlocking { it.toggleFavorite("anna", "barsik").getOrThrow() } }
+        val sessions = dependencies.sessions
         val restoration = StateRestorationTester(compose)
         var contactAuthor: String? = null
         restoration.setContent {
@@ -57,9 +57,8 @@ class NavigationTest {
     }
 
     @Test fun publishingConvertsFormValuesAndKeepsPhotosOnTheListing() {
-        val context = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().targetContext
-        val file = java.io.File(context.cacheDir, "typed-listing-${java.util.UUID.randomUUID()}")
-        val matches = MockMatchRepository(file)
+        val dependencies = MockRepositories(userId = "anna")
+        val matches = dependencies.matches
         val model = com.purrmatch.presentation.listing.NewListingViewModel(
             androidx.lifecycle.SavedStateHandle(), matches, "anna", 0)
         val form = com.purrmatch.presentation.listing.NewListingState(
@@ -79,17 +78,17 @@ class NavigationTest {
             assertEquals(java.time.LocalDate.of(2024, 2, 29), listing.birthday)
             assertEquals(5000L, listing.price)
             assertEquals("anna", listing.authorId)
-            assertEquals(listOf("sample:upload"), listing.photos.map { it.reference })
+            assertEquals(listOf("local://placeholder/upload"), listing.photos.map { it.reference })
         }
-        val restored = MockMatchRepository(file)
-        compose.waitUntil { restored.data.value.listing(form.id) != null }
-        assertEquals(matches.data.value.listing(form.id), restored.data.value.listing(form.id))
-        file.delete()
+        val sameServer = MockMatchRepository(dependencies.backend)
+        assertEquals(matches.data.value.listing(form.id), runBlocking { sameServer.getListing(form.id).getOrThrow() })
+        assertEquals(null, MockRepositories().matches.data.value.listing(form.id))
     }
 
     @Test fun editingPhoneKeepsWhatsAppFallbackOnTheCurrentAuthor() {
-        val matches = MockMatchRepository()
-        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("anna") } }
+        val dependencies = MockRepositories(userId = "anna")
+        val matches = dependencies.matches
+        val sessions = dependencies.sessions
         var contactProfile: com.purrmatch.presentation.profile.Profile? = null
         compose.setContent {
             PurrMatchApp(sessions, matches, initialDestination = Settings,
@@ -108,12 +107,15 @@ class NavigationTest {
     }
 
     @Test fun typedBirthdayAndPriceAreFormattedInListingDetails() {
-        val data = com.purrmatch.data.match.sampleMatchData()
+        val dependencies = MockRepositories(userId = "anna")
+        val matches = dependencies.matches
+        val sessions = dependencies.sessions
         val birthday = java.time.LocalDate.now().minusYears(3)
-        val listing = data.listings.first().copy(birthday = birthday, price = 12_345)
-        val matches = MockMatchRepository(initialData = data.copy(listings = listOf(listing),
-            profiles = data.profiles.map { if (it.id == "anna") it.copy(surname = "Иванова") else it }))
-        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("anna") } }
+        val listing = runBlocking { matches.getListing("mia").getOrThrow() }.copy(id = "formatted-listing", birthday = birthday, price = 12_345)
+        runBlocking {
+            matches.publish("anna", listing).getOrThrow()
+            matches.upsertProfile(matches.data.value.profile("anna")!!.copy(surname = "Иванова")).getOrThrow()
+        }
         compose.setContent { PurrMatchApp(sessions, matches, initialDestination = ListingDetails(listing.id)) }
         compose.onNodeWithText("12 345 ₽").assertIsDisplayed()
         compose.onNodeWithText("Британская короткошёрстная · кошка · 3 года").assertIsDisplayed()
@@ -123,9 +125,32 @@ class NavigationTest {
         compose.onNodeWithText("Анна Иванова", substring = false).assertIsDisplayed()
     }
 
+    @Test fun bootstrapShowsLoadingAndFailedLoadCanBeRetried() {
+        val dependencies = MockRepositories()
+        val release = kotlinx.coroutines.CompletableDeferred<Unit>()
+        var loads = 0
+        val matches = object : com.purrmatch.domain.match.MatchRepository by dependencies.matches {
+            override suspend fun load(userId: String): Result<Unit> {
+                loads++
+                release.await()
+                return if (loads == 1) Result.failure(IllegalStateException("offline")) else dependencies.matches.load(userId)
+            }
+        }
+        runBlocking { dependencies.sessions.signIn("anna").getOrThrow() }
+        compose.setContent { PurrMatchApp(dependencies.sessions, matches) }
+        compose.onNode(SemanticsMatcher.keyIsDefined(androidx.compose.ui.semantics.SemanticsProperties.ProgressBarRangeInfo)).assertExists()
+        compose.onNodeWithText("Главная", substring = false).assertDoesNotExist()
+        release.complete(Unit)
+        compose.onNodeWithText("Не удалось загрузить данные. Повторите попытку.").assertIsDisplayed()
+        compose.onNodeWithText("Повторить").performClick()
+        compose.onNodeWithText("Главная", substring = false).assertIsDisplayed()
+        compose.runOnIdle { assertEquals(2, loads) }
+    }
+
     @Test fun missingListingHasExplicitStateInsteadOfFirstCat() {
-        val matches = MockMatchRepository()
-        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("viewer") } }
+        val dependencies = MockRepositories(userId = "olga")
+        val matches = dependencies.matches
+        val sessions = dependencies.sessions
         compose.setContent { PurrMatchApp(sessions, matches, initialDestination = ListingDetails("missing")) }
         compose.onAllNodesWithText("Анкета не найдена").assertCountEquals(2)
         compose.onNodeWithText("Мия", substring = false).assertDoesNotExist()
@@ -134,8 +159,9 @@ class NavigationTest {
     }
 
     @Test fun logoutClearsProtectedStackAndNextUserDoesNotSeeFavorites() {
-        val matches = MockMatchRepository()
-        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("anna") } }
+        val dependencies = MockRepositories(userId = "anna")
+        val matches = dependencies.matches
+        val sessions = dependencies.sessions
         compose.setContent { PurrMatchApp(sessions, matches) }
         compose.onNodeWithText("Профиль", substring = false).performClick()
         compose.onNodeWithContentDescription("Настройки").performClick()
@@ -160,8 +186,8 @@ class NavigationTest {
     }
 
     @Test fun reopeningListingKeepsIntermediateAuthorInBackHistory() {
-        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("viewer") } }
-        compose.setContent { PurrMatchApp(sessions, MockMatchRepository()) }
+        val dependencies = MockRepositories(userId = "olga")
+        compose.setContent { PurrMatchApp(dependencies.sessions, dependencies.matches) }
         compose.onNodeWithText("Мия, 2 года").performClick()
         compose.onNodeWithText("Профиль автора и контакты").performClick()
         compose.onNodeWithText("Мия", substring = false).performClick()

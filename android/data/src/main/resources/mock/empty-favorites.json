@@ -1,0 +1,163 @@
+{
+  "profiles": [
+    {
+      "id": "anna",
+      "name": "Анна",
+      "login": "anna_cats",
+      "city": "Москва",
+      "about": "Помогаю кошкам находить дом",
+      "telegram": "@anna_cats",
+      "phone": "+7 (•••) •••-••-••",
+      "website": "example.com",
+      "surname": "",
+      "coordinates": {
+        "latitude": 55.7558,
+        "longitude": 37.6173
+      },
+      "whatsapp": ""
+    },
+    {
+      "id": "olga",
+      "name": "Ольга",
+      "login": "olga_cats",
+      "city": "Казань",
+      "about": "Забочусь о кошках из приюта.",
+      "telegram": "@olga_cats",
+      "phone": "",
+      "website": "shelter.example.com",
+      "surname": "",
+      "coordinates": {
+        "latitude": 55.7961,
+        "longitude": 49.1064
+      },
+      "whatsapp": ""
+    }
+  ],
+  "listings": [
+    {
+      "id": "mia",
+      "name": "Мия",
+      "authorId": "anna",
+      "breed": "Британская короткошёрстная",
+      "sex": "кошка",
+      "birthday": "2024-05-14",
+      "color": "Серый",
+      "eyes": "Янтарные",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Мия любит играть и тихо мурлыкать рядом с человеком. Приучена к лотку.",
+      "city": "Москва",
+      "price": 0,
+      "photos": [
+        "mock://listing/mia/1.jpg",
+        "mock://listing/mia/2.jpg",
+        "mock://listing/mia/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.7558,
+        "longitude": 37.6173
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "peach",
+      "name": "Персик",
+      "authorId": "anna",
+      "breed": "Метис",
+      "sex": "кот",
+      "birthday": "2026-03-14",
+      "color": "Серый",
+      "eyes": "Янтарные",
+      "character": "Общительный, Игривый",
+      "description": "Мия любит играть и тихо мурлыкать рядом с человеком. Приучена к лотку.",
+      "city": "Москва",
+      "price": 5000,
+      "photos": [
+        "mock://listing/peach/1.jpg",
+        "mock://listing/peach/2.jpg",
+        "mock://listing/peach/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.7558,
+        "longitude": 37.6173
+      },
+      "available": true,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    },
+    {
+      "id": "sonya",
+      "name": "Соня",
+      "authorId": "anna",
+      "breed": "Домашняя кошка",
+      "sex": "кошка",
+      "birthday": "2022-05-14",
+      "color": "Рыжая",
+      "eyes": "Янтарные",
+      "character": "Ласковая, Спокойная, Любопытная",
+      "description": "Спокойная и дружелюбная кошка.",
+      "city": "Москва",
+      "price": 0,
+      "photos": [
+        "mock://listing/sonya/1.jpg",
+        "mock://listing/sonya/2.jpg",
+        "mock://listing/sonya/3.jpg"
+      ],
+      "coordinates": {
+        "latitude": 55.7558,
+        "longitude": 37.6173
+      },
+      "available": false,
+      "dogs": true,
+      "cats": true,
+      "children": true
+    }
+  ],
+  "selections": {
+    "anna": {
+      "favorites": [],
+      "seen": [],
+      "filters": {
+        "breed": null,
+        "sex": null,
+        "color": null,
+        "eyes": null,
+        "city": null,
+        "minAge": null,
+        "maxAge": null,
+        "maxPrice": null,
+        "freeOnly": null
+      }
+    },
+    "olga": {
+      "favorites": [],
+      "seen": [],
+      "filters": {
+        "breed": null,
+        "sex": null,
+        "color": null,
+        "eyes": null,
+        "city": null,
+        "minAge": null,
+        "maxAge": null,
+        "maxPrice": null,
+        "freeOnly": null
+      }
+    }
+  },
+  "credentials": [
+    {
+      "userId": "anna",
+      "login": "anna_cats",
+      "password": "purrmatch-demo"
+    },
+    {
+      "userId": "olga",
+      "login": "olga_cats",
+      "password": "purrmatch-demo"
+    }
+  ]
+}

@@ -2,11 +2,8 @@ package com.purrmatch.presentation
 
 import android.view.KeyEvent
 import androidx.test.platform.app.InstrumentationRegistry
-import com.purrmatch.data.match.MockMatchRepository
-import com.purrmatch.data.session.LocalSessionRepository
 import com.purrmatch.presentation.navigation.Favorites
 import com.purrmatch.presentation.navigation.PurrMatchApp
-import kotlinx.coroutines.runBlocking
 
 import androidx.activity.BackEventCompat
 import androidx.activity.OnBackPressedDispatcher
@@ -56,9 +53,8 @@ class NavigationMotionTest {
     }
 
     @Test fun tabChangeCrossfadesWithoutSlidingAndKeepsTheCurrentCard() {
-        val matches = MockMatchRepository()
-        val sessions = LocalSessionRepository().also { runBlocking { it.signIn("viewer") } }
-        compose.setContent { PurrMatchApp(sessions, matches, initialDestination = Favorites) }
+        val dependencies = MockRepositories(fixtureName = "empty-favorites", userId = "anna")
+        compose.setContent { PurrMatchApp(dependencies.sessions, dependencies.matches, initialDestination = Favorites) }
         compose.onNodeWithText("Главная", substring = false).performClick()
         compose.waitForIdle()
         compose.mainClock.autoAdvance = false

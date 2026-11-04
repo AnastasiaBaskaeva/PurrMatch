@@ -1,190 +1,118 @@
 package com.purrmatch.data.match
 
+import com.purrmatch.data.backend.BackendResponse
+import com.purrmatch.data.backend.MockBackend
+import com.purrmatch.data.backend.dto.*
+import com.purrmatch.data.backend.toResult
 import com.purrmatch.domain.match.*
-import java.io.File
-import java.io.IOException
-import java.time.LocalDate
-import java.io.ObjectOutputStream
-import java.util.UUID
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
-/** Local mock source. No credentials or network DTOs enter presentation. */
+/**
+ * Maps mock HTTP DTOs into a small observable cache. The cache holds only what responses brought:
+ * the user's own profile and selection, and the profiles and listings of screens that were opened.
+ * All mutations live in the backend's memory.
+ */
 class MockMatchRepository(
-    private val file: File? = null,
-    initialData: MatchData = sampleMatchData(),
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val backend: MockBackend = MockBackend(),
 ) : MatchRepository {
-    private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
+    // Writes are applied one at a time, so an older response cannot overwrite a newer one.
     private val mutex = Mutex()
-    private val ready = CompletableDeferred<Unit>()
-    private val mutableData = MutableStateFlow(initialData)
+    private val mutableData = MutableStateFlow(MatchData(emptyList(), emptyList()))
     override val data = mutableData.asStateFlow()
-    private var credentials = emptyMap<String, PasswordVerifier>()
-    private var loadFailure: Throwable? = null
 
-    init {
-        scope.launch {
-            mutex.withLock {
-                runCatching {
-                    val stored = file?.takeIf { it.exists() }?.let(::readMatchSnapshot)
-                        ?: legacyMatchSnapshot(mutableData.value)
-                    mutableData.value = stored.data
-                    credentials = stored.credentials
-                }.onFailure { loadFailure = it }
-                ready.complete(Unit)
-            }
+    override suspend fun load(userId: String): Result<Unit> {
+        request({ backend.getProfile(userId) }) { profile -> cache { withProfile(profile.toDomain()) } }
+            .onFailure { return Result.failure(it) }
+        return request({ backend.getSelection(userId) }) { selection ->
+            cache { withSelection(userId, selection.toDomain()) }
         }
     }
 
-    internal suspend fun awaitReady() = ready.await()
+    override suspend fun register(login: String, password: String, name: String): Result<String> =
+        request({ backend.register(RegisterRequestDto(login, password, name)) }) { it.userId }
 
-    private suspend fun update(transform: (MatchData) -> MatchData): Result<Unit> = withContext(ioDispatcher) {
-        ready.await()
-        mutex.withLock {
-            runCatching {
-                retryFailedLoad()
-                val next = transform(mutableData.value)
-                persist(next, credentials)
-                mutableData.value = next
-            }
+    override suspend fun authenticate(login: String, password: String): Result<String> =
+        request({ backend.authenticate(LoginRequestDto(login, password)) }) { it.userId }
+
+    override suspend fun getProfile(id: String): Result<Profile> = request({ backend.getProfile(id) }) {
+        it.toDomain().also { profile -> cache { withProfile(profile) } }
+    }
+
+    override suspend fun getFavorites(userId: String): Result<List<Listing>> =
+        request({ backend.getFavorites(userId) }) { dtos ->
+            dtos.map { it.toDomain() }.also { listings -> cache { withListings(listings) } }
         }
-    }
 
-    private fun retryFailedLoad() {
-        if (loadFailure == null) return
-        // A failed existing snapshot must be read again, never replaced with fresh fixtures.
-        val stored = readMatchSnapshot(checkNotNull(file))
-        mutableData.value = stored.data
-        credentials = stored.credentials
-        loadFailure = null
-    }
-
-    private fun persist(data: MatchData, credentials: Map<String, PasswordVerifier>) {
-        file?.let { target ->
-            val temporary = File(target.parentFile, "${target.name}.tmp")
-            ObjectOutputStream(temporary.outputStream()).use { it.writeObject(StoredMatches(data, credentials)) }
-            if (!temporary.renameTo(target)) throw IOException("Cannot save mock data")
+    override suspend fun getAuthorListings(authorId: String): Result<List<Listing>> =
+        request({ backend.getListings(authorId = authorId) }) { dtos ->
+            dtos.map { it.toDomain() }.also { listings -> cache { withListings(listings) } }
         }
+
+    override fun remember(listing: Listing) { cache { withListings(listOf(listing)) } }
+
+    override suspend fun getListings(userId: String, filters: SearchFilters): Result<List<Listing>> =
+        request({ backend.getListings(userId, filters.toDto()) }) { listings -> listings.map { it.toDomain() } }
+
+    // A read that changes nothing and may be slow, so it neither waits for other writes nor touches the cache.
+    override suspend fun browse(userId: String, limit: Int, after: String?): Result<ListingPage> =
+        capture { backend.browse(userId, limit, after).toResult().getOrThrow().toDomain() }
+
+    override suspend fun getListing(id: String): Result<Listing> = request({ backend.getListing(id) }) {
+        it.toDomain().also { listing -> cache { withListings(listOf(listing)) } }
     }
 
-    override suspend fun register(login: String, password: String, name: String): Result<String> = withContext(ioDispatcher) {
-        ready.await()
-        mutex.withLock {
-            runCatching {
-                retryFailedLoad()
-                val normalized = login.trim()
-                require(normalized.isNotEmpty() && name.isNotBlank() && password.length >= MIN_PASSWORD_LENGTH)
-                if (mutableData.value.profiles.any { it.login == normalized }) throw LoginOccupiedException()
-                val id = UUID.randomUUID().toString()
-                val profile = Profile(id = id, login = normalized, name = name.trim(),
-                    city = "", about = "", telegram = "", phone = "", website = "")
-                val next = mutableData.value.copy(profiles = mutableData.value.profiles + profile)
-                val nextCredentials = credentials + (id to PasswordVerifier.create(password))
-                persist(next, nextCredentials)
-                credentials = nextCredentials
-                mutableData.value = next
-                id
-            }
+    override suspend fun upsertProfile(profile: Profile): Result<Unit> =
+        request({ backend.upsertProfile(profile.toDto()) }) { saved -> cache { withProfile(saved.toDomain()) } }
+
+    override suspend fun toggleFavorite(userId: String, listingId: String): Result<Unit> =
+        request({ backend.toggleFavorite(listingId, FavoriteRequestDto(userId)) }) { cacheSelection(userId, it) }
+
+    override suspend fun swipe(userId: String, listingId: String, like: Boolean): Result<Unit> =
+        request({ backend.swipe(listingId, SwipeRequestDto(userId, like)) }) { cacheSelection(userId, it) }
+
+    override suspend fun applyFilters(userId: String, filters: SearchFilters): Result<Unit> =
+        request({ backend.applyFilters(userId, filters.toDto()) }) { cacheSelection(userId, it) }
+
+    override suspend fun publish(userId: String, listing: Listing): Result<Unit> =
+        request({ backend.publish(userId, listing.toDto()) }) { published ->
+            cache { withListings(listOf(published.toDomain())) }
         }
-    }
 
-    override suspend fun authenticate(login: String, password: String): Result<String> = withContext(ioDispatcher) {
-        ready.await()
-        mutex.withLock {
-            runCatching {
-                retryFailedLoad()
-                val profile = mutableData.value.profiles.firstOrNull { it.login == login.trim() }
-                if (profile == null || credentials[profile.id]?.matches(password) != true) throw InvalidCredentialsException()
-                profile.id
-            }
+    override suspend fun delete(userId: String, listingId: String): Result<Unit> =
+        request({ backend.delete(userId, listingId) }) {
+            // The server only hides the listing (soft deletion), so saved favorites keep working.
+            cache { copy(listings = listings.map { if (it.id == listingId) it.copy(available = false) else it }) }
         }
+
+    private suspend fun <T : Any, R> request(call: suspend () -> BackendResponse<T>, map: (T) -> R): Result<R> =
+        mutex.withLock { capture { map(call().toResult().getOrThrow()) } }
+
+    private fun cacheSelection(userId: String, selection: SelectionDto) {
+        cache { withSelection(userId, selection.toDomain()) }
     }
 
-    private suspend fun select(userId: String, transform: (UserSelection) -> UserSelection) = update {
-        it.copy(selections = it.selections + (userId to transform(it.selection(userId))))
+    private fun cache(change: MatchData.() -> MatchData) = mutableData.update(change)
+
+    // Replaces entries with the same id in place, appends new ones.
+    private fun MatchData.withProfile(profile: Profile) =
+        copy(profiles = if (profiles.any { it.id == profile.id }) profiles.map { if (it.id == profile.id) profile else it }
+            else profiles + profile)
+
+    private fun MatchData.withListings(fresh: List<Listing>): MatchData {
+        val byId = fresh.associateBy { it.id }
+        val known = listings.mapTo(HashSet()) { it.id }
+        return copy(listings = listings.map { byId[it.id] ?: it } + fresh.filter { it.id !in known })
     }
 
-    override suspend fun ensureProfile(userId: String, login: String, name: String): Result<Unit> {
-        return update { data ->
-            if (data.profile(userId) != null) data else data.copy(
-                profiles = data.profiles + Profile(id = userId, name = name, login = login,
-                    city = "", about = "", telegram = "", phone = "", website = ""),
-            )
-        }
-    }
+    private fun MatchData.withSelection(userId: String, selection: UserSelection) =
+        copy(selections = selections + (userId to selection))
 
-    override suspend fun saveProfile(profile: Profile) = update {
-        it.copy(profiles = it.profiles.filterNot { p -> p.id == profile.id } + profile)
-    }
-
-    override suspend fun toggleFavorite(userId: String, listingId: String): Result<Unit> {
-        return update { data ->
-            if (data.listing(listingId) == null) data else data.copy(
-                selections = data.selections + (userId to data.selection(userId).let {
-                    it.copy(favorites = if (listingId in it.favorites) it.favorites - listingId else it.favorites + listingId)
-                }),
-            )
-        }
-    }
-
-    override suspend fun swipe(userId: String, listingId: String, like: Boolean): Result<Unit> {
-        return update { data ->
-            val selection = data.selection(userId)
-            if (data.listing(listingId)?.available != true || listingId in selection.seen) data else data.copy(
-                selections = data.selections + (userId to selection.copy(
-                seen = selection.seen + listingId,
-                favorites = if (like && listingId !in selection.favorites) selection.favorites + listingId else selection.favorites,
-                )),
-            )
-        }
-    }
-
-    override suspend fun applyFilters(userId: String, filters: SearchFilters) = select(userId) { it.copy(filters = filters) }
-
-    override suspend fun publish(userId: String, listing: Listing): Result<Unit> {
-        return update { data ->
-            if (data.listing(listing.id) != null) data else data.copy(
-                listings = data.listings + listing.copy(authorId = userId),
-            )
-        }
-    }
-
-    override suspend fun delete(userId: String, listingId: String) = update {
-        it.copy(listings = it.listings.map { listing ->
-            if (listing.id == listingId && listing.authorId == userId) listing.copy(available = false) else listing
-        })
-    }
-}
-
-fun sampleMatchData(): MatchData {
-    val anna = Profile(id = "anna", name = "Анна", login = "anna_cats", city = "Москва",
-        about = "Помогаю кошкам находить заботливый дом. Отвечаю на сообщения каждый день.",
-        telegram = "@anna_cats", phone = "+7 (•••) •••-••-••", website = "example.com")
-    val mia = Listing("mia", "Мия", authorId = "anna", breed = "Британская короткошёрстная",
-        sex = "кошка", birthday = LocalDate.of(2024, 5, 14), color = "Серый", eyes = "Янтарные",
-        character = "Ласковая, Спокойная, Любопытная", city = "Москва",
-        photos = List(3) { ListingPhoto("sample:detail") },
-        description = "Мия любит играть и тихо мурлыкать рядом с человеком. Приучена к лотку.")
-    return MatchData(
-        profiles = listOf(anna, Profile(id = "olga", name = "Ольга", login = "olga_cats", city = "Казань",
-            about = "Забочусь о кошках из приюта.", telegram = "@olga_cats", website = "shelter.example.com")),
-        listings = listOf(
-            mia,
-            mia.copy(id = "peach", name = "Персик", breed = "Метис", sex = "кот", birthday = LocalDate.of(2026, 3, 14), price = 5_000),
-            mia.copy(id = "sonya", name = "Соня", breed = "Домашняя кошка", birthday = LocalDate.of(2022, 5, 14), color = "Рыжая",
-                description = "Спокойная и дружелюбная кошка.", available = false),
-            mia.copy(id = "barsik", name = "Барсик", authorId = "olga", breed = "Метис", sex = "кот", city = "Казань"),
-        ),
-        selections = mapOf("anna" to UserSelection(favorites = listOf("mia", "peach", "sonya"))),
-    )
+    private suspend fun <T> capture(block: suspend () -> T): Result<T> = try { Result.success(block()) }
+    catch (cancelled: CancellationException) { throw cancelled }
+    catch (failure: Exception) { Result.failure(failure) }
 }
