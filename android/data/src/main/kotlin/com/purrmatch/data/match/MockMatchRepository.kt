@@ -83,7 +83,7 @@ class MockMatchRepository(
             runCatching {
                 retryFailedLoad()
                 val normalized = login.trim()
-                require(normalized.isNotEmpty() && name.isNotBlank() && password.length >= 8)
+                require(normalized.isNotEmpty() && name.isNotBlank() && password.length >= MIN_PASSWORD_LENGTH)
                 if (mutableData.value.profiles.any { it.login == normalized }) throw LoginOccupiedException()
                 val id = UUID.randomUUID().toString()
                 val profile = Profile(id = id, login = normalized, name = name.trim(),
