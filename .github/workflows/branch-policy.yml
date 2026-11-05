@@ -32,3 +32,29 @@ jobs:
             echo "::error::Source branch must match $pattern for a PR into $BASE_BRANCH."
             exit 1
           fi
+
+      - name: Checkout for main policy
+        if: github.base_ref == 'main'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check main change scope
+        if: github.base_ref == 'main'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          changes="$(git diff --name-only --no-renames "$BASE_SHA...$HEAD_SHA" --)"
+          while IFS= read -r path; do
+            case "$path" in
+              ''|.github/workflows/*.yml|.github/workflows/*.yaml|.github/main-protection.json) ;;
+              *)
+                echo '::error::Only CI workflows and branch protection settings may change in main.'
+                echo "$path"
+                exit 1
+                ;;
+            esac
+          done <<< "$changes"
