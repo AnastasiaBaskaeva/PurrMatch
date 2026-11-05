@@ -5,7 +5,7 @@ on:
     branches: [backend/trunk, infra/trunk, main]
     types: [opened, synchronize, reopened, edited]
   push:
-    branches: [main]
+    branches: [backend/trunk, main]
 
 permissions:
   contents: read
@@ -17,8 +17,9 @@ concurrency:
 jobs:
   backend:
     name: Backend checks
+    needs: contract
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     defaults:
       run:
         shell: bash
@@ -73,6 +74,57 @@ jobs:
       - name: Build
         if: steps.source.outputs.present == 'true'
         run: go build -trimpath -o "$RUNNER_TEMP/purrmatch" ./cmd/purrmatch
+
+      - name: Set up QEMU
+        if: steps.source.outputs.present == 'true'
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        if: steps.source.outputs.present == 'true'
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and test container images
+        if: steps.source.outputs.present == 'true'
+        run: |
+          for arch in amd64 arm64; do
+            image="purrmatch:${GITHUB_SHA}-${arch}"
+            docker buildx build --platform "linux/$arch" --load --tag "$image" backend
+            container_user="$(docker image inspect --format '{{.Config.User}}' "$image")"
+            [[ "${container_user%%:*}" =~ ^[1-9][0-9]*$ ]]
+            (
+              container="$(docker run --detach --platform "linux/$arch" --read-only --cap-drop=ALL --security-opt=no-new-privileges --publish 127.0.0.1::8080 "$image")"
+              trap 'docker logs "$container"; docker rm --force "$container" >/dev/null' EXIT
+              address="$(docker port "$container" 8080/tcp)"
+              response="$(curl --fail --silent --show-error --retry 20 --retry-all-errors --retry-delay 1 --retry-max-time 30 --max-time 2 "http://$address/healthz")"
+              [[ "$response" == '{"status":"ok"}' ]]
+              docker stop -t 15 "$container" >/dev/null
+              [[ "$(docker inspect --format '{{.State.ExitCode}}' "$container")" == '0' ]]
+            )
+          done
+        working-directory: .
+
+      - name: Export tested images
+        if: steps.source.outputs.present == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/backend/trunk'
+        working-directory: ${{ runner.temp }}
+        run: |
+          for arch in amd64 arm64; do
+            docker save "purrmatch:${GITHUB_SHA}-${arch}" | gzip -n > "purrmatch-linux-${arch}.tar.gz"
+          done
+          sha256sum purrmatch-linux-*.tar.gz > SHA256SUMS
+
+      - name: Upload tested images
+        if: steps.source.outputs.present == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/backend/trunk'
+        uses: actions/upload-artifact@v7
+        with:
+          name: purrmatch-images-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/purrmatch-linux-*.tar.gz
+            ${{ runner.temp }}/SHA256SUMS
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
 
   contract:
     name: API contract checks
