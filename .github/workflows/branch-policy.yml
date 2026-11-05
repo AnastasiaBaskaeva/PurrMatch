@@ -2,7 +2,7 @@ name: Branch policy
 
 on:
   pull_request:
-    branches: [main, android/trunk, backend/trunk]
+    branches: [main, android/trunk, backend/trunk, infra/trunk]
     types: [opened, synchronize, reopened, edited]
 
 permissions:
@@ -23,7 +23,8 @@ jobs:
           case "$BASE_BRANCH" in
             android/trunk) pattern='^android/.+' ;;
             backend/trunk) pattern='^backend/.+' ;;
-            main) pattern='^(android/trunk|backend/trunk)$' ;;
+            infra/trunk) pattern='^infra/.+' ;;
+            main) pattern='^(android/trunk|backend/trunk|infra/trunk)$' ;;
             *) exit 1 ;;
           esac
 
