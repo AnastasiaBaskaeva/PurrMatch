@@ -1,0 +1,57 @@
+name: Backup CI
+
+on:
+  pull_request:
+    branches: [infra/trunk, main]
+    types: [opened, synchronize, reopened, edited]
+    paths:
+      - infra/backup/**
+      - .github/workflows/backup.yml
+  push:
+    branches: [infra/trunk, main]
+    paths:
+      - infra/backup/**
+      - .github/workflows/backup.yml
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: Backup checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Check backup sources
+        id: source
+        shell: bash
+        run: |
+          if [[ -f infra/backup/backup.py ]]; then
+            echo 'present=true' >> "$GITHUB_OUTPUT"
+          elif [[ -n "$(git ls-files -- infra/backup)" ]]; then
+            echo '::error::Backup entry point is missing.'
+            exit 1
+          else
+            echo 'present=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install test dependencies
+        if: steps.source.outputs.present == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --no-remove -y python3-jwt python3-cryptography python3-boto3 age
+
+      - name: Check syntax and systemd units
+        if: steps.source.outputs.present == 'true'
+        run: |
+          bash -n infra/backup/install.sh
+          systemd-analyze verify infra/backup/purrmatch-backup.service infra/backup/purrmatch-backup.timer
+
+      - name: Tests
+        if: steps.source.outputs.present == 'true'
+        run: sudo unshare --net /usr/bin/python3 -I -m unittest discover -s infra/backup/tests -v

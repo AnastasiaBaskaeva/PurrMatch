@@ -1,0 +1,9 @@
+{
+  "environment": "test",
+  "service_account_id": "",
+  "secret_id": "",
+  "bucket": "",
+  "access_key_field": "access-key-id",
+  "secret_key_field": "secret-access-key",
+  "age_recipient": ""
+}

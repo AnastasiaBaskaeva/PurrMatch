@@ -1,0 +1,12 @@
+[Unit]
+Description=Schedule PurrMatch encrypted K3s backup
+
+[Timer]
+OnCalendar=*-*-* *:00,30:00
+Persistent=true
+RandomizedDelaySec=2min
+AccuracySec=30s
+Unit=purrmatch-backup.service
+
+[Install]
+WantedBy=timers.target
