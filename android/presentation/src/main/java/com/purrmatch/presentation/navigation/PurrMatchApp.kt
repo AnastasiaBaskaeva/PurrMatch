@@ -87,6 +87,7 @@ private fun AuthNavigation(sessions: SessionRepository, matches: MatchRepository
         backStack = stack,
         transitionSpec = { navigationTransition(isPop = false) },
         popTransitionSpec = { navigationTransition(isPop = true) },
+        predictivePopTransitionSpec = { navigationTransition(isPop = true) },
         onBack = { if (stack.size > 1) stack.removeAt(stack.lastIndex) },
         entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
         entryProvider = entryProvider {
@@ -221,6 +222,7 @@ private fun MainNavigation(
         NavDisplay(entries = navigation.entries(provider), onBack = navigation::back,
             transitionSpec = { navigationTransition(isPop = false) },
             popTransitionSpec = { navigationTransition(isPop = true) },
+            predictivePopTransitionSpec = { navigationTransition(isPop = true) },
             modifier = Modifier.weight(1f).fillMaxWidth())
         if (navigation.showsTabs) BottomBar(navigation.tab, { navigation.tab = it },
             Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp))
