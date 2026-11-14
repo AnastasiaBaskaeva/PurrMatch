@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: purrmatch-prod
+  labels:
+    app.kubernetes.io/part-of: purrmatch
+    purrmatch.io/environment: prod
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: v1.36
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: v1.36
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: purrmatch-budget
+  namespace: purrmatch-prod
+spec:
+  hard:
+    requests.cpu: '4'
+    requests.memory: 8Gi
+    limits.cpu: '6'
+    limits.memory: 12Gi
+    pods: '20'
+    services.nodeports: '0'
+    services.loadbalancers: '0'
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: purrmatch-defaults
+  namespace: purrmatch-prod
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 256Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 64Mi
+      max:
+        cpu: '2'
+        memory: 2Gi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: purrmatch-api
+  namespace: purrmatch-prod
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: purrmatch-prod
+automountServiceAccountToken: false
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: purrmatch-prod
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress: []
+  egress: []
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: purrmatch-prod
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

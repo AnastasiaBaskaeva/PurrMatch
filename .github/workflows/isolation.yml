@@ -1,0 +1,59 @@
+name: Isolation CI
+
+on:
+  pull_request:
+    branches: [infra/trunk, main]
+    types: [opened, synchronize, reopened, edited]
+    paths:
+      - infra/isolation/**
+      - .github/workflows/isolation.yml
+  push:
+    branches: [infra/trunk, main]
+    paths:
+      - infra/isolation/**
+      - .github/workflows/isolation.yml
+
+permissions:
+  contents: read
+
+jobs:
+  isolation:
+    name: Isolation checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Check isolation sources
+        id: source
+        shell: bash
+        run: |
+          if [[ -f infra/isolation/test.yaml && -f infra/isolation/prod.yaml ]]; then
+            echo 'present=true' >> "$GITHUB_OUTPUT"
+          elif [[ -n "$(git ls-files -- infra/isolation)" ]]; then
+            echo '::error::Both isolation manifests are required.'
+            exit 1
+          else
+            echo 'present=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate Kubernetes manifests
+        if: steps.source.outputs.present == 'true'
+        shell: bash
+        run: |
+          purr_tools="$(mktemp -d "$RUNNER_TEMP/isolation.XXXXXX")"
+          curl --disable --fail --silent --show-error --location \
+            --proto '=https' --proto-redir '=https' \
+            --connect-timeout 10 --max-time 120 \
+            --output "$purr_tools/kubeconform.tar.gz" \
+            https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz
+          printf '%s  %s\n' \
+            9bc2bffbf71f261128533edaf912153948b7ff238f9a531ae6d34466ec287883 \
+            "$purr_tools/kubeconform.tar.gz" | sha256sum --check --strict
+          tar -xzf "$purr_tools/kubeconform.tar.gz" -C "$purr_tools" kubeconform
+          "$purr_tools/kubeconform" -strict -summary -kubernetes-version 1.36.6 \
+            -schema-location 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/2bfaff3898a7a4fa4e4760da3d2656211c9b4c71/{{.NormalizedKubernetesVersion}}-standalone{{.StrictSuffix}}/{{.ResourceKind}}{{.KindSuffix}}.json' \
+            infra/isolation/test.yaml infra/isolation/prod.yaml
